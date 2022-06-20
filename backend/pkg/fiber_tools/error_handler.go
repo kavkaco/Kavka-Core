@@ -1,4 +1,4 @@
-package lib
+package fiber_tools
 
 import "github.com/gofiber/fiber/v2"
 

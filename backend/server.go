@@ -2,8 +2,8 @@ package main
 
 import (
 	"Tahagram/configs"
-	"Tahagram/lib"
 	"Tahagram/logs"
+	"Tahagram/pkg/fiber_tools"
 	"Tahagram/routers"
 	"fmt"
 	"log"
@@ -32,7 +32,7 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			ErrorHandler: lib.ErrorHandler,
+			ErrorHandler: fiber_tools.ErrorHandler,
 			AppName:      "Tahagram",
 			ServerHeader: "Fiber",
 			Prefork:      true,
