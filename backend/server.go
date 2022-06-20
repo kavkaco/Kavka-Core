@@ -3,7 +3,6 @@ package main
 import (
 	"Tahagram/configs"
 	"Tahagram/logs"
-	"Tahagram/pkg/fiber_tools"
 	"Tahagram/routers"
 	"fmt"
 	"log"
@@ -32,7 +31,6 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			ErrorHandler: fiber_tools.ErrorHandler,
 			AppName:      "Tahagram",
 			ServerHeader: "Fiber",
 			Prefork:      true,
@@ -45,8 +43,11 @@ func main() {
 		},
 	))
 
+	api := app.Group("/api")
+
 	logs.InitLogger(app)
-	routers.InitUsers(app)
+
+	routers.InitUsers(api)
 
 	log.Fatal(
 		app.Listen(

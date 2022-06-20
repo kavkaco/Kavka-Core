@@ -6,6 +6,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func InitUsers(app *fiber.App) {
-	app.Post("/users/login", controllers.LoginAction)
+func InitUsers(router fiber.Router) {
+	usersRouter := router.Group("/users")
+
+	usersRouter.Get("/login", controllers.LoginAction)
 }

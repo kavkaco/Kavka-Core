@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"Tahagram/pkg/fiber_tools"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,6 +17,6 @@ func LoginAction(c *fiber.Ctx) error {
 
 	// fmt.Println(sess)
 
-	fiber_tools.JSON(c, User{Username: "Taha"})
+	c.SendString("Hello world")
 	return nil
 }
