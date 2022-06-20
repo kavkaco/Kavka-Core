@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -60,4 +61,16 @@ func ParseMongoConfigs(path string) (*MongoConfigs, error) {
 	yaml.Unmarshal(data, &configs)
 
 	return &configs, nil
+}
+
+func GetAllowOrigins() string {
+	wd, _ := os.Getwd()
+
+	data, err := os.ReadFile(wd + "/configs/allow_origins")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return string(data)
 }
