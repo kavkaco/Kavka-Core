@@ -1,0 +1,6 @@
+services:
+  redis:
+    container_name: "tahagram_redis_db"
+    image: "redis:latest"
+    ports:
+      - "6379:6379"

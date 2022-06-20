@@ -1,8 +1,9 @@
 package main
 
 import (
-	"Tahagram/api"
 	"Tahagram/configs"
+	"Tahagram/lib"
+	"Tahagram/routers"
 	"fmt"
 	"log"
 	"os"
@@ -10,28 +11,33 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+var AppConfigs configs.AppConfigs
+
 func main() {
-	mainPath, _ := os.Getwd()
-	configs, configsErr := configs.ParseConfig(mainPath + "/configs/configs.yml")
-	if configsErr != nil {
-		log.Fatal(configsErr)
+	wd, _ := os.Getwd()
+
+	appConfigs, appConfigsErr := configs.ParseAppConfig(wd + "/configs/configs.yml")
+	if appConfigsErr != nil {
+		log.Fatal("Error in parsing app configs")
 	}
 
 	app := fiber.New(
 		fiber.Config{
-			ErrorHandler: api.ErrorHandler,
+			ErrorHandler: lib.ErrorHandler,
 			AppName:      "Tahagram",
 			ServerHeader: "Express",
 			Prefork:      true,
 		},
 	)
 
+	routers.InitUsers(app)
+
 	log.Fatal(
 		app.Listen(
 			fmt.Sprintf(
 				"%s:%d",
 				"0.0.0.0",
-				configs.ListenPort,
+				appConfigs.ListenPort,
 			),
 		),
 	)
