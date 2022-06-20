@@ -1,8 +1,9 @@
-# Tahagram
+# Tahagram!
 
-A complete chat application.
+A friendly team that develops a Chat Application.
 
-### Contributors
+### Core Members
+- https://github.com/tahadostifam -> Backend & DevOps
+- https://github.com/HosseinFalah -> Frontend
 
-- [TahaDostifam](https://github.com/tahadostifam)
-- [HosseinFalah](https://github.com/hosseinfalah)
+### [Alpa version](https://github.com/tahadostifam/Tahagram)
