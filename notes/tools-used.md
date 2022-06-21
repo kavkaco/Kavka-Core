@@ -3,7 +3,7 @@
 ### Backend
 
 - GoLang
-- MongoDB + GORM
+- Cassandra
 - WebSocket
 - WebRTC
 
@@ -11,13 +11,11 @@
 
 - Kubernetes
 - Docker
-- Jenkins
 
 ### Reverse Proxy
 
 - Nginx
 
-### Frontend
+### Monitoring
 
-- Nextjs
-- Material UI
+- Nagios
