@@ -2,6 +2,7 @@ package main
 
 import (
 	"Tahagram/configs"
+	"Tahagram/database"
 	"Tahagram/logs"
 	"Tahagram/routers"
 	"Tahagram/websocket"
@@ -29,6 +30,8 @@ func parseConfigs() {
 
 func main() {
 	parseConfigs()
+
+	database.EstablishConnection()
 
 	app := fiber.New(
 		fiber.Config{
