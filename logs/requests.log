@@ -178,3 +178,51 @@ Method: GET
 Path: /ws
 Time: 20:14:28 
 
+Pid: 145764
+Status: 404
+Method: GET
+Path: /ws
+Time: 20:29:43 
+
+Pid: 146613
+Status: 404
+Method: GET
+Path: /ws
+Time: 20:30:42 
+
+Pid: 146613
+Status: 101
+Method: GET
+Path: /ws/1
+Time: 20:30:58 
+
+Pid: 146950
+Status: 101
+Method: GET
+Path: /ws/1
+Time: 20:31:11 
+
+Pid: 148545
+Status: 101
+Method: GET
+Path: /ws
+Time: 20:32:56 
+
+Pid: 148546
+Status: 101
+Method: GET
+Path: /ws
+Time: 20:34:44 
+
+Pid: 148546
+Status: 101
+Method: GET
+Path: /ws
+Time: 20:34:46 
+
+Pid: 149584
+Status: 101
+Method: GET
+Path: /ws
+Time: 20:35:13 
+
