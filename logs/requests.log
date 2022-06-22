@@ -1,0 +1,132 @@
+Pid: 83051
+Status: 405
+Method: POST
+Path: /api/users/login
+Time: 17:29:50 
+
+Pid: 83051
+Status: 101
+Method: GET
+Path: /ws
+Time: 17:30:12 
+
+Pid: 102154
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:09:22 
+
+Pid: 102651
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:11:12 
+
+Pid: 103611
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:12:42 
+
+Pid: 103890
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:12:59 
+
+Pid: 103894
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:14:58 
+
+Pid: 105737
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:18:04 
+
+Pid: 105917
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:18:14 
+
+Pid: 106225
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:18:32 
+
+Pid: 107269
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:19:10 
+
+Pid: 109896
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:23:09 
+
+Pid: 110202
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:23:55 
+
+Pid: 110760
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:24:54 
+
+Pid: 111586
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:25:20 
+
+Pid: 119615
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:40:05 
+
+Pid: 120597
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:40:51 
+
+Pid: 120952
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:41:34 
+
+Pid: 122156
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:42:43 
+
+Pid: 122402
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:42:53 
+
+Pid: 123419
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:43:16 
+
+Pid: 124344
+Status: 101
+Method: GET
+Path: /ws
+Time: 19:45:05 
+

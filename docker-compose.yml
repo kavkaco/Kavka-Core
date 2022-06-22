@@ -1,6 +1,31 @@
+version: "3.9"
 services:
   redis:
     container_name: "tahagram_redis_db"
     image: "redis:latest"
     ports:
       - "6379:6379"
+    restart: always
+  mongo:
+    container_name: "tahagram_mongo_db"
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: tahagram
+  # app:
+  #   build: .
+  #   depends_on:
+  #     - redis
+  #     - mongo
+  #   image: "golang:latest"
+  #   ports:
+  #     - "8000:8000"
+  #     - "8100:8100"
+
+networks:
+  default:
+    name: tahagram_default_network

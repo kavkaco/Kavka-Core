@@ -4,6 +4,7 @@ import (
 	"Tahagram/configs"
 	"Tahagram/logs"
 	"Tahagram/routers"
+	"Tahagram/websocket"
 	"fmt"
 	"log"
 	"os"
@@ -43,11 +44,12 @@ func main() {
 		},
 	))
 
-	api := app.Group("/api")
-
 	logs.InitLogger(app)
 
+	api := app.Group("/api")
 	routers.InitUsers(api)
+
+	websocket.InitWebSocket(app)
 
 	log.Fatal(
 		app.Listen(
