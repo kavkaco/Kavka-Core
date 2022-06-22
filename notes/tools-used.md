@@ -3,7 +3,7 @@
 ### Backend
 
 - GoLang
-- Cassandra
+- MongoDB(GORM)
 - WebSocket
 - WebRTC
 
