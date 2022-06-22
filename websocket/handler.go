@@ -1,15 +1,22 @@
 package websocket
 
 import (
+	"Tahagram/logs"
+	"fmt"
+
 	"github.com/gofiber/websocket/v2"
 )
 
-func WebSocketMessageHandler(msg string, msgType int, c *websocket.Conn) {
-	// data := make(map[string]string)
-	// data["a"] = "1"
-	// data["b"] = "2"
-	// SendJson(data, c, msgType)
+type SSendMessage struct {
+	Text string `json:"text"`
+}
 
-	// fmt.Println(parsedData.Array[0])
-	// fmt.Println(parsedData.Array[1])
+func WebSocketMessageHandler(msg string, msgType int, c *websocket.Conn) {
+	var s *SSendMessage = &SSendMessage{}
+	err := c.ReadJSON(s)
+	if err != nil {
+		logs.ErrorLogger.Println("Error in parsing websocket message to JSON: " + err.Error())
+	}
+
+	fmt.Println(s.Text)
 }
