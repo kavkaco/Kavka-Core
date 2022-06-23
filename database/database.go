@@ -36,8 +36,6 @@ func EstablishConnection() {
 		mongoConfigs.Password,
 	)
 
-	fmt.Println(connectionString)
-
 	client, clientErr := mongo.Connect(ctx, options.Client().ApplyURI(connectionString))
 	if clientErr != nil {
 		fmt.Println("Error in connecting to mongo database:")
