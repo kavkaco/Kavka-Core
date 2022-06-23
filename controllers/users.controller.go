@@ -2,14 +2,15 @@ package controllers
 
 import (
 	"Tahagram/httpstatus"
-	"Tahagram/models"
+	"Tahagram/pkg/validate"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type SigninBody struct {
-	Email string `json:"email" xml:"email" form:"email" validate:"required,email"`
+	Email string `json:"email" xml:"email" form:"email" validate:"required;email"`
+	//validate:"required"
 }
 
 type User struct {
@@ -17,14 +18,14 @@ type User struct {
 }
 
 func SigninAction(c *fiber.Ctx) error {
-	u := new(SigninBody)
+	var u SigninBody
 
-	if err := c.BodyParser(u); err != nil {
+	if err := c.BodyParser(&u); err != nil {
 		httpstatus.InternalServerError(c)
 		return err
 	}
 
-	errors := models.ValidateStruct(u)
+	errors := validate.ValidateStruct(u)
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}

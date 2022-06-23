@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"fmt"
 	"reflect"
 	"regexp"
 	"strings"
@@ -20,36 +19,27 @@ func ValidateStruct(inter interface{}) []ValidationError {
 
 	t := reflect.TypeOf(inter)
 
-	for i := 0; i < t.NumField(); i++ { // each field
+	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		allTags := field.Tag.Get(validateTagName)
-		value := reflect.ValueOf(inter).Field(i).String()
-
-		fmt.Printf("%s:%s\n", field.Name, value)
-
 		tags := strings.Split(allTags, ";")
-		for _, tag := range tags { // each tag
-			// fmt.Printf("Field:%s\n", field.Name)
-			// fmt.Printf("Value:%s\n", value)
-			// fmt.Println("-----------")
-
+		value := reflect.ValueOf(inter).Field(i).String()
+		for _, tag := range tags {
 			switch tag {
 			case "required":
 				if len(strings.TrimSpace(value)) == 0 {
 					errors = append(errors, ValidationError{
 						Message: "required",
-						Field:   field.Name,
+						Field:   strings.ToLower(field.Name),
 					})
 				}
 			case "email":
 				if !mailRegex.MatchString(value) {
 					errors = append(errors, ValidationError{
 						Message: "not valid",
-						Field:   field.Name,
+						Field:   strings.ToLower(field.Name),
 					})
 				}
-			default:
-				panic("ValidateStruct:->Invalid Tag!-> " + tag)
 			}
 		}
 	}
