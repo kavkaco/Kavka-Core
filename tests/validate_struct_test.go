@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Tahagram/models"
+	"Tahagram/pkg/validate"
 	"os"
 	"testing"
 
@@ -9,15 +9,17 @@ import (
 )
 
 type User struct {
-	Name string `validate:"required"`
+	Name  string `validate:"required"`
+	Email string `validate:"email"`
 }
 
 func TestValidateStruct(t *testing.T) {
 	u := User{
-		Name: "",
+		Name:  "Taha",
+		Email: "taha@mail.com",
 	}
 
-	errors := models.ValidateStruct(u)
+	errors := validate.ValidateStruct(u)
 	if errors != nil {
 		writeValidationErrorsToTable(errors)
 	} else {
@@ -25,7 +27,7 @@ func TestValidateStruct(t *testing.T) {
 	}
 }
 
-func writeValidationErrorsToTable(errors []models.ValidationError) {
+func writeValidationErrorsToTable(errors []validate.ValidationError) {
 	var data = [][]string{}
 	for _, v := range errors {
 		data = append(data, []string{v.Field, v.Message})
