@@ -1,26 +1,45 @@
 package models
 
-import "github.com/go-playground/validator/v10"
+import (
+	"reflect"
+	"strings"
+)
 
-type ErrorResponse struct {
-	FailedField string
-	Tag         string
-	Value       string
+type ValidationError struct {
+	Message string
+	Field   string
 }
 
-var Validate = validator.New()
+// var mailRegex = regexp.MustCompile(`\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z`)
 
-func ValidateStruct(t interface{}) []*ErrorResponse {
-	var errors []*ErrorResponse
-	err := Validate.Struct(t)
-	if err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			var element ErrorResponse
-			element.FailedField = err.StructNamespace()
-			element.Tag = err.Tag()
-			element.Value = err.Param()
-			errors = append(errors, &element)
+func ValidateStruct(inter interface{}) []ValidationError {
+	const validateTagName = "validate"
+	var errors []ValidationError
+
+	t := reflect.TypeOf(inter)
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		allTags := field.Tag.Get(validateTagName)
+		values := reflect.ValueOf(inter)
+
+		tags := strings.Split(allTags, ";")
+		for tagIndex, tag := range tags {
+			value := values.Field(tagIndex).String()
+
+			switch tag {
+			case "required":
+				if len(strings.TrimSpace(value)) == 0 {
+					errors = append(errors, ValidationError{
+						Message: "required",
+						Field:   field.Name,
+					})
+				}
+			default:
+				panic("ValidateStruct:->Invalid Tag!-> " + tag)
+			}
 		}
 	}
+
 	return errors
 }

@@ -226,3 +226,39 @@ Method: GET
 Path: /ws
 Time: 20:35:13 
 
+Pid: 195461
+Status: 404
+Method: POST
+Path: /api/users/login
+Time: 15:00:57 
+
+Pid: 195468
+Status: 405
+Method: POST
+Path: /api/users/signin
+Time: 15:03:32 
+
+Pid: 196794
+Status: 422
+Method: POST
+Path: /api/users/signin
+Time: 15:03:53 
+
+Pid: 196794
+Status: 400
+Method: POST
+Path: /api/users/signin
+Time: 15:04:41 
+
+Pid: 196794
+Status: 400
+Method: POST
+Path: /api/users/signin
+Time: 15:05:13 
+
+Pid: 196794
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 15:05:19 
+

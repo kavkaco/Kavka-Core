@@ -9,7 +9,7 @@ import (
 func InitUsers(router fiber.Router) {
 	usersRouter := router.Group("/users")
 
-	usersRouter.Get("/signin", controllers.SigninAction)
-	usersRouter.Get("/verify_code", controllers.VerifyCodeAction)
-	usersRouter.Get("/authentication", controllers.AuthenticationAction)
+	usersRouter.Post("/signin", controllers.SigninAction)
+	usersRouter.Post("/verify_code", controllers.VerifyCodeAction)
+	usersRouter.Post("/authentication", controllers.AuthenticationAction)
 }

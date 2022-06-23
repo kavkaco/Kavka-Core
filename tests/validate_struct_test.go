@@ -1,0 +1,39 @@
+package main
+
+import (
+	"Tahagram/models"
+	"os"
+	"testing"
+
+	"github.com/olekukonko/tablewriter"
+)
+
+type User struct {
+	Name string `validate:"required"`
+}
+
+func TestValidateStruct(t *testing.T) {
+	u := User{
+		Name: "",
+	}
+
+	errors := models.ValidateStruct(u)
+	if errors != nil {
+		writeValidationErrorsToTable(errors)
+	} else {
+		t.Log("Valid Struct!")
+	}
+}
+
+func writeValidationErrorsToTable(errors []models.ValidationError) {
+	var data = [][]string{}
+	for _, v := range errors {
+		data = append(data, []string{v.Field, v.Message})
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Field", "Message"})
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
+}

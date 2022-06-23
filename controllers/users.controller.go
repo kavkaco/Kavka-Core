@@ -1,14 +1,11 @@
 package controllers
 
 import (
-	"Tahagram/database"
 	"Tahagram/httpstatus"
 	"Tahagram/models"
-	"context"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type SigninBody struct {
@@ -32,11 +29,13 @@ func SigninAction(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
-	filter := bson.D{{"email", u.Email}}
-	result := database.UsersCollection.FindOne(context.TODO(), filter)
+	// filter := bson.D{{"email", u.Email}}
+	// result := database.UsersCollection.FindOne(context.TODO(), filter)
 
-	fmt.Println(result)
+	// fmt.Println(result)
 	// ANCHOR
+
+	fmt.Println("Success Request!")
 
 	return nil
 }
