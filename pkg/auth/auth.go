@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"Tahagram/configs"
 	"math/rand"
 	"strings"
 	"time"
@@ -16,17 +17,25 @@ func MakeVerificCode() int {
 	return min + r.Intn(max-min)
 }
 
-func MakeVerificCodeExpire(now time.Time) time.Time {
-	return now.Add(10 * time.Minute)
+func MakeVerificCodeExpire() time.Time {
+	return time.Now().Add(configs.VerificCodeExpire)
+}
+
+func MakeVerificLimitDate() time.Time {
+	return time.Now().Add(configs.VerificLimitDate)
 }
 
 func GetEmailWithoutAt(email string) string {
 	return email[:strings.IndexByte(email, '@')]
 }
 
-func UserLimited(limitDate *time.Time) bool {
+func IsUserLimited(limitDate *time.Time) bool {
 	if limitDate == nil {
 		return false
 	}
 	return false // TODO
+}
+
+func IsVerificCodeExpired(expire time.Time) bool {
+	return !expire.After(time.Now())
 }
