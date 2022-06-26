@@ -47,17 +47,17 @@ func SigninAction(c *fiber.Ctx) error {
 	var user *models.User = models.FindUserByEmail(body.Email)
 
 	if user != nil {
-		if !user.VerificLimitDate.IsZero() && auth.IsUserLimited(&user.VerificLimitDate) {
+		if !auth.IsUserLimited(user.VerificLimitDate) {
 			c.Status(200).JSON(fiber.Map{
 				"Message":  "limited",
-				"LimitEnd": user.VerificLimitDate.String(),
+				"LimitEnd": time.Unix(user.VerificLimitDate, 0).String(),
 			})
 		} else {
 			newData := bson.D{
 				primitive.E{Key: "$set", Value: bson.D{
 					primitive.E{Key: "verific_code", Value: uint(auth.MakeVerificCode())},
 					primitive.E{Key: "verific_code_expire", Value: auth.MakeVerificCodeExpire()},
-					primitive.E{Key: "verific_code_limit_date", Value: time.Time{}},
+					primitive.E{Key: "verific_code_limit_date", Value: nil},
 				}},
 			}
 
@@ -114,71 +114,81 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 	}
 
 	var user *models.User = models.FindUserByEmail(body.Email)
+
 	if user != nil {
-		if user.VerificTryCount >= configs.MaxVerificTryCount {
-			database.UsersCollection.UpdateOne(context.TODO(),
-				bson.D{
-					primitive.E{Key: "email", Value: body.Email},
-				},
-				bson.D{
-					primitive.E{
-						Key: "$set",
-						Value: bson.D{
-							primitive.E{
-								Key:   "verific_limit_date",
-								Value: auth.MakeVerificLimitDate(),
+		if !auth.IsUserLimited(user.VerificLimitDate) {
+			c.Status(200).JSON(fiber.Map{
+				"Message":  "limited",
+				"LimitEnd": time.Unix(user.VerificLimitDate, 0).String(),
+			})
+		} else {
+			if user.VerificTryCount >= configs.MaxVerificTryCount {
+				limit := auth.MakeVerificLimitDate()
+				database.UsersCollection.UpdateOne(context.TODO(),
+					bson.D{
+						primitive.E{Key: "email", Value: body.Email},
+					},
+					bson.D{
+						primitive.E{
+							Key: "$set",
+							Value: bson.D{
+								primitive.E{
+									Key:   "verific_limit_date",
+									Value: limit,
+								},
+								primitive.E{
+									Key:   "verific_try_count",
+									Value: 0,
+								},
 							},
 						},
 					},
-				},
-			)
-			c.Status(503).JSON(fiber.Map{
-				"Message": "maximum verific code try count",
-			})
-		} else {
-			userVerificCode, userVerificCodeErr := strconv.Atoi(body.VerificCode)
-			if userVerificCodeErr != nil {
-				httpstatus.Unauthorized(c)
+				)
+
+				c.Status(200).JSON(fiber.Map{
+					"Message":  "limited",
+					"LimitEnd": time.Unix(limit, 0),
+				})
 			} else {
-				if user.VerificCode == userVerificCode {
+				userVerificCode, userVerificCodeErr := strconv.Atoi(body.VerificCode)
+				if userVerificCodeErr != nil {
+					httpstatus.Unauthorized(c)
+				} else {
+					if user.VerificCode == userVerificCode {
+						if !auth.IsVerificCodeExpired(user.VerificCodeExpire) {
+							sess, sessErr := session.SessionStore.Get(c)
+							if sessErr != nil {
+								user.IncreaseTryCount()
+								httpstatus.InternalServerError(c)
+							}
 
-					fmt.Println(time.Now())
-					fmt.Println(user.VerificCodeExpire)
-					fmt.Printf("Expired: %v\n", auth.IsVerificCodeExpired(user.VerificCodeExpire))
+							sess.Set("user_id", user.StaticID)
 
-					if !auth.IsVerificCodeExpired(user.VerificCodeExpire) {
-						sess, sessErr := session.SessionStore.Get(c)
-						if sessErr != nil {
+							c.Status(200).JSON(fiber.Map{
+								"Message": "success signin",
+							})
+
+							database.UsersCollection.FindOneAndUpdate(context.TODO(),
+								bson.D{
+									primitive.E{Key: "email", Value: body.Email},
+								},
+								bson.D{
+									primitive.E{Key: "verific_code", Value: nil},
+									primitive.E{Key: "verific_try_count", Value: nil},
+									primitive.E{Key: "verific_code_expire", Value: nil},
+									primitive.E{Key: "first_login_completed", Value: true},
+								},
+							)
+						} else {
 							user.IncreaseTryCount()
-							httpstatus.InternalServerError(c)
+							c.Status(401).JSON(fiber.Map{
+								"Message": "verific code expired",
+							})
 						}
-
-						sess.Set("user_id", user.StaticID)
-
-						c.Status(200).JSON(fiber.Map{
-							"Message": "success signin",
-						})
-
-						database.UsersCollection.FindOneAndUpdate(context.TODO(),
-							bson.D{
-								primitive.E{Key: "email", Value: body.Email},
-							},
-							bson.D{
-								primitive.E{Key: "verific_code", Value: nil},
-								primitive.E{Key: "verific_try_count", Value: nil},
-								primitive.E{Key: "verific_code_expire", Value: nil},
-								primitive.E{Key: "first_login_completed", Value: true},
-							},
-						)
 					} else {
 						user.IncreaseTryCount()
-						c.Status(401).JSON(fiber.Map{
-							"Message": "verific code expired",
-						})
+						httpstatus.Unauthorized(c)
 					}
-				} else {
-					user.IncreaseTryCount()
-					httpstatus.Unauthorized(c)
 				}
 			}
 		}

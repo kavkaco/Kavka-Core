@@ -21,8 +21,8 @@ type User struct {
 	ProfilePhotos       []string      `bson:"profile_photos"`
 	VerificCode         int           `bson:"verific_code"`
 	VerificTryCount     int           `bson:"verific_try_count"`
-	VerificCodeExpire   time.Time     `bson:"verific_code_expire"`
-	VerificLimitDate    time.Time     `bson:"verific_limit_date"`
+	VerificCodeExpire   int64         `bson:"verific_code_expire"`
+	VerificLimitDate    int64         `bson:"verific_limit_date"`
 	FirstLoginCompleted bool          `bson:"first_login_completed"`
 }
 

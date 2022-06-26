@@ -17,25 +17,25 @@ func MakeVerificCode() int {
 	return min + r.Intn(max-min)
 }
 
-func MakeVerificCodeExpire() time.Time {
-	return time.Now().Add(configs.VerificCodeExpire)
+func MakeVerificCodeExpire() int64 {
+	return time.Now().Add(configs.VerificCodeExpire).Unix()
 }
 
-func MakeVerificLimitDate() time.Time {
-	return time.Now().Add(configs.VerificLimitDate)
+func MakeVerificLimitDate() int64 {
+	return time.Now().Add(10 * time.Second).Unix()
+	// Add(configs.VerificLimitDate)
+}
+
+func IsUserLimited(limitDate int64) bool {
+	now := time.Now().Unix()
+	return !(now < limitDate)
+}
+
+func IsVerificCodeExpired(expire int64) bool {
+	now := time.Now().Unix()
+	return !(now < expire)
 }
 
 func GetEmailWithoutAt(email string) string {
 	return email[:strings.IndexByte(email, '@')]
-}
-
-func IsUserLimited(limitDate *time.Time) bool {
-	if limitDate == nil {
-		return false
-	}
-	return false // TODO
-}
-
-func IsVerificCodeExpired(expire time.Time) bool {
-	return !expire.After(time.Now())
 }

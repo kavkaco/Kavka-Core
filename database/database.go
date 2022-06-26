@@ -21,14 +21,7 @@ func MakeConnectionString(host string, port int, username string, password strin
 	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port)
 }
 
-func EstablishConnection() {
-	wd, _ := os.Getwd()
-
-	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/configs/mongo.yml")
-	if mongoConfigsErr != nil {
-		fmt.Println("Error in parsing mongodb configs")
-	}
-
+func EstablishConnection(mongoConfigs configs.MongoConfigs) {
 	connectionString := MakeConnectionString(
 		mongoConfigs.Host,
 		mongoConfigs.Port,
@@ -41,8 +34,6 @@ func EstablishConnection() {
 		fmt.Println("Error in connecting to mongo database:")
 		fmt.Println(clientErr)
 		os.Exit(1)
-	} else {
-		fmt.Println("Successfully connected to mongo database")
 	}
 
 	MongoDB = client.Database(mongoConfigs.DatabaseName)

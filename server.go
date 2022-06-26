@@ -15,8 +15,9 @@ import (
 )
 
 var AppConfigs configs.AppConfigs
+var MongoConfigs configs.MongoConfigs
 
-func parseConfigs() {
+func ParseConfigs() {
 	wd, _ := os.Getwd()
 
 	appConfigs, appConfigsErr := configs.ParseAppConfig(wd + "/configs/configs.yml")
@@ -25,13 +26,19 @@ func parseConfigs() {
 		os.Exit(1)
 	}
 
+	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/configs/mongo.yml")
+	if mongoConfigsErr != nil {
+		fmt.Println("Error in parsing mongodb configs")
+	}
+
 	AppConfigs = *appConfigs
+	MongoConfigs = *mongoConfigs
 }
 
 func main() {
-	parseConfigs()
+	ParseConfigs()
 
-	database.EstablishConnection()
+	database.EstablishConnection(MongoConfigs)
 
 	app := fiber.New(
 		fiber.Config{

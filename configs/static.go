@@ -4,6 +4,6 @@ import "time"
 
 var (
 	MaxVerificTryCount = 5
-	VerificCodeExpire  = 10 * time.Minute
-	VerificLimitDate   = 2 * time.Hour
+	VerificCodeExpire  = 10 * time.Minute // 10 * time.Minute
+	VerificLimitDate   = 5 * time.Second  // 2 * time.Hour
 )
