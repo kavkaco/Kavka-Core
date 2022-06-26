@@ -1,2 +1,0 @@
-ERROR: 2022/06/22 20:35:20 handler.go:34: Error in parsing websocket message to JSON: invalid character 'a' looking for beginning of value
-ERROR: 2022/06/22 20:37:49 handler.go:22: Error in reading socket message.

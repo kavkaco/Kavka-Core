@@ -2,10 +2,8 @@ package session
 
 import (
 	"Tahagram/configs"
-	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/storage/redis"
@@ -28,12 +26,11 @@ func InitSession() *session.Store {
 	})
 
 	var session = session.New(session.Config{
-		KeyLookup:  "cookie:session_id",
-		Storage:    redisStore,
-		Expiration: 10 * 24 * time.Hour, // 14 Days
+		KeyLookup:      "cookie:session_id",
+		Storage:        redisStore,
+		CookieHTTPOnly: true,
+		CookieSecure:   true,
 	})
-
-	fmt.Println("Connected To Redis Database")
 
 	return session
 }

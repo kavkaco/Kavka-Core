@@ -4,6 +4,7 @@ import (
 	"Tahagram/configs"
 	"Tahagram/database"
 	"Tahagram/httpstatus"
+	"Tahagram/logs"
 	"Tahagram/models"
 	"Tahagram/pkg/auth"
 	"Tahagram/pkg/validate"
@@ -60,7 +61,7 @@ func SigninAction(c *fiber.Ctx) error {
 				primitive.E{Key: "$set", Value: bson.D{
 					primitive.E{Key: "verific_code", Value: uint(auth.MakeVerificCode())},
 					primitive.E{Key: "verific_code_expire", Value: auth.MakeVerificCodeExpire()},
-					primitive.E{Key: "verific_code_limit_date", Value: nil},
+					primitive.E{Key: "verific_limit_date", Value: nil},
 				}},
 			}
 
@@ -68,8 +69,9 @@ func SigninAction(c *fiber.Ctx) error {
 				primitive.E{Key: "email", Value: body.Email},
 			}, newData)
 
-			err := sendSigninEmail()
-			if err != nil {
+			sendEmailErr := sendSigninEmail()
+			if sendEmailErr != nil {
+				logs.ErrorLogger.Println(sendEmailErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -81,6 +83,7 @@ func SigninAction(c *fiber.Ctx) error {
 	} else {
 		sendEmailErr := sendSigninEmail()
 		if sendEmailErr != nil {
+			logs.ErrorLogger.Println(sendEmailErr)
 			httpstatus.InternalServerError(c)
 		} else {
 			_, insertErr := database.UsersCollection.InsertOne(context.TODO(), bson.D{
@@ -89,8 +92,10 @@ func SigninAction(c *fiber.Ctx) error {
 				primitive.E{Key: "username", Value: auth.GetEmailWithoutAt(body.Email)},
 				primitive.E{Key: "verific_code", Value: uint(auth.MakeVerificCode())},
 				primitive.E{Key: "verific_try_count", Value: 0},
+				primitive.E{Key: "verific_code_expire", Value: auth.MakeVerificCodeExpire()},
 			})
 			if insertErr != nil {
+				logs.ErrorLogger.Println(insertErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -162,26 +167,41 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 							sess, sessErr := session.SessionStore.Get(c)
 							if sessErr != nil {
 								user.IncreaseTryCount()
+								logs.ErrorLogger.Println(sessErr)
 								httpstatus.InternalServerError(c)
 							}
 
-							sess.Set("user_id", user.StaticID)
-
-							c.Status(200).JSON(fiber.Map{
-								"Message": "success signin",
-							})
+							sess.Set("static_id", user.StaticID)
 
 							database.UsersCollection.FindOneAndUpdate(context.TODO(),
 								bson.D{
 									primitive.E{Key: "email", Value: body.Email},
 								},
 								bson.D{
-									primitive.E{Key: "verific_code", Value: nil},
-									primitive.E{Key: "verific_try_count", Value: nil},
-									primitive.E{Key: "verific_code_expire", Value: nil},
-									primitive.E{Key: "first_login_completed", Value: true},
+									primitive.E{
+										Key: "$set",
+										Value: bson.D{
+											primitive.E{Key: "verific_code", Value: nil},
+											primitive.E{Key: "verific_try_count", Value: nil},
+											primitive.E{Key: "verific_code_expire", Value: nil},
+											primitive.E{Key: "verific_limit_date", Value: nil},
+											primitive.E{Key: "first_login_completed", Value: true},
+										},
+									},
 								},
 							)
+
+							// FIXME
+							c.Cookies("test", "aaa")
+							c.Cookie(&fiber.Cookie{
+								Name:    "session_id",
+								Value:   sess.ID(),
+								Expires: time.Now().Add(14 * 24 * time.Hour),
+							})
+
+							c.Status(200).JSON(fiber.Map{
+								"Message": "success signin",
+							})
 						} else {
 							user.IncreaseTryCount()
 							c.Status(401).JSON(fiber.Map{
@@ -205,6 +225,7 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 func AuthenticationAction(c *fiber.Ctx) error {
 	sess, sessErr := session.SessionStore.Get(c)
 	if sessErr != nil {
+		logs.ErrorLogger.Println(sessErr)
 		httpstatus.InternalServerError(c)
 	}
 
