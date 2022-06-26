@@ -26,6 +26,9 @@ type VerifyCodeBody struct {
 	Email       string `json:"email" xml:"email" form:"email" validate:"required;email"`
 	VerificCode string `json:"code" xml:"code" form:"code" validate:"required"`
 }
+type AuthBody struct {
+	Email string `json:"email" xml:"email" form:"email" validate:"required;email"`
+}
 
 type User struct {
 	Username string `json:"username"`
@@ -200,6 +203,29 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 }
 
 func AuthenticationAction(c *fiber.Ctx) error {
+	sess, sessErr := session.SessionStore.Get(c)
+	if sessErr != nil {
+		httpstatus.InternalServerError(c)
+	}
+
+	userId := sess.Get("user_id")
+	if userId != nil {
+		var user *models.User
+		database.UsersCollection.FindOne(context.TODO(), bson.D{
+			primitive.E{
+				Key:   "static_id",
+				Value: userId.(int),
+			},
+		}).Decode(&user)
+
+		if user != nil {
+			c.Status(200).JSON(user)
+		} else {
+			httpstatus.Unauthorized(c)
+		}
+	} else {
+		httpstatus.Unauthorized(c)
+	}
 
 	return nil
 }

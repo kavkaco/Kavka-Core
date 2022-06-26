@@ -22,8 +22,7 @@ func MakeVerificCodeExpire() int64 {
 }
 
 func MakeVerificLimitDate() int64 {
-	return time.Now().Add(10 * time.Second).Unix()
-	// Add(configs.VerificLimitDate)
+	return time.Now().Add(configs.VerificLimitDate).Unix()
 }
 
 func IsUserLimited(limitDate int64) bool {
