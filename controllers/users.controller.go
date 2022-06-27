@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/fatih/structs"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -191,8 +192,6 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 								},
 							)
 
-							// FIXME
-							c.Cookies("test", "aaa")
 							c.Cookie(&fiber.Cookie{
 								Name:    "session_id",
 								Value:   sess.ID(),
@@ -229,9 +228,11 @@ func AuthenticationAction(c *fiber.Ctx) error {
 		httpstatus.InternalServerError(c)
 	}
 
-	userId := sess.Get("user_id")
-	if userId != nil {
+	userId := sess.Get("static_id")
+
+	if userId != nil && userId.(int) > 0 {
 		var user *models.User
+
 		database.UsersCollection.FindOne(context.TODO(), bson.D{
 			primitive.E{
 				Key:   "static_id",
@@ -239,8 +240,16 @@ func AuthenticationAction(c *fiber.Ctx) error {
 			},
 		}).Decode(&user)
 
+		var dataToSend map[string]interface{} = structs.Map(user)
+
+		delete(dataToSend, "VerificCode")
+		delete(dataToSend, "VerificTryCount")
+		delete(dataToSend, "VerificCodeExpire")
+		delete(dataToSend, "VerificLimitDate")
+		delete(dataToSend, "FirstLoginCompleted")
+
 		if user != nil {
-			c.Status(200).JSON(user)
+			c.Status(200).JSON(dataToSend)
 		} else {
 			httpstatus.Unauthorized(c)
 		}

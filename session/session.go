@@ -26,10 +26,8 @@ func InitSession() *session.Store {
 	})
 
 	var session = session.New(session.Config{
-		KeyLookup:      "cookie:session_id",
-		Storage:        redisStore,
-		CookieHTTPOnly: true,
-		CookieSecure:   true,
+		KeyLookup: "cookie:session_id",
+		Storage:   redisStore,
 	})
 
 	return session
