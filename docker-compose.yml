@@ -16,15 +16,17 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
       MONGO_INITDB_DATABASE: tahagram
-  # app:
-  #   build: .
-  #   depends_on:
-  #     - redis
-  #     - mongo
-  #   image: "golang:latest"
-  #   ports:
-  #     - "8000:8000"
-  #     - "8100:8100"
+  app:
+    container_name: "tahagram_backend_server"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+      - mongo
+    image: "golang:latest"
+    ports:
+      - "8000:8000"
 
 networks:
   default:
