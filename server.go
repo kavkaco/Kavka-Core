@@ -4,6 +4,7 @@ import (
 	"Tahagram/configs"
 	"Tahagram/database"
 	"Tahagram/logs"
+	"Tahagram/middleware"
 	"Tahagram/routers"
 	"Tahagram/websocket"
 	"fmt"
@@ -60,6 +61,13 @@ func main() {
 	routers.InitUsers(api)
 
 	websocket.InitWebSocket(app)
+
+	app.Get("/", middleware.AuthMiddleware, func(c *fiber.Ctx) error {
+
+		c.SendString("Hello")
+
+		return nil
+	})
 
 	log.Fatal(
 		app.Listen(

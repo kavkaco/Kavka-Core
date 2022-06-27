@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -222,37 +221,10 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 }
 
 func AuthenticationAction(c *fiber.Ctx) error {
-	sess, sessErr := session.SessionStore.Get(c)
-	if sessErr != nil {
-		logs.ErrorLogger.Println(sessErr)
-		httpstatus.InternalServerError(c)
-	}
+	authorized, user := auth.AuthenticateUser(c)
 
-	userId := sess.Get("static_id")
-
-	if userId != nil && userId.(int) > 0 {
-		var user *models.User
-
-		database.UsersCollection.FindOne(context.TODO(), bson.D{
-			primitive.E{
-				Key:   "static_id",
-				Value: userId.(int),
-			},
-		}).Decode(&user)
-
-		var dataToSend map[string]interface{} = structs.Map(user)
-
-		delete(dataToSend, "VerificCode")
-		delete(dataToSend, "VerificTryCount")
-		delete(dataToSend, "VerificCodeExpire")
-		delete(dataToSend, "VerificLimitDate")
-		delete(dataToSend, "FirstLoginCompleted")
-
-		if user != nil {
-			c.Status(200).JSON(dataToSend)
-		} else {
-			httpstatus.Unauthorized(c)
-		}
+	if authorized {
+		httpstatus.ResponseUserData(c, user)
 	} else {
 		httpstatus.Unauthorized(c)
 	}
@@ -261,6 +233,7 @@ func AuthenticationAction(c *fiber.Ctx) error {
 }
 
 func sendSigninEmail() error {
+	// TODO
 	fmt.Println("Email sent")
 	return nil
 }
