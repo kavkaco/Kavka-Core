@@ -7,6 +7,14 @@ import (
 
 func InitWebSocket(app *fiber.App) {
 	app.Use("/ws", func(c *fiber.Ctx) error {
+		// authorized, _ := auth.AuthenticateUser(c)
+
+		// if authorized {
+
+		// } else {
+
+		// }
+
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("accepted", true)
 			return c.Next()

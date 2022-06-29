@@ -12,10 +12,6 @@ type SSendMessage struct {
 }
 
 var ws = websocket.New(func(c *websocket.Conn) {
-	fmt.Println("user is upgraded")
-	fmt.Println(c.Params("id"))
-	fmt.Println(c.Locals("accepted"))
-
 	for {
 		msgType, msg, msgErr := c.ReadMessage()
 		if msgErr != nil {

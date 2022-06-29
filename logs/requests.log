@@ -1,1044 +1,906 @@
-Pid: 96474
-Status: 401
-Method: POST
-Path: /api/users/verify_code
-Time: 21:59:41 
-
-Pid: 96471
+Pid: 10598
 Status: 200
 Method: POST
 Path: /api/users/signin
-Time: 22:13:41 
+Time: 15:12:08 
 
-Pid: 96471
+Pid: 10598
 Status: 200
 Method: POST
 Path: /api/users/verify_code
-Time: 22:13:46 
+Time: 15:12:13 
 
-Pid: 96471
+Pid: 11447
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 15:14:24 
+
+Pid: 11447
 Status: 200
 Method: POST
 Path: /api/users/verify_code
-Time: 22:16:39 
+Time: 15:14:33 
 
-Pid: 104071
-Status: 401
+Pid: 11447
+Status: 500
 Method: POST
-Path: /api/users/verify_code
-Time: 22:45:41 
+Path: /api/users/authentication
+Time: 15:14:48 
 
-Pid: 104071
+Pid: 11447
+Status: 500
+Method: POST
+Path: /api/users/authentication
+Time: 15:14:49 
+
+Pid: 12302
 Status: 200
 Method: POST
 Path: /api/users/signin
-Time: 22:45:44 
+Time: 15:15:17 
 
-Pid: 104071
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 22:45:54 
-
-Pid: 104071
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 22:46:01 
-
-Pid: 104604
+Pid: 12302
 Status: 200
 Method: POST
 Path: /api/users/verify_code
-Time: 22:49:29 
+Time: 15:15:25 
 
-Pid: 104604
+Pid: 12302
+Status: 500
+Method: POST
+Path: /api/users/authentication
+Time: 15:15:27 
+
+Pid: 13581
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 15:18:36 
+
+Pid: 13581
 Status: 200
 Method: POST
 Path: /api/users/verify_code
-Time: 22:49:31 
+Time: 15:18:41 
 
-Pid: 105010
+Pid: 13581
+Status: 500
+Method: POST
+Path: /api/users/authentication
+Time: 15:18:43 
+
+Pid: 14557
 Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 22:50:39 
-
-Pid: 104998
-Status: 422
-Method: POST
-Path: /api/users/verify_code
-Time: 22:54:48 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:55:15 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:56:32 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:56:36 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:57:19 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:57:31 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:59:22 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:59:53 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 22:59:56 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:00:02 
-
-Pid: 104998
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:00:07 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:00:35 
-
-Pid: 104998
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:00:41 
-
-Pid: 105010
-Status: 405
 Method: GET
-Path: /api/users/verify_code
-Time: 23:00:49 
+Path: /
+Time: 15:20:39 
 
-Pid: 105010
+Pid: 14557
 Status: 404
 Method: GET
 Path: /favicon.ico
-Time: 23:00:49 
+Time: 15:20:39 
 
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:01:04 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:01:09 
-
-Pid: 104998
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:01:18 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:01:23 
-
-Pid: 104998
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:01:24 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:02:07 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:02:11 
-
-Pid: 104998
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:02:14 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:02:38 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:02:52 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:03:01 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:03:02 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:06:09 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:09:03 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:09:12 
-
-Pid: 104998
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:09:15 
-
-Pid: 105001
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:14:47 
-
-Pid: 105001
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:19:31 
-
-Pid: 105001
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:19:42 
-
-Pid: 105001
-Status: 400
-Method: POST
-Path: /api/users/verify_code
-Time: 23:24:18 
-
-Pid: 105001
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:27:52 
-
-Pid: 105001
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:27:59 
-
-Pid: 110628
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:28:09 
-
-Pid: 110628
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:28:17 
-
-Pid: 110628
-Status: 500
-Method: POST
-Path: /api/users/verify_code
-Time: 23:28:19 
-
-Pid: 111122
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:29:12 
-
-Pid: 111122
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:29:16 
-
-Pid: 112203
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:33:53 
-
-Pid: 112203
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:34:10 
-
-Pid: 112203
-Status: 500
-Method: POST
-Path: /api/users/verify_code
-Time: 23:34:12 
-
-Pid: 112203
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:34:18 
-
-Pid: 112203
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:34:26 
-
-Pid: 114910
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:54:07 
-
-Pid: 114910
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:54:15 
-
-Pid: 115554
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:56:41 
-
-Pid: 115554
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:56:48 
-
-Pid: 115843
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:57:07 
-
-Pid: 115843
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:57:11 
-
-Pid: 115847
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 23:58:30 
-
-Pid: 115847
-Status: 500
-Method: POST
-Path: /api/users/verify_code
-Time: 23:58:54 
-
-Pid: 115847
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 23:59:02 
-
-Pid: 8660
+Pid: 14557
 Status: 200
 Method: GET
 Path: /
-Time: 13:01:18 
+Time: 15:20:43 
 
-Pid: 8660
+Pid: 14557
+Status: 200
+Method: GET
+Path: /
+Time: 15:21:30 
+
+Pid: 15215
+Status: 200
+Method: GET
+Path: /
+Time: 15:21:39 
+
+Pid: 15215
+Status: 200
+Method: GET
+Path: /
+Time: 15:21:40 
+
+Pid: 17552
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:08 
+
+Pid: 17552
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:11 
+
+Pid: 17552
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:13 
+
+Pid: 17552
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:13 
+
+Pid: 18629
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:57 
+
+Pid: 18629
+Status: 200
+Method: GET
+Path: /
+Time: 15:22:58 
+
+Pid: 19091
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:00 
+
+Pid: 19091
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:01 
+
+Pid: 19456
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:15 
+
+Pid: 19456
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:16 
+
+Pid: 19456
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:16 
+
+Pid: 19456
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:16 
+
+Pid: 19456
+Status: 200
+Method: GET
+Path: /get
+Time: 15:24:16 
+
+Pid: 19952
+Status: 200
+Method: GET
+Path: /get
+Time: 15:25:14 
+
+Pid: 19952
+Status: 200
+Method: GET
+Path: /get
+Time: 15:25:15 
+
+Pid: 19952
+Status: 200
+Method: GET
+Path: /get
+Time: 15:25:17 
+
+Pid: 20409
+Status: 200
+Method: GET
+Path: /get
+Time: 15:25:50 
+
+Pid: 20409
+Status: 200
+Method: GET
+Path: /get
+Time: 15:25:51 
+
+Pid: 20409
+Status: 200
+Method: GET
+Path: /
+Time: 15:25:53 
+
+Pid: 20409
+Status: 200
+Method: GET
+Path: /
+Time: 15:25:54 
+
+Pid: 20409
+Status: 200
+Method: GET
+Path: /
+Time: 15:25:54 
+
+Pid: 21385
+Status: 200
+Method: GET
+Path: /
+Time: 15:33:54 
+
+Pid: 21385
+Status: 200
+Method: GET
+Path: /get
+Time: 15:33:56 
+
+Pid: 21385
+Status: 200
+Method: GET
+Path: /get
+Time: 15:34:06 
+
+Pid: 21800
+Status: 200
+Method: GET
+Path: /get
+Time: 15:34:24 
+
+Pid: 21800
+Status: 200
+Method: GET
+Path: /get
+Time: 15:34:26 
+
+Pid: 22320
+Status: 200
+Method: GET
+Path: /get
+Time: 15:38:25 
+
+Pid: 22320
+Status: 200
+Method: GET
+Path: /get
+Time: 15:38:27 
+
+Pid: 23647
 Status: 404
 Method: GET
-Path: /favicon.ico
-Time: 13:01:18 
+Path: /get
+Time: 15:41:21 
 
-Pid: 8660
-Status: 200
-Method: GET
-Path: /
-Time: 13:01:45 
-
-Pid: 8658
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:03:56 
-
-Pid: 8658
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:04:21 
-
-Pid: 8660
-Status: 405
-Method: GET
-Path: /api/users/signin
-Time: 13:05:52 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:43 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:47 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:47 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:48 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:48 
-
-Pid: 8658
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:07:48 
-
-Pid: 10066
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:08:34 
-
-Pid: 10066
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:08:40 
-
-Pid: 10066
-Status: 500
-Method: POST
-Path: /api/users/authentication
-Time: 13:08:45 
-
-Pid: 11467
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:13:27 
-
-Pid: 11467
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:13:34 
-
-Pid: 11743
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:14:20 
-
-Pid: 11743
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:14:25 
-
-Pid: 13759
-Status: 200
-Method: GET
-Path: /
-Time: 13:22:03 
-
-Pid: 13759
+Pid: 23847
 Status: 404
 Method: GET
-Path: /favicon.ico
-Time: 13:22:03 
+Path: /get
+Time: 15:41:27 
 
-Pid: 14398
+Pid: 23847
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:41:31 
+
+Pid: 23847
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:41:32 
+
+Pid: 24132
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:41:51 
+
+Pid: 24541
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:42:59 
+
+Pid: 24541
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:43:15 
+
+Pid: 24541
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:43:18 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:22 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:23 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:24 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:25 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:26 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:26 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:26 
+
+Pid: 25388
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:27 
+
+Pid: 25711
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:36 
+
+Pid: 25711
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:37 
+
+Pid: 25711
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:44:38 
+
+Pid: 28493
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:48:52 
+
+Pid: 28493
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:48:53 
+
+Pid: 28493
 Status: 200
 Method: POST
 Path: /api/users/signin
-Time: 13:23:59 
+Time: 15:49:04 
 
-Pid: 14398
+Pid: 28493
 Status: 200
 Method: POST
 Path: /api/users/verify_code
-Time: 13:24:11 
+Time: 15:49:09 
 
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:19 
-
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:19 
-
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:19 
-
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:19 
-
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:20 
-
-Pid: 14409
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:20 
-
-Pid: 14741
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:24:37 
-
-Pid: 14741
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:24:43 
-
-Pid: 14741
+Pid: 28493
 Status: 500
 Method: POST
 Path: /api/users/authentication
-Time: 13:24:49 
+Time: 15:49:13 
 
-Pid: 14741
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:54 
-
-Pid: 14741
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:54 
-
-Pid: 14741
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:54 
-
-Pid: 14741
-Status: 200
-Method: GET
-Path: /
-Time: 13:24:54 
-
-Pid: 15749
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:25:47 
-
-Pid: 15749
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:25:54 
-
-Pid: 15749
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:25:59 
-
-Pid: 15749
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:26:02 
-
-Pid: 15750
-Status: 200
-Method: GET
-Path: /
-Time: 13:26:06 
-
-Pid: 15750
-Status: 200
-Method: GET
-Path: /
-Time: 13:26:07 
-
-Pid: 15750
-Status: 200
-Method: GET
-Path: /
-Time: 13:26:07 
-
-Pid: 15750
-Status: 200
-Method: GET
-Path: /
-Time: 13:26:07 
-
-Pid: 15750
-Status: 405
-Method: GET
-Path: /api/users/signin
-Time: 13:28:11 
-
-Pid: 15750
-Status: 405
-Method: GET
-Path: /api/users/signin
-Time: 13:28:18 
-
-Pid: 15750
-Status: 200
-Method: GET
-Path: /
-Time: 13:28:21 
-
-Pid: 16560
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:29:18 
-
-Pid: 16560
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:29:23 
-
-Pid: 16565
-Status: 200
-Method: GET
-Path: /
-Time: 13:29:27 
-
-Pid: 16565
-Status: 200
-Method: GET
-Path: /
-Time: 13:29:27 
-
-Pid: 17128
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:30:47 
-
-Pid: 17128
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:30:49 
-
-Pid: 17128
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:31:00 
-
-Pid: 17128
-Status: 500
-Method: POST
-Path: /api/users/verify_code
-Time: 13:31:08 
-
-Pid: 17128
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:31:12 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:21 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:22 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:22 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:22 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:22 
-
-Pid: 17124
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:22 
-
-Pid: 17515
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:32 
-
-Pid: 17515
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:33 
-
-Pid: 17515
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:33 
-
-Pid: 17515
-Status: 200
-Method: GET
-Path: /
-Time: 13:31:33 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:32:55 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:32:58 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:32:59 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:32:59 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:32:59 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:33:00 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:33:07 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:33:11 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:33:12 
-
-Pid: 18123
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:33:12 
-
-Pid: 19934
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:32 
-
-Pid: 19934
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:33 
-
-Pid: 20223
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:42 
-
-Pid: 20223
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:44 
-
-Pid: 20223
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:49 
-
-Pid: 20223
-Status: 200
-Method: POST
-Path: /api/users/authentication
-Time: 13:38:52 
-
-Pid: 26171
-Status: 200
-Method: POST
-Path: /api/users/signin
-Time: 13:49:00 
-
-Pid: 26171
-Status: 200
-Method: POST
-Path: /api/users/verify_code
-Time: 13:49:06 
-
-Pid: 26171
+Pid: 29420
 Status: 500
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:09 
+Time: 15:50:33 
 
-Pid: 26549
+Pid: 29420
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 15:50:39 
+
+Pid: 31336
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 15:52:44 
+
+Pid: 31336
+Status: 200
+Method: POST
+Path: /api/users/verify_code
+Time: 15:52:49 
+
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:48 
+Time: 15:52:51 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:50 
+Time: 15:52:52 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:51 
+Time: 15:52:53 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:51 
+Time: 15:52:53 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:51 
+Time: 15:52:53 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:51 
+Time: 15:52:53 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:54 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:54 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:54 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:54 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:54 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:55 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:52 
+Time: 15:52:55 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:53 
+Time: 15:52:55 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:53 
+Time: 15:52:56 
 
-Pid: 26549
+Pid: 31336
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:53 
+Time: 15:52:56 
 
-Pid: 26549
+Pid: 31328
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:10 
+
+Pid: 31591
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:16 
+
+Pid: 31591
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:16 
+
+Pid: 31591
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:18 
+
+Pid: 31591
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:19 
+
+Pid: 31863
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:29 
+
+Pid: 31863
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:30 
+
+Pid: 31863
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:31 
+
+Pid: 32147
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:53:59 
+
+Pid: 32147
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:00 
+
+Pid: 32585
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:25 
+
+Pid: 32585
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:26 
+
+Pid: 32585
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:26 
+
+Pid: 32585
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:27 
+
+Pid: 32585
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:54:27 
+
+Pid: 34023
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:57:18 
+
+Pid: 34023
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:57:19 
+
+Pid: 34023
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:57:19 
+
+Pid: 34023
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:57:20 
+
+Pid: 34023
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:57:21 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:02 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:03 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:04 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:04 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:05 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:05 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:05 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:05 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:05 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:06 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:06 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:06 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:06 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:06 
+
+Pid: 34424
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:58:07 
+
+Pid: 35811
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:59:53 
+
+Pid: 35811
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:59:54 
+
+Pid: 35811
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:59:54 
+
+Pid: 35811
+Status: 200
+Method: GET
+Path: /set_session
+Time: 15:59:55 
+
+Pid: 36294
+Status: 200
+Method: GET
+Path: /set_session
+Time: 16:00:37 
+
+Pid: 36294
+Status: 200
+Method: GET
+Path: /set_session
+Time: 16:00:38 
+
+Pid: 37989
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 16:03:13 
+
+Pid: 37989
+Status: 200
+Method: POST
+Path: /api/users/verify_code
+Time: 16:03:18 
+
+Pid: 37989
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 13:49:53 
+Time: 16:03:20 
 
-Pid: 29509
+Pid: 37989
 Status: 200
 Method: POST
 Path: /api/users/authentication
-Time: 14:00:31 
+Time: 16:03:21 
 
-Pid: 29501
+Pid: 37989
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:03:21 
+
+Pid: 37989
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:03:22 
+
+Pid: 37989
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:03:22 
+
+Pid: 38506
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:05:16 
+
+Pid: 38863
+Status: 200
+Method: POST
+Path: /api/users/logout
+Time: 16:06:01 
+
+Pid: 38863
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:05 
+
+Pid: 38863
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:05 
+
+Pid: 39175
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:52 
+
+Pid: 39175
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:52 
+
+Pid: 39175
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:53 
+
+Pid: 39175
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:53 
+
+Pid: 39175
+Status: 200
+Method: POST
+Path: /api/users/logout
+Time: 16:06:54 
+
+Pid: 39175
 Status: 500
-Method: GET
-Path: /
-Time: 14:00:37 
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:56 
 
-Pid: 29509
+Pid: 39175
 Status: 500
-Method: GET
-Path: /
-Time: 14:00:47 
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:57 
 
-Pid: 29509
-Status: 200
-Method: GET
-Path: /
-Time: 14:02:30 
+Pid: 39175
+Status: 500
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:57 
 
-Pid: 29509
-Status: 200
-Method: GET
-Path: /
-Time: 14:02:42 
+Pid: 39175
+Status: 500
+Method: POST
+Path: /api/users/authentication
+Time: 16:06:58 
 

@@ -12,4 +12,5 @@ func InitUsers(router fiber.Router) {
 	usersRouter.Post("/signin", controllers.SigninAction)
 	usersRouter.Post("/verify_code", controllers.VerifyCodeAction)
 	usersRouter.Post("/authentication", controllers.AuthenticationAction)
+	usersRouter.Post("/logout", controllers.LogoutAction)
 }

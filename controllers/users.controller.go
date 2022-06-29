@@ -191,11 +191,15 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 								},
 							)
 
+							sessionID := sess.ID()
+
 							c.Cookie(&fiber.Cookie{
 								Name:    "session_id",
-								Value:   sess.ID(),
+								Value:   sessionID,
 								Expires: time.Now().Add(14 * 24 * time.Hour),
 							})
+
+							defer sess.Save()
 
 							c.Status(200).JSON(fiber.Map{
 								"Message": "success signin",
@@ -227,6 +231,26 @@ func AuthenticationAction(c *fiber.Ctx) error {
 		httpstatus.ResponseUserData(c, user)
 	} else {
 		httpstatus.Unauthorized(c)
+	}
+
+	return nil
+}
+
+func LogoutAction(c *fiber.Ctx) error {
+	sess, sessErr := session.SessionStore.Get(c)
+	if sessErr != nil {
+		logs.ErrorLogger.Println(sessErr)
+		httpstatus.InternalServerError(c)
+	}
+
+	err := sess.Destroy()
+
+	if err != nil {
+		httpstatus.InternalServerError(c)
+	} else {
+		c.Status(200).JSON(fiber.Map{
+			"Message": "logout",
+		})
 	}
 
 	return nil

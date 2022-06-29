@@ -56,15 +56,15 @@ func AuthenticateUser(c *fiber.Ctx) (bool, *models.User) {
 		httpstatus.InternalServerError(c)
 	}
 
-	userId := sess.Get("static_id")
+	userID := sess.Get("static_id")
 
-	if userId != nil && userId.(int) > 0 {
+	if userID != nil && userID.(int) > 0 {
 		var user *models.User
 
 		database.UsersCollection.FindOne(context.TODO(), bson.D{
 			primitive.E{
 				Key:   "static_id",
-				Value: userId.(int),
+				Value: userID.(int),
 			},
 		}).Decode(&user)
 
@@ -76,4 +76,6 @@ func AuthenticateUser(c *fiber.Ctx) (bool, *models.User) {
 	} else {
 		return false, nil
 	}
+
+	return false, nil
 }
