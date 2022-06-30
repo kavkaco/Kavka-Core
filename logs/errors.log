@@ -1,0 +1,16 @@
+ERROR: 2022/06/29 19:17:44 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/29 19:17:45 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/29 19:18:54 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/29 19:18:55 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:03 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:23 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:25 handler.go:30: Error in parsing websocket message to JSON: websocket: close 1001 (going away)
+ERROR: 2022/06/30 16:08:25 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:27 handler.go:30: Error in parsing websocket message to JSON: websocket: close 1001 (going away)
+ERROR: 2022/06/30 16:08:27 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:43 handler.go:30: Error in parsing websocket message to JSON: websocket: close 1001 (going away)
+ERROR: 2022/06/30 16:08:43 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:08:44 handler.go:30: Error in parsing websocket message to JSON: websocket: close 1001 (going away)
+ERROR: 2022/06/30 16:08:44 handler.go:18: Error in reading socket message.
+ERROR: 2022/06/30 16:14:13 handler.go:31: Error in parsing websocket message to JSON: websocket: close 1001 (going away)
+ERROR: 2022/06/30 16:14:13 handler.go:18: Error in reading socket message.

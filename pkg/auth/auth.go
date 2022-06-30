@@ -76,6 +76,4 @@ func AuthenticateUser(c *fiber.Ctx) (bool, *models.User) {
 	} else {
 		return false, nil
 	}
-
-	return false, nil
 }

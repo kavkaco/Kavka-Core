@@ -14,7 +14,7 @@ func InternalServerError(c *fiber.Ctx) {
 }
 
 func Unauthorized(c *fiber.Ctx) {
-	c.Status(500).JSON(fiber.Map{
+	c.Status(401).JSON(fiber.Map{
 		"message": "Unauthorized",
 	})
 }

@@ -191,14 +191,6 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 								},
 							)
 
-							sessionID := sess.ID()
-
-							c.Cookie(&fiber.Cookie{
-								Name:    "session_id",
-								Value:   sessionID,
-								Expires: time.Now().Add(14 * 24 * time.Hour),
-							})
-
 							defer sess.Save()
 
 							c.Status(200).JSON(fiber.Map{

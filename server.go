@@ -50,7 +50,8 @@ func main() {
 
 	app.Use(cors.New(
 		cors.Config{
-			AllowOrigins: configs.GetAllowOrigins(),
+			AllowOrigins:     configs.GetAllowOrigins(),
+			AllowCredentials: true,
 		},
 	))
 
