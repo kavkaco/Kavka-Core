@@ -1444,3 +1444,69 @@ Method: GET
 Path: /ws
 Time: 16:20:06 
 
+Pid: 30607
+Status: 401
+Method: POST
+Path: /api/users/authentication
+Time: 16:21:52 
+
+Pid: 30607
+Status: 401
+Method: POST
+Path: /api/users/authentication
+Time: 16:21:54 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/signin
+Time: 16:21:58 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/verify_code
+Time: 16:22:07 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:11 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:12 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:13 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:14 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:14 
+
+Pid: 30607
+Status: 200
+Method: POST
+Path: /api/users/logout
+Time: 16:22:34 
+
+Pid: 30607
+Status: 401
+Method: POST
+Path: /api/users/authentication
+Time: 16:22:37 
+

@@ -33,4 +33,4 @@ func InitSession() *session.Store {
 	return session
 }
 
-var SessionStore session.Store = *InitSession()
+var SessionStore *session.Store = InitSession()
