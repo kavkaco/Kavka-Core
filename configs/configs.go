@@ -63,6 +63,25 @@ func ParseMongoConfigs(path string) (*MongoConfigs, error) {
 	return &configs, nil
 }
 
+type SmtpConfigs struct {
+	Host     string `yaml:"HOST"`
+	Port     int    `yaml:"PORT"`
+	Email    string `yaml:"EMAIL"`
+	Password string `yaml:"PASSWORD"`
+}
+
+func ParseSmtpConfigs(path string) (*SmtpConfigs, error) {
+	var configs SmtpConfigs
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	yaml.Unmarshal(data, &configs)
+
+	return &configs, nil
+}
+
 func GetAllowOrigins() string {
 	wd, _ := os.Getwd()
 

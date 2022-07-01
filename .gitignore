@@ -2,3 +2,4 @@
 logs/errors.log
 logs/requests.log
 build/
+configs/smtp.yml
