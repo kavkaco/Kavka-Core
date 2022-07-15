@@ -37,5 +37,6 @@ func EstablishMongoDBConnection(mongoConfigs configs.MongoConfigs) {
 	}
 
 	MongoDB = client.Database(mongoConfigs.DatabaseName)
-	UsersCollection = MongoDB.Collection("users")
+
+	UsersCollection = MongoDB.Collection("userDB")
 }
