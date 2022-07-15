@@ -1,10 +1,10 @@
 package main
 
 import (
-	"Tahagram/configs"
-	"Tahagram/database"
-	"Tahagram/models"
-	"Tahagram/pkg/auth"
+	"Nexus/app/database"
+	"Nexus/app/models"
+	"Nexus/internal/configs"
+	"Nexus/pkg/auth"
 	"fmt"
 	"os"
 	"testing"
@@ -16,7 +16,7 @@ func TestMakeVerificCode(t *testing.T) {
 }
 
 func TestEmailWithoutAt(t *testing.T) {
-	t.Logf("Email Without At : %s\n", auth.GetEmailWithoutAt("mr.tahadostifam@gmail.com"))
+	t.Logf("Email Without At : %s\n", auth.GetEmailWithoutAt("NexusChat@gmail.com"))
 }
 
 func TestIsVerificCodeExpired(t *testing.T) {
@@ -26,8 +26,8 @@ func TestIsVerificCodeExpired(t *testing.T) {
 		fmt.Println("Error in parsing mongodb configs")
 	}
 
-	email := "mr.tahadostifam@gmail.com"
-	database.EstablishConnection(*mongoConfigs)
+	email := "NexusChat@gmail.com"
+	database.EstablishMongoDBConnection(*mongoConfigs)
 	time.Sleep(1 * time.Second)
 
 	var user *models.User = models.FindUserByEmail(email)

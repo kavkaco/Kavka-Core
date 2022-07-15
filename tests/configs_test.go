@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Tahagram/configs"
+	"Nexus/internal/configs"
 	"os"
 	"testing"
 )

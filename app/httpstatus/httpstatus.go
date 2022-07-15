@@ -1,7 +1,7 @@
 package httpstatus
 
 import (
-	"Tahagram/models"
+	"Nexus/app/models"
 
 	"github.com/fatih/structs"
 	"github.com/gofiber/fiber/v2"

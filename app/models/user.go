@@ -1,7 +1,7 @@
 package models
 
 import (
-	"Tahagram/database"
+	"Nexus/app/database"
 	"context"
 	"math/rand"
 	"time"
@@ -18,7 +18,7 @@ type User struct {
 	Bio                 string        `bson:"bio"`
 	LastSeen            string        `bson:"last_seen"`
 	Chats               []interface{} `bson:"chats"`
-	ProfilePhotos       []string      `bson:"profile_photos"`
+	ProfileImages       []string      `bson:"profile_images"`
 	VerificCode         int           `bson:"verific_code"`
 	VerificTryCount     int           `bson:"verific_try_count"`
 	VerificCodeExpire   int64         `bson:"verific_code_expire"`

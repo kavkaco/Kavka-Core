@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Tahagram/pkg/validate"
+	"Nexus/pkg/validate"
 	"os"
 	"testing"
 

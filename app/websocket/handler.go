@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"Tahagram/logs"
+	"Nexus/pkg/logger"
 	"encoding/json"
 	"fmt"
 
@@ -20,14 +20,14 @@ var ws = websocket.New(func(c *websocket.Conn) {
 	for {
 		_, msg, msgErr := c.ReadMessage()
 		if msgErr != nil {
-			logs.ErrorLogger.Println("Error in reading socket message.")
+			logger.ErrorLogger.Println("Error in reading socket message.")
 			break
 		}
 
 		var data *MessageData = &MessageData{}
 		parseErr := json.Unmarshal([]byte(msg), &data)
 		if parseErr != nil {
-			logs.ErrorLogger.Println("Error in parsing websocket message to JSON: " + parseErr.Error())
+			logger.ErrorLogger.Println("Error in parsing websocket message to JSON: " + parseErr.Error())
 		} else {
 			WebSocketMessageHandler(data, c)
 		}

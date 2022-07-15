@@ -1,13 +1,13 @@
 version: "3.9"
 services:
   redis:
-    container_name: "tahagram_redis_db"
+    container_name: "nexus_redis_db"
     image: "redis:latest"
     ports:
       - "6379:6379"
     restart: always
   mongo:
-    container_name: "tahagram_mongo_db"
+    container_name: "nexus_mongo_db"
     image: "mongo:latest"
     ports:
       - "27017:27017"
@@ -15,9 +15,9 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
-      MONGO_INITDB_DATABASE: tahagram
+      MONGO_INITDB_DATABASE: nexus
   app:
-    container_name: "tahagram_backend_server"
+    container_name: "nexus_server"
     build:
       context: ./
       dockerfile: Dockerfile
@@ -30,4 +30,4 @@ services:
 
 networks:
   default:
-    name: tahagram_default_network
+    name: nexus_default_network

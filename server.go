@@ -1,11 +1,12 @@
 package main
 
 import (
-	"Tahagram/configs"
-	"Tahagram/database"
-	"Tahagram/logs"
-	"Tahagram/routers"
-	"Tahagram/websocket"
+	"Nexus/app/database"
+	"Nexus/app/routers"
+	"Nexus/app/session"
+	"Nexus/app/websocket"
+	"Nexus/internal/configs"
+	"Nexus/pkg/logger"
 	"fmt"
 	"log"
 	"os"
@@ -16,33 +17,45 @@ import (
 
 var AppConfigs configs.AppConfigs
 var MongoConfigs configs.MongoConfigs
+var RedisConfigs configs.RedisConfigs
+var AllowedOrigins string
 
 func ParseConfigs() {
 	wd, _ := os.Getwd()
 
-	appConfigs, appConfigsErr := configs.ParseAppConfig(wd + "/configs/configs.yml")
+	appConfigs, appConfigsErr := configs.ParseAppConfig(wd + "/app/configs/configs.yml")
 	if appConfigsErr != nil {
 		fmt.Println("Error in parsing app configs")
 		os.Exit(1)
 	}
 
-	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/configs/mongo.yml")
+	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/app/configs/mongo.yml")
 	if mongoConfigsErr != nil {
 		fmt.Println("Error in parsing mongodb configs")
 	}
 
+	redisConfigs, redisConfigsErr := configs.ParseRedisConfigs(wd + "/app/configs/redis.yml")
+	if redisConfigsErr != nil {
+		log.Fatal("Error in connecting to redis database")
+	}
+
+	allowedOrigins := configs.GetAllowedOrigins(wd + "/app/configs/allowed_origins")
+
 	AppConfigs = *appConfigs
 	MongoConfigs = *mongoConfigs
+	RedisConfigs = *redisConfigs
+	AllowedOrigins = allowedOrigins
 }
 
 func main() {
 	ParseConfigs()
 
-	database.EstablishConnection(MongoConfigs)
+	defer database.EstablishRedisDBConnection(RedisConfigs)
+	database.EstablishMongoDBConnection(MongoConfigs)
 
 	app := fiber.New(
 		fiber.Config{
-			AppName:      "Tahagram",
+			AppName:      "Nexus",
 			ServerHeader: "Fiber",
 			Prefork:      true,
 		},
@@ -50,17 +63,19 @@ func main() {
 
 	app.Use(cors.New(
 		cors.Config{
-			AllowOrigins:     configs.GetAllowOrigins(),
+			AllowOrigins:     AllowedOrigins,
 			AllowCredentials: true,
 		},
 	))
 
-	logs.InitLogger(app)
+	logger.InitLogger(app)
 
 	api := app.Group("/api")
 	routers.InitUsers(api)
 
 	websocket.InitWebSocket(app)
+
+	session.InitSession()
 
 	log.Fatal(
 		app.Listen(

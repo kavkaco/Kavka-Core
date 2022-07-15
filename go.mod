@@ -1,4 +1,4 @@
-module Tahagram
+module Nexus
 
 go 1.18
 

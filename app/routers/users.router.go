@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"Tahagram/controllers"
+	"Nexus/app/controllers"
 
 	"github.com/gofiber/fiber/v2"
 )

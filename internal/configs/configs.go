@@ -82,10 +82,8 @@ func ParseSmtpConfigs(path string) (*SmtpConfigs, error) {
 	return &configs, nil
 }
 
-func GetAllowOrigins() string {
-	wd, _ := os.Getwd()
-
-	data, err := os.ReadFile(wd + "/configs/allow_origins")
+func GetAllowedOrigins(path string) string {
+	data, err := os.ReadFile(path)
 
 	if err != nil {
 		fmt.Println(err)

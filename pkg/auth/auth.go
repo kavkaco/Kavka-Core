@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"Tahagram/configs"
-	"Tahagram/database"
-	"Tahagram/httpstatus"
-	"Tahagram/logs"
-	"Tahagram/models"
-	"Tahagram/session"
+	"Nexus/app/database"
+	"Nexus/app/httpstatus"
+	"Nexus/app/models"
+	"Nexus/app/session"
+	"Nexus/internal/configs"
+	"Nexus/pkg/logger"
 	"context"
 	"math/rand"
 	"strings"
@@ -52,7 +52,7 @@ func GetEmailWithoutAt(email string) string {
 func AuthenticateUser(c *fiber.Ctx) (bool, *models.User) {
 	sess, sessErr := session.SessionStore.Get(c)
 	if sessErr != nil {
-		logs.ErrorLogger.Println(sessErr)
+		logger.ErrorLogger.Println(sessErr)
 		httpstatus.InternalServerError(c)
 	}
 

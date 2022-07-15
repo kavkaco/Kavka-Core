@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"Tahagram/httpstatus"
-	"Tahagram/pkg/auth"
+	"Nexus/app/httpstatus"
+	"Nexus/pkg/auth"
 
 	"github.com/gofiber/fiber/v2"
 )

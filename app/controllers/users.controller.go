@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"Tahagram/configs"
-	"Tahagram/database"
-	"Tahagram/httpstatus"
-	"Tahagram/logs"
-	"Tahagram/models"
-	"Tahagram/pkg/auth"
-	"Tahagram/pkg/validate"
-	"Tahagram/session"
+	"Nexus/app/database"
+	"Nexus/app/httpstatus"
+	"Nexus/app/models"
+	"Nexus/app/session"
+	"Nexus/app/smtp"
+	"Nexus/internal/configs"
+	"Nexus/pkg/auth"
+	"Nexus/pkg/logger"
+	"Nexus/pkg/validate"
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -69,9 +69,9 @@ func SigninAction(c *fiber.Ctx) error {
 				primitive.E{Key: "email", Value: body.Email},
 			}, newData)
 
-			sendEmailErr := sendSigninEmail()
+			sendEmailErr := smtp.SendSigninEmail()
 			if sendEmailErr != nil {
-				logs.ErrorLogger.Println(sendEmailErr)
+				logger.ErrorLogger.Println(sendEmailErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -81,9 +81,9 @@ func SigninAction(c *fiber.Ctx) error {
 
 		}
 	} else {
-		sendEmailErr := sendSigninEmail()
+		sendEmailErr := smtp.SendSigninEmail()
 		if sendEmailErr != nil {
-			logs.ErrorLogger.Println(sendEmailErr)
+			logger.ErrorLogger.Println(sendEmailErr)
 			httpstatus.InternalServerError(c)
 		} else {
 			_, insertErr := database.UsersCollection.InsertOne(context.TODO(), bson.D{
@@ -95,7 +95,7 @@ func SigninAction(c *fiber.Ctx) error {
 				primitive.E{Key: "verific_code_expire", Value: auth.MakeVerificCodeExpire()},
 			})
 			if insertErr != nil {
-				logs.ErrorLogger.Println(insertErr)
+				logger.ErrorLogger.Println(insertErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -167,7 +167,7 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 							sess, sessErr := session.SessionStore.Get(c)
 							if sessErr != nil {
 								user.IncreaseTryCount()
-								logs.ErrorLogger.Println(sessErr)
+								logger.ErrorLogger.Println(sessErr)
 								httpstatus.InternalServerError(c)
 							}
 
@@ -231,7 +231,7 @@ func AuthenticationAction(c *fiber.Ctx) error {
 func LogoutAction(c *fiber.Ctx) error {
 	sess, sessErr := session.SessionStore.Get(c)
 	if sessErr != nil {
-		logs.ErrorLogger.Println(sessErr)
+		logger.ErrorLogger.Println(sessErr)
 		httpstatus.InternalServerError(c)
 	}
 
@@ -245,11 +245,5 @@ func LogoutAction(c *fiber.Ctx) error {
 		})
 	}
 
-	return nil
-}
-
-func sendSigninEmail() error {
-	// TODO
-	fmt.Println("Email sent")
 	return nil
 }

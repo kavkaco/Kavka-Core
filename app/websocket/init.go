@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"Tahagram/httpstatus"
-	"Tahagram/pkg/auth"
+	"Nexus/app/httpstatus"
+	"Nexus/pkg/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
