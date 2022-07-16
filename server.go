@@ -50,7 +50,7 @@ func ParseConfigs() {
 func main() {
 	ParseConfigs()
 
-	defer database.EstablishRedisDBConnection(RedisConfigs)
+	database.EstablishRedisDBConnection(RedisConfigs)
 	database.EstablishMongoDBConnection(MongoConfigs)
 
 	app := fiber.New(
