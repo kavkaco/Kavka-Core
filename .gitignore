@@ -1,7 +1,5 @@
-logs/errors.log
-logs/requests.log
-build/
-configs/smtp.yml
-configs/smtp.prod.yml
 .vscode
 .idea
+logs/
+build/
+app/configs/

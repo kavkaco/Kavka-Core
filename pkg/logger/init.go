@@ -13,8 +13,9 @@ var ErrorLogger *log.Logger
 
 func InitLogger(app *fiber.App) {
 	wd, _ := os.Getwd()
+	logsDir := wd + "/logs"
 
-	requestsFile, requestsFileErr := os.OpenFile(wd+"/logs/requests.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	requestsFile, requestsFileErr := os.OpenFile(fmt.Sprintf("%s/requests.log", logsDir), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if requestsFileErr != nil {
 		fmt.Println(requestsFileErr)
@@ -31,7 +32,7 @@ func InitLogger(app *fiber.App) {
 		),
 	)
 
-	errorsFile, errorsFileErr := os.OpenFile(wd+"/logs/errors.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	errorsFile, errorsFileErr := os.OpenFile(fmt.Sprintf("%s/errors.log", logsDir), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if errorsFileErr != nil {
 		fmt.Println(errorsFileErr)

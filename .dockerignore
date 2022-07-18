@@ -1,4 +1,4 @@
-logs/errors.log
-logs/requests.log
+.vscode
+.idea
+logs/
 build/
-configs/smtp.yml

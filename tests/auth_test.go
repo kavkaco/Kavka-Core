@@ -21,7 +21,7 @@ func TestEmailWithoutAt(t *testing.T) {
 
 func TestIsVerificCodeExpired(t *testing.T) {
 	wd, _ := os.Getwd()
-	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/../configs/mongo.yml")
+	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/../app/configs/mongo.yml")
 	if mongoConfigsErr != nil {
 		fmt.Println("Error in parsing mongodb configs")
 	}
