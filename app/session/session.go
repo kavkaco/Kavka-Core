@@ -5,13 +5,13 @@ import (
 	"github.com/gofiber/storage/redis"
 )
 
-func InitSession(redisClient *redis.Storage) *session.Store {
+var SessionStore *session.Store
+
+func InitSession(redisClient *redis.Storage) {
 	session := session.New(session.Config{
 		KeyLookup: "cookie:session_id",
 		Storage:   redisClient,
 	})
 
-	return session
+	SessionStore = session
 }
-
-var SessionStore *session.Store

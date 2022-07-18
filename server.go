@@ -72,7 +72,7 @@ func main() {
 	api := app.Group("/api")
 	routers.InitUsers(api)
 	websocket.InitWebSocket(app)
-	session.SessionStore = session.InitSession(redisClient)
+	session.InitSession(redisClient)
 
 	log.Fatal(
 		app.Listen(
