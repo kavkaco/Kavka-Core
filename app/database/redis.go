@@ -8,9 +8,7 @@ import (
 	"github.com/gofiber/storage/redis"
 )
 
-var RedisStore *redis.Storage
-
-func EstablishRedisDBConnection(redisConfigs configs.RedisConfigs) {
+func InitRedisDB(redisConfigs configs.RedisConfigs) *redis.Storage {
 	client := redis.New(redis.Config{
 		Host:     redisConfigs.Host,
 		Username: redisConfigs.Username,
@@ -21,8 +19,9 @@ func EstablishRedisDBConnection(redisConfigs configs.RedisConfigs) {
 
 	if client != nil {
 		fmt.Println("Successfully connected to redis database")
-		RedisStore = client
+		return client
 	} else {
 		log.Fatal("Error in connecting to redis database")
+		return nil
 	}
 }

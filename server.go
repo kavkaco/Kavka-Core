@@ -50,14 +50,14 @@ func ParseConfigs() {
 func main() {
 	ParseConfigs()
 
-	database.EstablishRedisDBConnection(RedisConfigs)
-	database.EstablishMongoDBConnection(MongoConfigs)
+	redisClient := database.InitRedisDB(RedisConfigs)
+	database.InitMongoDB(MongoConfigs)
 
 	app := fiber.New(
 		fiber.Config{
 			AppName:      "Nexus",
 			ServerHeader: "Fiber",
-			Prefork:      true,
+			// Prefork:      true,
 		},
 	)
 
@@ -69,13 +69,10 @@ func main() {
 	))
 
 	logger.InitLogger(app)
-
 	api := app.Group("/api")
 	routers.InitUsers(api)
-
 	websocket.InitWebSocket(app)
-
-	session.InitSession()
+	session.SessionStore = session.InitSession(redisClient)
 
 	log.Fatal(
 		app.Listen(

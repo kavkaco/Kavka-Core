@@ -1,21 +1,14 @@
 package session
 
 import (
-	"Nexus/app/database"
-	"log"
-
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/redis"
 )
 
-func InitSession() *session.Store {
-	if database.RedisStore == nil {
-		log.Fatal("Error in initializing Session. RedisStore is empty!")
-		return nil
-	}
-
+func InitSession(redisClient *redis.Storage) *session.Store {
 	session := session.New(session.Config{
 		KeyLookup: "cookie:session_id",
-		Storage:   database.RedisStore,
+		Storage:   redisClient,
 	})
 
 	return session
