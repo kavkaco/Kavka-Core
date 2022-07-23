@@ -1,8 +1,8 @@
 package websocket
 
 import (
-	"Nexus/app/httpstatus"
-	"Nexus/pkg/auth"
+	"Kavka/app/httpstatus"
+	"Kavka/pkg/auth"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"

@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"Nexus/app/database"
-	"Nexus/app/httpstatus"
-	"Nexus/app/models"
-	"Nexus/app/session"
-	"Nexus/internal/configs"
-	"Nexus/pkg/logger"
+	"Kavka/app/database"
+	"Kavka/app/httpstatus"
+	"Kavka/app/models"
+	"Kavka/app/session"
+	"Kavka/internal/configs"
+	"Kavka/pkg/logger"
 	"context"
 	"math/rand"
 	"strings"

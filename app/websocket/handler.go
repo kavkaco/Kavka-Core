@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"Nexus/pkg/logger"
+	"Kavka/pkg/logger"
 	"encoding/json"
 	"fmt"
 

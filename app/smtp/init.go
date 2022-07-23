@@ -1,6 +1,6 @@
 package smtp
 
-import "Nexus/internal/configs"
+import "Kavka/internal/configs"
 
 func InitSmtp(smtpConfigs configs.SmtpConfigs) {
 

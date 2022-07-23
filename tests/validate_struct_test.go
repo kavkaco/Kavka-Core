@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Nexus/pkg/validate"
+	"Kavka/pkg/validate"
 	"os"
 	"testing"
 

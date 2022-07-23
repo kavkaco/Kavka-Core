@@ -1,7 +1,7 @@
 package database
 
 import (
-	"Nexus/internal/configs"
+	"Kavka/internal/configs"
 	"fmt"
 	"log"
 

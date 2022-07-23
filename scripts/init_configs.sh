@@ -34,7 +34,7 @@ HOST: 127.0.0.1
 USERNAME: mongo
 PASSWORD: mongo
 PORT: 27017
-DB_NAME: nexus
+DB_NAME: kavka
 EOT
     cat <<EOT >> app/configs/smtp.yml
 HOST: smtp.gmail.com

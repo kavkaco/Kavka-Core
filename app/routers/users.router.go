@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"Nexus/app/controllers"
+	"Kavka/app/controllers"
 
 	"github.com/gofiber/fiber/v2"
 )

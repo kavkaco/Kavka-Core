@@ -1,4 +1,4 @@
-module Nexus
+module Kavka
 
 go 1.18
 

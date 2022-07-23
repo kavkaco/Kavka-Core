@@ -1,10 +1,10 @@
 package main
 
 import (
-	"Nexus/app/database"
-	"Nexus/app/models"
-	"Nexus/internal/configs"
-	"Nexus/pkg/auth"
+	"Kavka/app/database"
+	"Kavka/app/models"
+	"Kavka/internal/configs"
+	"Kavka/pkg/auth"
 	"fmt"
 	"os"
 	"testing"
@@ -16,7 +16,7 @@ func TestMakeVerificCode(t *testing.T) {
 }
 
 func TestEmailWithoutAt(t *testing.T) {
-	t.Logf("Email Without At : %s\n", auth.GetEmailWithoutAt("NexusChat@gmail.com"))
+	t.Logf("Email Without At : %s\n", auth.GetEmailWithoutAt("test.mail@gmail.com"))
 }
 
 func TestIsVerificCodeExpired(t *testing.T) {
@@ -26,7 +26,7 @@ func TestIsVerificCodeExpired(t *testing.T) {
 		fmt.Println("Error in parsing mongodb configs")
 	}
 
-	email := "NexusChat@gmail.com"
+	email := "test.mail@gmail.com"
 	database.EstablishMongoDBConnection(*mongoConfigs)
 	time.Sleep(1 * time.Second)
 

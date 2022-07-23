@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Nexus/internal/configs"
+	"Kavka/internal/configs"
 	"os"
 	"testing"
 )

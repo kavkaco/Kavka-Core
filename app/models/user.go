@@ -1,7 +1,7 @@
 package models
 
 import (
-	"Nexus/app/database"
+	"Kavka/app/database"
 	"context"
 	"math/rand"
 	"time"

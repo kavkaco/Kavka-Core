@@ -1,7 +1,7 @@
 package httpstatus
 
 import (
-	"Nexus/app/models"
+	"Kavka/app/models"
 
 	"github.com/fatih/structs"
 	"github.com/gofiber/fiber/v2"

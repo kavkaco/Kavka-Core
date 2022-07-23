@@ -1,12 +1,12 @@
 package main
 
 import (
-	"Nexus/app/database"
-	"Nexus/app/routers"
-	"Nexus/app/session"
-	"Nexus/app/websocket"
-	"Nexus/internal/configs"
-	"Nexus/pkg/logger"
+	"Kavka/app/database"
+	"Kavka/app/routers"
+	"Kavka/app/session"
+	"Kavka/app/websocket"
+	"Kavka/internal/configs"
+	"Kavka/pkg/logger"
 	"fmt"
 	"log"
 	"os"
@@ -55,7 +55,7 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			AppName:      "Nexus",
+			AppName:      "Kavka",
 			ServerHeader: "Fiber",
 			// Prefork:      true,
 		},
