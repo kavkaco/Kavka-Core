@@ -27,7 +27,7 @@ func TestIsVerificCodeExpired(t *testing.T) {
 	}
 
 	email := "test.mail@gmail.com"
-	database.EstablishMongoDBConnection(*mongoConfigs)
+	database.InitMongoDB(*mongoConfigs)
 	time.Sleep(1 * time.Second)
 
 	var user *models.User = models.FindUserByEmail(email)
