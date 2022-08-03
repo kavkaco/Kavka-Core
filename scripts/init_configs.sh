@@ -45,10 +45,10 @@ EOT
     echo -e "${GREEN}+ Configs files initialized"
 else
     echo -e "${RED}- Error"
-    echo -e "${BLUE}    These configs files already exists : "
+    echo -e "${BLUE}    These config files already exists : "
     for f in "${filesExists[@]}"
     do
         echo -e "${YELLOW}        ${f}"
     done
-    echo -e "${BLUE}    Removed them and try again"
+    echo -e "${BLUE}    Remove them and try again"
 fi
