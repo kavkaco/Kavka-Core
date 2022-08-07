@@ -21,7 +21,7 @@ func MakeConnectionString(host string, port int, username string, password strin
 	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port)
 }
 
-func InitMongoDB(mongoConfigs configs.MongoConfigs) {
+func InitMongoDB(mongoConfigs configs.Mongo) {
 	connectionString := MakeConnectionString(
 		mongoConfigs.Host,
 		mongoConfigs.Port,
@@ -36,7 +36,7 @@ func InitMongoDB(mongoConfigs configs.MongoConfigs) {
 		os.Exit(1)
 	}
 
-	MongoDB = client.Database(mongoConfigs.DatabaseName)
+	MongoDB = client.Database(mongoConfigs.DBName)
 
 	UsersCollection = MongoDB.Collection("userDB")
 }

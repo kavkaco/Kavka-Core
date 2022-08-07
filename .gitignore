@@ -1,4 +1,4 @@
 .vscode
 .idea
 build/
-app/configs/
+app/configs/configs.yml
