@@ -6,7 +6,6 @@ import (
 	"Kavka/app/session"
 	"Kavka/app/websocket"
 	"Kavka/internal/configs"
-	"Kavka/pkg/logger"
 	"fmt"
 	"log"
 	"os"
@@ -48,7 +47,7 @@ func ParseConfigs() {
 }
 
 func main() {
-	ParseConfigs()
+	ParseConfigs() // FIXME - will change
 
 	redisClient := database.InitRedisDB(RedisConfigs)
 	database.InitMongoDB(MongoConfigs)
@@ -68,7 +67,6 @@ func main() {
 		},
 	))
 
-	logger.InitLogger(app)
 	api := app.Group("/api")
 	routers.InitUsers(api)
 	websocket.InitWebSocket(app)

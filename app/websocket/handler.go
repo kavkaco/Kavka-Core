@@ -1,9 +1,9 @@
 package websocket
 
 import (
-	"Kavka/pkg/logger"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/gofiber/websocket/v2"
 )
@@ -20,14 +20,14 @@ var ws = websocket.New(func(c *websocket.Conn) {
 	for {
 		_, msg, msgErr := c.ReadMessage()
 		if msgErr != nil {
-			logger.ErrorLogger.Println("Error in reading socket message.")
+			log.Fatal("Error in reading socket message.")
 			break
 		}
 
 		var data *MessageData = &MessageData{}
 		parseErr := json.Unmarshal([]byte(msg), &data)
 		if parseErr != nil {
-			logger.ErrorLogger.Println("Error in parsing websocket message to JSON: " + parseErr.Error())
+			log.Fatalf("Error in parsing websocket message to JSON: %s\n", parseErr.Error())
 		} else {
 			WebSocketMessageHandler(data, c)
 		}

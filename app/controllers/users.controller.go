@@ -7,10 +7,10 @@ import (
 	"Kavka/app/session"
 	"Kavka/app/smtp"
 	"Kavka/internal/configs"
+	"Kavka/internal/validator"
 	"Kavka/pkg/auth"
-	"Kavka/pkg/logger"
-	"Kavka/pkg/validate"
 	"context"
+	"log"
 	"strconv"
 	"time"
 
@@ -43,7 +43,7 @@ func SigninAction(c *fiber.Ctx) error {
 		return err
 	}
 
-	errors := validate.ValidateStruct(body)
+	errors := validator.ValidateStruct(body)
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
@@ -71,7 +71,7 @@ func SigninAction(c *fiber.Ctx) error {
 
 			sendEmailErr := smtp.SendSigninEmail()
 			if sendEmailErr != nil {
-				logger.ErrorLogger.Println(sendEmailErr)
+				log.Fatal(sendEmailErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -83,19 +83,20 @@ func SigninAction(c *fiber.Ctx) error {
 	} else {
 		sendEmailErr := smtp.SendSigninEmail()
 		if sendEmailErr != nil {
-			logger.ErrorLogger.Println(sendEmailErr)
+			log.Fatal(sendEmailErr)
 			httpstatus.InternalServerError(c)
 		} else {
+			user.MakeUsername()
 			_, insertErr := database.UsersCollection.InsertOne(context.TODO(), bson.D{
 				primitive.E{Key: "static_id", Value: models.MakeUserStaticID()},
 				primitive.E{Key: "email", Value: body.Email},
-				primitive.E{Key: "username", Value: auth.GetEmailWithoutAt(body.Email)},
+				primitive.E{Key: "username", Value: user.Email},
 				primitive.E{Key: "verific_code", Value: uint(auth.MakeVerificCode())},
 				primitive.E{Key: "verific_try_count", Value: 0},
 				primitive.E{Key: "verific_code_expire", Value: auth.MakeVerificCodeExpire()},
 			})
 			if insertErr != nil {
-				logger.ErrorLogger.Println(insertErr)
+				log.Fatal(insertErr)
 				httpstatus.InternalServerError(c)
 			} else {
 				c.Status(200).JSON(fiber.Map{
@@ -116,7 +117,7 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 		return err
 	}
 
-	errors := validate.ValidateStruct(body)
+	errors := validator.ValidateStruct(body)
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
@@ -167,7 +168,7 @@ func VerifyCodeAction(c *fiber.Ctx) error {
 							sess, sessErr := session.SessionStore.Get(c)
 							if sessErr != nil {
 								user.IncreaseTryCount()
-								logger.ErrorLogger.Println(sessErr)
+								log.Fatal(sessErr)
 								httpstatus.InternalServerError(c)
 							}
 
@@ -231,7 +232,7 @@ func AuthenticationAction(c *fiber.Ctx) error {
 func LogoutAction(c *fiber.Ctx) error {
 	sess, sessErr := session.SessionStore.Get(c)
 	if sessErr != nil {
-		logger.ErrorLogger.Println(sessErr)
+		log.Fatal(sessErr)
 		httpstatus.InternalServerError(c)
 	}
 

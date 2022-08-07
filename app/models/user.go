@@ -64,3 +64,12 @@ func (user *User) IncreaseTryCount() {
 		},
 	)
 }
+
+// FIXME - will remove
+func (user *User) MakeUsername() {
+	rand.Seed(time.Now().UnixNano())
+
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	user.Username = string(charset[rand.Intn(len(charset))])
+}

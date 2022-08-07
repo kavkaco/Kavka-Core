@@ -6,10 +6,9 @@ import (
 	"Kavka/app/models"
 	"Kavka/app/session"
 	"Kavka/internal/configs"
-	"Kavka/pkg/logger"
 	"context"
+	"log"
 	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -45,14 +44,10 @@ func IsVerificCodeExpired(expire int64) bool {
 	return !(now < expire)
 }
 
-func GetEmailWithoutAt(email string) string {
-	return email[:strings.IndexByte(email, '@')]
-}
-
 func AuthenticateUser(c *fiber.Ctx) (bool, *models.User) {
 	sess, sessErr := session.SessionStore.Get(c)
 	if sessErr != nil {
-		logger.ErrorLogger.Println(sessErr)
+		log.Fatal(sessErr)
 		httpstatus.InternalServerError(c)
 	}
 
