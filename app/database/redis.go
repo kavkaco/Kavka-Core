@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/storage/redis"
 )
 
-func InitRedisDB(redisConfigs configs.RedisConfigs) *redis.Storage {
+func InitRedisDB(redisConfigs configs.Redis) *redis.Storage {
 	client := redis.New(redis.Config{
 		Host:     redisConfigs.Host,
 		Username: redisConfigs.Username,

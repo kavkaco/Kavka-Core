@@ -21,7 +21,7 @@ func MakeConnectionString(host string, port int, username string, password strin
 	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port)
 }
 
-func InitMongoDB(mongoConfigs configs.MongoConfigs) {
+func InitMongoDB(mongoConfigs configs.Mongo) {
 	connectionString := MakeConnectionString(
 		mongoConfigs.Host,
 		mongoConfigs.Port,
