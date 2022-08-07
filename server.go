@@ -6,64 +6,36 @@ import (
 	"Kavka/app/session"
 	"Kavka/app/websocket"
 	"Kavka/internal/configs"
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-var AppConfigs configs.AppConfigs
-var MongoConfigs configs.MongoConfigs
-var RedisConfigs configs.RedisConfigs
-var AllowedOrigins string
-
-func ParseConfigs() {
-	wd, _ := os.Getwd()
-
-	appConfigs, appConfigsErr := configs.ParseAppConfig(wd + "/app/configs/configs.yml")
-	if appConfigsErr != nil {
-		fmt.Println("Error in parsing app configs")
-		os.Exit(1)
-	}
-
-	mongoConfigs, mongoConfigsErr := configs.ParseMongoConfigs(wd + "/app/configs/mongo.yml")
-	if mongoConfigsErr != nil {
-		fmt.Println("Error in parsing mongodb configs")
-	}
-
-	redisConfigs, redisConfigsErr := configs.ParseRedisConfigs(wd + "/app/configs/redis.yml")
-	if redisConfigsErr != nil {
-		log.Fatal("Error in connecting to redis database")
-	}
-
-	allowedOrigins := configs.GetAllowedOrigins(wd + "/app/configs/allowed_origins")
-
-	AppConfigs = *appConfigs
-	MongoConfigs = *mongoConfigs
-	RedisConfigs = *redisConfigs
-	AllowedOrigins = allowedOrigins
-}
+const APP_CONFIG_PATH string = "./app/configs/configs.yml"
 
 func main() {
-	ParseConfigs() // FIXME - will change
 
-	redisClient := database.InitRedisDB(RedisConfigs)
-	database.InitMongoDB(MongoConfigs)
+	cfg, err := configs.Parse(APP_CONFIG_PATH)
+	if err != nil {
+		log.Fatal("cannot parse configs. ", err.Error())
+	}
+
+	redisClient := database.InitRedisDB(cfg.Redis)
+	database.InitMongoDB(cfg.Mongo)
 
 	app := fiber.New(
 		fiber.Config{
-			AppName:      "Kavka",
-			ServerHeader: "Fiber",
-			// Prefork:      true,
+			AppName:      cfg.App.Name,
+			ServerHeader: cfg.App.Fiber.ServerHeader,
+			Prefork:      cfg.App.Fiber.Prefork,
 		},
 	)
 
 	app.Use(cors.New(
 		cors.Config{
-			AllowOrigins:     AllowedOrigins,
-			AllowCredentials: true,
+			AllowOrigins:     cfg.App.Fiber.CORS.AllowOrigins,
+			AllowCredentials: cfg.App.Fiber.CORS.AllowCredentials,
 		},
 	))
 
@@ -73,12 +45,6 @@ func main() {
 	session.InitSession(redisClient)
 
 	log.Fatal(
-		app.Listen(
-			fmt.Sprintf(
-				"%s:%d",
-				"0.0.0.0",
-				AppConfigs.ListenPort,
-			),
-		),
+		app.Listen(cfg.App.HTTP.Address),
 	)
 }
