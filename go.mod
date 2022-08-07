@@ -5,7 +5,6 @@ go 1.18
 require (
 	github.com/fatih/structs v1.1.0
 	github.com/gofiber/websocket/v2 v2.0.22
-	github.com/olekukonko/tablewriter v0.0.5
 	go.mongodb.org/mongo-driver v1.9.1
 )
 
@@ -17,7 +16,6 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
