@@ -36,7 +36,7 @@ func InitMongoDB(mongoConfigs configs.Mongo) {
 		os.Exit(1)
 	}
 
-	MongoDB = client.Database(mongoConfigs.DatabaseName)
+	MongoDB = client.Database(mongoConfigs.DBName)
 
 	UsersCollection = MongoDB.Collection("userDB")
 }

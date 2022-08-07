@@ -2,6 +2,6 @@ package smtp
 
 import "Kavka/internal/configs"
 
-func InitSmtp(smtpConfigs configs.Smtp) {
+func InitSmtp(smtpConfigs configs.SMTP) {
 
 }

@@ -13,7 +13,6 @@ func InitRedisDB(redisConfigs configs.Redis) *redis.Storage {
 		Host:     redisConfigs.Host,
 		Username: redisConfigs.Username,
 		Password: redisConfigs.Password,
-		Database: redisConfigs.Database,
 		Port:     redisConfigs.Port,
 	})
 
