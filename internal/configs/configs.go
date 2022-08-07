@@ -7,12 +7,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type AppConfigs struct {
+type App struct {
 	ListenPort int `yaml:"LISTEN_PORT"`
 }
 
-func ParseAppConfig(path string) (*AppConfigs, error) {
-	var configs AppConfigs
+func ParseAppConfig(path string) (*App, error) {
+	var configs App
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func ParseAppConfig(path string) (*AppConfigs, error) {
 	return &configs, nil
 }
 
-type RedisConfigs struct {
+type Redis struct {
 	Host     string `yaml:"HOST"`
 	Username string `yaml:"USERNAME"`
 	Password string `yaml:"PASSWORD"`
@@ -31,8 +31,8 @@ type RedisConfigs struct {
 	Database int    `yaml:"DB_NAME"`
 }
 
-func ParseRedisConfigs(path string) (*RedisConfigs, error) {
-	var configs RedisConfigs
+func ParseRedisConfigs(path string) (*Redis, error) {
+	var configs Redis
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func ParseRedisConfigs(path string) (*RedisConfigs, error) {
 	return &configs, nil
 }
 
-type MongoConfigs struct {
+type Mongo struct {
 	Host         string `yaml:"HOST"`
 	Username     string `yaml:"USERNAME"`
 	Password     string `yaml:"PASSWORD"`
@@ -51,8 +51,8 @@ type MongoConfigs struct {
 	DatabaseName string `yaml:"DB_NAME"`
 }
 
-func ParseMongoConfigs(path string) (*MongoConfigs, error) {
-	var configs MongoConfigs
+func ParseMongoConfigs(path string) (*Mongo, error) {
+	var configs Mongo
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -63,15 +63,15 @@ func ParseMongoConfigs(path string) (*MongoConfigs, error) {
 	return &configs, nil
 }
 
-type SmtpConfigs struct {
+type Smtp struct {
 	Host     string `yaml:"HOST"`
 	Port     int    `yaml:"PORT"`
 	Email    string `yaml:"EMAIL"`
 	Password string `yaml:"PASSWORD"`
 }
 
-func ParseSmtpConfigs(path string) (*SmtpConfigs, error) {
-	var configs SmtpConfigs
+func ParseSmtpConfigs(path string) (*Smtp, error) {
+	var configs Smtp
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

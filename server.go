@@ -14,9 +14,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-var AppConfigs configs.AppConfigs
-var MongoConfigs configs.MongoConfigs
-var RedisConfigs configs.RedisConfigs
+var AppConfigs configs.App
+var MongoConfigs configs.Mongo
+var RedisConfigs configs.Redis
 var AllowedOrigins string
 
 func ParseConfigs() {
