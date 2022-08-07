@@ -6,8 +6,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const CONFIG_PATH = "./app/configs/configs.yml"
-
 type App struct {
 	Name  string `yaml:"NAME"`
 	HTTP  HTTP   `yaml:"HTTP"`
@@ -55,9 +53,10 @@ type Config struct {
 	SMTP  SMTP  `yaml:"SMTP"`
 }
 
-func Parse() (*Config, error) {
+func Parse(path string) (*Config, error) {
+
 	var configs Config
-	data, err := os.ReadFile(CONFIG_PATH)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

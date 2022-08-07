@@ -12,9 +12,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
+const APP_CONFIG_PATH string = "./app/configs/configs.yml"
+
 func main() {
 
-	cfg, err := configs.Parse()
+	cfg, err := configs.Parse(APP_CONFIG_PATH)
 	if err != nil {
 		log.Fatal("cannot parse configs. ", err.Error())
 	}
