@@ -4,4 +4,4 @@ logs/errors.log
 logs/requests.log
 logs/*
 build/
-app/configs/
+app/configs/configs.yml
