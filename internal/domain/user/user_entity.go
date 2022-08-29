@@ -4,7 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
+	"Kavka/pkg/uuid"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,7 +15,7 @@ var (
 )
 
 type User struct {
-	StaticID      uuid.UUID
+	StaticID      string
 	Name          string
 	LastName      string
 	Username      string
@@ -39,8 +40,8 @@ func (u User) IsBanned() bool {
 	return u.Banned
 }
 
-func (u User) NewUserID() uuid.UUID {
-	return uuid.New()
+func (u User) NewStaticID() string {
+	return uuid.Random()
 }
 
 func (u *User) SetPassword(password string) error {
@@ -63,7 +64,7 @@ func (u User) IsValidPassword(password string) bool {
 }
 
 func (u *User) PrepareToCreate() {
-	u.StaticID = u.NewUserID()
+	u.StaticID = u.NewStaticID()
 	u.EmailVerified = false
 	u.Banned = false
 	// set timestamps

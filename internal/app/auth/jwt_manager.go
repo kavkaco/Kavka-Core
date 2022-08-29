@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 )
 
 // define errors
@@ -18,7 +17,7 @@ var (
 )
 
 type UserClaims struct {
-	StaticID uuid.UUID
+	StaticID string
 	jwt.StandardClaims
 }
 

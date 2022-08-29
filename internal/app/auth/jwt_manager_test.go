@@ -5,7 +5,8 @@ import (
 	"Kavka/internal/domain/user"
 	"testing"
 
-	"github.com/google/uuid"
+	"Kavka/pkg/uuid"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +15,7 @@ func TestJWTGenerateAndVerify(t *testing.T) {
 
 	// TestGenerate
 	token, generateErr := jwtManager.Generate(&user.User{
-		StaticID: uuid.New(),
+		StaticID: uuid.Random(),
 	})
 
 	if generateErr != nil {
