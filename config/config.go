@@ -1,7 +1,8 @@
-package configs
+package config
 
 import (
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -23,7 +24,10 @@ type (
 		Port    int    `yaml:"PORT"`
 		Address string `yaml:"ADDRESS"`
 	}
-
+	JWT struct {
+		SecretKey string        `json:"secret_key"`
+		TTL       time.Duration `json:"ttl_minute"`
+	}
 	Fiber struct {
 		ServerHeader string `yaml:"SERVER_HEADER"`
 		Prefork      bool   `yaml:"PREFORK"`
