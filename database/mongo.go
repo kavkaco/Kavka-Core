@@ -1,7 +1,7 @@
 package database
 
 import (
-	"Kavka/internal/configs"
+	"Kavka/configs"
 	"context"
 	"fmt"
 
