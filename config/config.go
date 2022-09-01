@@ -42,6 +42,7 @@ type (
 		Username string `yaml:"USERNAME"`
 		Password string `yaml:"PASSWORD"`
 		Port     int    `yaml:"PORT"`
+		DB       int    `yaml:"DB"`
 	}
 	Mongo struct {
 		Host     string `yaml:"HOST"`

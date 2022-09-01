@@ -22,8 +22,9 @@ MONGO:
 REDIS:
     HOST: "127.0.0.1"
     USERNAME: "redis"
-    PASSWORD: "redis"
+    PASSWORD:
     PORT: 6379
+    DB: 0
 SMTP:
     HOST: "YOUR_SMTP_SERVER"
     PORT: 465
