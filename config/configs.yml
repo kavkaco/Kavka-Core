@@ -10,9 +10,10 @@ APP:
         CORS:
             ALLOW_ORIGINS: "*"
             ALLOW_CREDENTIALS: true
-    JWT:
-        secret_key: "sample"
-        ttl_minute: 2000
+    AUTH:
+        JWT_SECRET_KEY: "sample"
+        AT_TTL_MINUTE: 30
+        RF_TTL_MINUTE: 100
 MONGO:
     HOST: "127.0.0.1"
     USERNAME: "mongo"
