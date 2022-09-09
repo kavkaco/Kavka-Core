@@ -4,6 +4,7 @@ import (
 	"Kavka/config"
 	"Kavka/internal/domain/user"
 	"testing"
+	"time"
 
 	"Kavka/pkg/uuid"
 
@@ -11,24 +12,37 @@ import (
 )
 
 func TestJWTGenerateAndVerify(t *testing.T) {
-	var jwtManager = NewJwtManager(config.JWT{SecretKey: "1234", TTL: 20})
+	var jwtManager = NewJwtManager(config.JWT{SecretKey: "1234", TTL: 10 * time.Second})
 
-	// TestGenerate
-	token, generateErr := jwtManager.Generate(&user.User{
+	// TestGenerateAccessToken
+	token, generateErr := jwtManager.GenerateAccessToken(&user.User{
 		StaticID: uuid.Random(),
 	})
 
-	if generateErr != nil {
-		t.Error(generateErr)
-	}
-
+	assert.Empty(t, generateErr)
 	assert.NotEmpty(t, token)
 
-	// TestVerify
-	userClaims, verifyErr := jwtManager.Verify(token)
-	if verifyErr != nil {
-		t.Error(verifyErr)
+	// TestVerifyAccessToken
+	verifyTests := []struct {
+		name  string
+		token string
+		err   error
+	}{
+		{
+			name:  "valid",
+			token: token,
+			err:   nil,
+		},
+		{
+			name:  "not_valid",
+			token: "meaningless_string",
+			err:   ErrInvalidToken,
+		},
 	}
-
-	t.Log(userClaims)
+	for _, tt := range verifyTests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, verifyErr := jwtManager.VerifyAccessToken(tt.token)
+			assert.Equal(t, verifyErr, tt.err)
+		})
+	}
 }

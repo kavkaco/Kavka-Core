@@ -26,14 +26,19 @@ type JwtManager struct {
 	ttl       time.Duration
 }
 
-func NewJwtManager(config config.JWT) *JwtManager {
+type IJwtManager interface {
+	GenerateAccessToken(u *user.User) (string, error)
+	VerifyAccessToken(accessToken string) (*UserClaims, error)
+}
+
+func NewJwtManager(config config.JWT) IJwtManager {
 	return &JwtManager{
 		secretKey: config.SecretKey,
 		ttl:       config.TTL,
 	}
 }
 
-func (m *JwtManager) Generate(u *user.User) (string, error) {
+func (m *JwtManager) GenerateAccessToken(u *user.User) (string, error) {
 	claims := UserClaims{
 		StaticID: u.StaticID,
 	}
@@ -42,18 +47,19 @@ func (m *JwtManager) Generate(u *user.User) (string, error) {
 	return token.SignedString([]byte(m.secretKey))
 }
 
-func (m *JwtManager) Verify(accessToken string) (*UserClaims, error) {
+func (m *JwtManager) VerifyAccessToken(accessToken string) (*UserClaims, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &UserClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, ErrUnexpectedSigningMethod
 			}
+
 			return []byte(m.secretKey), nil
 		},
 	)
 
 	if err != nil {
-		return nil, errors.New(ErrInvalidToken.Error() + ": " + err.Error())
+		return nil, ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(*UserClaims)

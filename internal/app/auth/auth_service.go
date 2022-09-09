@@ -1,7 +1,15 @@
 package auth
 
-import "Kavka/internal/domain/user"
+import (
+	"Kavka/internal/adapter/cache"
+	"Kavka/internal/domain/user"
+)
 
-type Service struct {
-	userRepository user.Repository
+type AuthService struct {
+	userCache      *cache.UserCache
+	userRepository *user.Repository
+}
+
+func NewAuthService(userCache *cache.UserCache, userRepository *user.Repository) *AuthService {
+	return &AuthService{userCache, userRepository}
 }
