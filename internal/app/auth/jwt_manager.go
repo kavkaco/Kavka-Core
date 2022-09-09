@@ -3,6 +3,8 @@ package auth
 import (
 	"Kavka/config"
 	"Kavka/internal/domain/user"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"time"
 
@@ -29,6 +31,7 @@ type JwtManager struct {
 type IJwtManager interface {
 	GenerateAccessToken(u *user.User) (string, error)
 	VerifyAccessToken(accessToken string) (*UserClaims, error)
+	GenerateRefreshToken() (string, error)
 }
 
 func NewJwtManager(config config.JWT) IJwtManager {
@@ -36,6 +39,16 @@ func NewJwtManager(config config.JWT) IJwtManager {
 		secretKey: config.SecretKey,
 		ttl:       config.TTL,
 	}
+}
+
+func (m *JwtManager) GenerateRefreshToken() (string, error) {
+	bytes := make([]byte, 20)
+
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(bytes), nil
 }
 
 func (m *JwtManager) GenerateAccessToken(u *user.User) (string, error) {

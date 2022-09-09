@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJWTGenerateAndVerify(t *testing.T) {
-	var jwtManager = NewJwtManager(config.JWT{SecretKey: "1234", TTL: 10 * time.Second})
+var jwtManager = NewJwtManager(config.JWT{SecretKey: "1234", TTL: 10 * time.Second})
 
+func TestJWTGenerateAndVerify(t *testing.T) {
 	// TestGenerateAccessToken
 	token, generateErr := jwtManager.GenerateAccessToken(&user.User{
 		StaticID: uuid.Random(),
@@ -35,14 +35,21 @@ func TestJWTGenerateAndVerify(t *testing.T) {
 		},
 		{
 			name:  "not_valid",
-			token: "meaningless_string",
+			token: "akdmakldmakldmaldalkdm",
 			err:   ErrInvalidToken,
 		},
 	}
+
 	for _, tt := range verifyTests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, verifyErr := jwtManager.VerifyAccessToken(tt.token)
 			assert.Equal(t, verifyErr, tt.err)
 		})
 	}
+}
+
+func TestGenerateRefreshToken(t *testing.T) {
+	_, err := jwtManager.GenerateRefreshToken()
+
+	assert.Empty(t, err)
 }
