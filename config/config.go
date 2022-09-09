@@ -18,6 +18,7 @@ type (
 		Name  string `yaml:"NAME"`
 		HTTP  HTTP   `yaml:"HTTP"`
 		Fiber Fiber  `yaml:"FIBER"`
+		Auth  Auth   `yaml:"AUTH"`
 	}
 	HTTP struct {
 		Host    string `yaml:"HOST"`
@@ -25,9 +26,9 @@ type (
 		Address string `yaml:"ADDRESS"`
 	}
 	Auth struct {
-		JWTSecretKey string        `json:"JWT_SECRET_KEY"`
-		AT_TTL       time.Duration `json:"AT_TTL_MINUTE"`
-		RF_TTL       time.Duration `json:"RF_TTL_MINUTE"` // Refresh Token TTL minute
+		JWTSecretKey  string        `json:"JWT_SECRET_KEY"`
+		AT_TTL_MINUTE time.Duration `json:"AT_TTL_MINUTE"`
+		RF_TTL_MINUTE time.Duration `json:"RF_TTL_MINUTE"` // Refresh Token TTL minute
 	}
 	Fiber struct {
 		ServerHeader string `yaml:"SERVER_HEADER"`

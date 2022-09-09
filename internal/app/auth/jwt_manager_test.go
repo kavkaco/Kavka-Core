@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var jwtManager = NewJwtManager(config.JWT{SecretKey: "1234", TTL: 10 * time.Second})
+var jwtManager = NewJwtManager(config.Auth{JWTSecretKey: "1234", AT_TTL_MINUTE: 1 * time.Second})
 
 func TestJWTGenerateAndVerify(t *testing.T) {
 	// TestGenerateAccessToken

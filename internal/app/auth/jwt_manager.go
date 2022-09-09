@@ -34,10 +34,10 @@ type IJwtManager interface {
 	GenerateRefreshToken() (string, error)
 }
 
-func NewJwtManager(config config.JWT) IJwtManager {
+func NewJwtManager(config config.Auth) IJwtManager {
 	return &JwtManager{
-		secretKey: config.SecretKey,
-		ttl:       config.TTL,
+		secretKey: config.JWTSecretKey,
+		ttl:       config.AT_TTL_MINUTE,
 	}
 }
 
