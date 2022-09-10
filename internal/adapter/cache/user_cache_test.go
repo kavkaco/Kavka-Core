@@ -15,7 +15,7 @@ const RF_TOKEN = "sample_token"
 const SAMPLE_USERNAME = "sample_username"
 
 // NOTE - need more review & refactor probably
-func TestSetToken(t *testing.T) {
+func TestSetAndGetToken(t *testing.T) {
 	var wd, wdErr = os.Getwd()
 	assert.Empty(t, wdErr)
 
