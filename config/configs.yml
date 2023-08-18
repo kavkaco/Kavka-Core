@@ -10,6 +10,10 @@ APP:
     CORS:
       ALLOW_ORIGINS: "*"
       ALLOW_CREDENTIALS: true
+  AUTH:
+    JWT_SECRET_KEY: "sample"
+    OTP_EXPIRE_MINUTE: 100
+    TOKEN_EXPIRE_DAY: 7
 MONGO:
   HOST: "127.0.0.1"
   USERNAME: "mongo"
@@ -19,8 +23,9 @@ MONGO:
 REDIS:
   HOST: "127.0.0.1"
   USERNAME: "redis"
-  PASSWORD: "redis"
+  PASSWORD:
   PORT: 6379
+  DB: 0
 SMTP:
   HOST: "YOUR_SMTP_SERVER"
   PORT: 465

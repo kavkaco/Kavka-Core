@@ -2,8 +2,7 @@ package user
 
 import (
 	"errors"
-
-	"github.com/google/uuid"
+	"os/user"
 )
 
 var (
@@ -13,8 +12,8 @@ var (
 )
 
 type Repository interface {
-	Create(name string, lastName string, username string, passwordHash string, email string) (*User, error)
-	GetByStaticUUID(staticID uuid.UUID) (*User, error)
-	Delete(staticID uuid.UUID) error
-	// TODO - complete: edit profile
+	Create(phone string) (*User, error)
+	GetByStaticUUID(staticID string) (*User, error)
+	Delete(staticID string) error
+	Update(u *user.User) (*User, error)
 }

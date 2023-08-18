@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Kavka/app/database"
+	"Kavka/configs"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,15 +11,16 @@ import (
 const CONFIG_PATH string = "./app/configs/configs.yml"
 
 func main() {
-	cfg, err := configs.Parse(CONFIG_PATH)
+	cfg, err := configs.Read(CONFIG_PATH)
 	if err != nil {
 		log.Fatal("cannot parse configs: ", err.Error())
 	}
 
-	mongoDB, mongoErr := database.InitMongoDB(cfg.Mongo)
-	if mongoErr != nil {
-		log.Fatal("MongoDB Connection Error :", mongoErr.Error())
-	}
+	// FIXME
+	// mongoDB, mongoErr := database.InitMongoDB(cfg.Mongo)
+	// if mongoErr != nil {
+	// 	log.Fatal("MongoDB Connection Error :", mongoErr.Error())
+	// }
 
 	// TODO - move
 	app := fiber.New(

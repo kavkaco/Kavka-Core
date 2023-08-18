@@ -2,3 +2,4 @@
 .idea
 build/
 configs/configs.yml
+./test.go
