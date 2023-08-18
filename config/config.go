@@ -53,7 +53,6 @@ type (
 		Port     int    `yaml:"PORT"`
 		DBName   string `yaml:"DB_NAME"`
 	}
-
 	SMTP struct {
 		Host     string `yaml:"HOST"`
 		Port     int    `yaml:"PORT"`
