@@ -26,9 +26,9 @@ type (
 		Address string `yaml:"ADDRESS"`
 	}
 	Auth struct {
-		JWTSecretKey  string        `json:"JWT_SECRET_KEY"`
-		AT_TTL_MINUTE time.Duration `json:"AT_TTL_MINUTE"`
-		RF_TTL_MINUTE time.Duration `json:"RF_TTL_MINUTE"` // Refresh Token TTL minute
+		JWTSecretKey      string        `json:"JWT_SECRET_KEY"`
+		OTP_EXPIRE_MINUTE time.Duration `json:"OTP_EXPIRE_MINUTE"`
+		TOKEN_EXPIRE_DAY  time.Duration `json:"TOKEN_EXPIRE_DAY"`
 	}
 	Fiber struct {
 		ServerHeader string `yaml:"SERVER_HEADER"`

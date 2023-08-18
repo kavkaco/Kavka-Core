@@ -20,8 +20,6 @@ func TestRedis(t *testing.T) {
 
 	redisClient := GetRedisDBInstance(cfg.Redis)
 
-	t.Log(redisClient)
-
 	// Set Some Values
 
 	status := redisClient.Set(context.TODO(), "name", "Sample", time.Second*3)
