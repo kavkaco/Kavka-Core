@@ -5,15 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"Kavka/pkg/uuid"
-
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var jwtManager = NewJwtManager(config.Auth{JWTSecretKey: "sample_secret", OTP_EXPIRE_MINUTE: 1 * time.Second})
 
 func TestJWTGenerateAndVerify(t *testing.T) {
-	staticID := uuid.Random()
+	staticID := primitive.NewObjectID()
 
 	token, generateErr := jwtManager.Generate(staticID)
 

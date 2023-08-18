@@ -4,16 +4,17 @@ import (
 	"errors"
 	"time"
 
-	"Kavka/pkg/uuid"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // define errors
 var (
+	UsersCollection  = "users"
 	ErrEmptyPassword = errors.New("empty password")
 )
 
 type User struct {
-	StaticID  string
+	StaticID  primitive.ObjectID `bson:"_id"`
 	Name      string
 	LastName  string
 	Phone     string
@@ -26,7 +27,7 @@ type User struct {
 func NewUser(phone string) *User {
 	u := User{}
 	u.Phone = phone
-	u.StaticID = u.NewStaticID()
+	u.StaticID = primitive.NewObjectID()
 	u.Banned = false
 
 	// set timestamps
@@ -45,6 +46,8 @@ func (u User) IsBanned() bool {
 	return u.Banned
 }
 
-func (u User) NewStaticID() string {
-	return uuid.Random()
+type CreateUserData struct {
+	Name     string
+	LastName string
+	Phone    string
 }

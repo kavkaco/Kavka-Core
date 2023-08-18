@@ -3,6 +3,8 @@ package user
 import (
 	"errors"
 	"os/user"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -11,9 +13,8 @@ var (
 	ErrEmailAlreadyTaken    = errors.New("email already taken")
 )
 
-type Repository interface {
-	Create(phone string) (*User, error)
-	GetByStaticUUID(staticID string) (*User, error)
-	Delete(staticID string) error
-	Update(u *user.User) (*User, error)
+type UserRepository interface {
+	FindByID(staticID primitive.ObjectID) (*user.User, error)
+	Where(filter any) ([]*user.User, error)
+	Create(u *CreateUserData) (*user.User, error)
 }

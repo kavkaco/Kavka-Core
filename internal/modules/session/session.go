@@ -3,7 +3,7 @@ package session
 import (
 	"Kavka/config"
 	"Kavka/internal/modules/jwt_manager"
-	"Kavka/internal/modules/random"
+	"Kavka/utils/random"
 	"context"
 	"encoding/json"
 

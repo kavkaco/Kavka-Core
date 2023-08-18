@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var JWT_ALGORITHM = jwt.SigningMethodHS256
@@ -18,7 +19,7 @@ var (
 )
 
 type UserPayload struct {
-	StaticID string
+	staticID primitive.ObjectID
 	jwt.StandardClaims
 }
 
@@ -29,7 +30,7 @@ type JwtManager struct {
 
 type IJwtManager interface {
 	Verify(token string) (*UserPayload, error)
-	Generate(staticID string) (string, error)
+	Generate(staticID primitive.ObjectID) (string, error)
 }
 
 func NewJwtManager(config config.Auth) IJwtManager {
@@ -39,10 +40,8 @@ func NewJwtManager(config config.Auth) IJwtManager {
 	}
 }
 
-func (m *JwtManager) Generate(staticID string) (string, error) {
-	payload := UserPayload{
-		StaticID: staticID,
-	}
+func (m *JwtManager) Generate(staticID primitive.ObjectID) (string, error) {
+	payload := UserPayload{staticID: staticID}
 
 	token := jwt.NewWithClaims(JWT_ALGORITHM, payload)
 	return token.SignedString([]byte(m.secretKey))
