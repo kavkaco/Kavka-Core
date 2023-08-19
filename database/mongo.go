@@ -3,9 +3,11 @@ package database
 import (
 	"Kavka/config"
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -13,6 +15,10 @@ import (
 var (
 	mongoLock     = &sync.Mutex{}
 	mongoInstance *mongo.Database
+)
+
+var (
+	UsersCollection = "users"
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {
@@ -37,7 +43,28 @@ func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
 		}
 
 		mongoInstance = client.Database(mongoConfigs.DBName)
+
+		collectionsConfigurations(mongoInstance)
 	}
 
 	return mongoInstance, nil
+}
+
+func collectionsConfigurations(db *mongo.Database) {
+	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.D{{Key: "phone", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	})
+}
+
+func IsDuplicateKeyError(err error) bool {
+	var e mongo.WriteException
+	if errors.As(err, &e) {
+		for _, we := range e.WriteErrors {
+			if we.Code == 11000 {
+				return true
+			}
+		}
+	}
+	return false
 }

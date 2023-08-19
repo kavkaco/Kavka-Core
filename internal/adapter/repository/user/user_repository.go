@@ -1,13 +1,20 @@
 package repository
 
 import (
+	"Kavka/database"
 	"Kavka/internal/domain/user"
 	"Kavka/utils"
 	"context"
+	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+)
+
+var (
+	ErrUserNotFound      = errors.New("user not found")
+	ErrPhoneAlreadyTaken = errors.New("phone already taken")
 )
 
 type UserRepository struct {
@@ -16,13 +23,15 @@ type UserRepository struct {
 
 func NewUserRepository(db *mongo.Database) *UserRepository {
 	return &UserRepository{
-		db.Collection(user.UsersCollection),
+		db.Collection(database.UsersCollection),
 	}
 }
 
 func (repo *UserRepository) Create(u *user.CreateUserData) (*user.User, error) {
 	result, err := repo.usersCollection.InsertOne(context.TODO(), u)
-	if err != nil {
+	if database.IsDuplicateKeyError(err) {
+		return nil, ErrPhoneAlreadyTaken
+	} else if err != nil {
 		return nil, err
 	}
 
@@ -65,5 +74,5 @@ func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, e
 		return user, nil
 	}
 
-	return nil, user.ErrUserNotFound
+	return nil, ErrUserNotFound
 }

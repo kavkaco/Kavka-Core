@@ -9,7 +9,6 @@ import (
 
 // define errors
 var (
-	UsersCollection  = "users"
 	ErrEmptyPassword = errors.New("empty password")
 )
 
