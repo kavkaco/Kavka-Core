@@ -61,8 +61,7 @@ func (repo *UserRepository) Where(filter any) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
-	filter := bson.D{{Key: "_id", Value: staticID}}
+func (repo *UserRepository) findBy(filter bson.D) (*user.User, error) {
 	result, err := repo.Where(filter)
 	if err != nil {
 		return nil, err
@@ -75,4 +74,14 @@ func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, e
 	}
 
 	return nil, ErrUserNotFound
+}
+
+func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
+	filter := bson.D{{Key: "_id", Value: staticID}}
+	return repo.findBy(filter)
+}
+
+func (repo *UserRepository) FindByPhone(phone string) (*user.User, error) {
+	filter := bson.D{{Key: "phone", Value: phone}}
+	return repo.findBy(filter)
 }

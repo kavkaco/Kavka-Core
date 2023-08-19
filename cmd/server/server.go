@@ -1,44 +1,44 @@
 package main
 
 import (
-	"Kavka/configs"
+	"Kavka/config"
+	"Kavka/database"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-const CONFIG_PATH string = "./app/configs/configs.yml"
+const CONFIG_PATH string = "./config/configs.yml"
 
 func main() {
-	cfg, err := configs.Read(CONFIG_PATH)
-	if err != nil {
-		log.Fatal("cannot parse configs: ", err.Error())
+	configs, configErr := config.Read(CONFIG_PATH)
+	if configErr != nil {
+		panic(configErr)
 	}
 
-	// FIXME
-	// mongoDB, mongoErr := database.InitMongoDB(cfg.Mongo)
-	// if mongoErr != nil {
-	// 	log.Fatal("MongoDB Connection Error :", mongoErr.Error())
-	// }
+	_, mongoErr := database.GetMongoDBInstance(configs.Mongo)
+	if mongoErr != nil {
+		panic(mongoErr)
+	}
 
 	// TODO - move
 	app := fiber.New(
 		fiber.Config{
-			AppName:      cfg.App.Name,
-			ServerHeader: cfg.App.Fiber.ServerHeader,
-			Prefork:      cfg.App.Fiber.Prefork,
+			AppName:      configs.App.Name,
+			ServerHeader: configs.App.Fiber.ServerHeader,
+			Prefork:      configs.App.Fiber.Prefork,
 		},
 	)
 
 	app.Use(cors.New(
 		cors.Config{
-			AllowOrigins:     cfg.App.Fiber.CORS.AllowOrigins,
-			AllowCredentials: cfg.App.Fiber.CORS.AllowCredentials,
+			AllowOrigins:     configs.App.Fiber.CORS.AllowOrigins,
+			AllowCredentials: configs.App.Fiber.CORS.AllowCredentials,
 		},
 	))
 
 	log.Fatal(
-		app.Listen(cfg.App.HTTP.Address),
+		app.Listen(configs.App.HTTP.Address),
 	)
 }

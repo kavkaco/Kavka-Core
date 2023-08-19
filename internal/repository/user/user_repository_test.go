@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const CONFIG_PATH = "/../../../../config/configs.yml"
+const CONFIG_PATH = "/../../../config/configs.yml"
 const PHONE = "sample_phone_number"
 
 type MyTestSuite struct {
@@ -69,7 +69,7 @@ func (s *MyTestSuite) TestFind() {
 	}{
 		{
 			name:   "empty",
-			filter: bson.D{{Key: "name", Value: "ThisUserDoesNotExistReally!"}},
+			filter: bson.D{{Key: "name", Value: "sample"}},
 			length: 0,
 		},
 		{
@@ -110,6 +110,40 @@ func (s *MyTestSuite) TestFindByID() {
 	for _, tt := range cases {
 		s.T().Run(tt.name, func(t *testing.T) {
 			user, err := s.userRepo.FindByID(tt.StaticID)
+
+			if tt.exist {
+				assert.NoError(s.T(), err)
+				assert.NotEmpty(s.T(), user)
+
+				s.T().Log(user.FullName())
+			} else {
+				assert.Empty(s.T(), user)
+			}
+		})
+	}
+}
+
+func (s *MyTestSuite) TestFindByPhone() {
+	cases := []struct {
+		name  string
+		phone string
+		exist bool
+	}{
+		{
+			name:  "empty",
+			phone: "sample",
+			exist: false,
+		},
+		{
+			name:  "found_just_one",
+			phone: s.sampleUser.Phone,
+			exist: true,
+		},
+	}
+
+	for _, tt := range cases {
+		s.T().Run(tt.name, func(t *testing.T) {
+			user, err := s.userRepo.FindByPhone(tt.phone)
 
 			if tt.exist {
 				assert.NoError(s.T(), err)

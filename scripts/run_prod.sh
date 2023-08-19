@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-./build.sh
+./scripts/build.sh
 ./build/server
