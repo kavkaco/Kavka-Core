@@ -24,5 +24,3 @@ type Device struct {
 	IP       string
 	Location string
 }
-
-// TODO

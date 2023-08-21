@@ -8,13 +8,19 @@ import (
 	"Kavka/modules/session"
 	repository "Kavka/repository/user"
 	"Kavka/service"
+	"Kavka/utils/sms_otp"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-const CONFIG_PATH string = "./config/configs.yml"
+const (
+	// YAML config file path
+	CONFIG_PATH string = "./config/configs.yml"
+	// Define templates path (used by: SmsOtpService)
+	templatesPath = "./app/views/mail/"
+)
 
 func main() {
 	// Load Configs
@@ -51,9 +57,10 @@ func main() {
 
 	// ----- Init Services -----
 	session := session.NewSession(redisClient, configs.App.Auth)
+	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, templatesPath)
 
 	userRepo := repository.NewUserRepository(mongoDB)
-	userService := service.NewUserService(userRepo, session)
+	userService := service.NewUserService(userRepo, session, smsOtp)
 	router.NewUserRouter(app.Group("/users"), userService)
 
 	// Everything almost done!

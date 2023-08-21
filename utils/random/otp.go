@@ -14,5 +14,5 @@ func GenerateOTP() int {
 	min := math.Pow(10, OTP_LENGTH-1)
 	max := math.Pow(10, OTP_LENGTH) - 1
 
-	return rand.Intn(int(max - min))
+	return rand.Intn(int(max-min) + int(min))
 }

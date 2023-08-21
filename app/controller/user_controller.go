@@ -3,6 +3,7 @@ package controller
 import (
 	validator "Kavka/app/validators"
 	"Kavka/service"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -16,13 +17,15 @@ func NewUserController(userService *service.UserService) *UserController {
 }
 
 func (ctrl *UserController) HandleLogin(ctx *fiber.Ctx) error {
-	validator.Validate[validator.UserLoginDto](ctx)
+	body := validator.Validate[validator.UserLoginDto](ctx)
+	phone := body.Phone
 
-	// ctx.SendString("Phone:" + body.Phone)
-	// otp, err := ctrl.userService.Login(phone)
-	// if err != nil {
-	// 	return err
-	// }
+	otp, err := ctrl.userService.Login(phone)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("OTP Code: %d\n", otp)
 
 	return nil
 }

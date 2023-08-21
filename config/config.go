@@ -1,18 +1,24 @@
 package config
 
 import (
+	"errors"
 	"os"
+	"strings"
 	"time"
 
+	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
+
+var ENV_ITEMS = []string{"devel", "prod"}
+var ENV string
 
 type (
 	IConfig struct {
 		App   App   `yaml:"APP"`
 		Mongo Mongo `yaml:"MONGO"`
 		Redis Redis `yaml:"REDIS"`
-		SMTP  SMTP  `yaml:"SMTP"`
+		SMS   `yaml:"SMS"`
 	}
 	App struct {
 		Name  string `yaml:"NAME"`
@@ -53,15 +59,22 @@ type (
 		Port     int    `yaml:"PORT"`
 		DBName   string `yaml:"DB_NAME"`
 	}
-	SMTP struct {
-		Host     string `yaml:"HOST"`
-		Port     int    `yaml:"PORT"`
-		Email    string `yaml:"EMAIL"`
-		Password string `yaml:"PASSWORD"`
-	}
+	// TODO - Add sms-service's configs
+	SMS struct{}
 )
 
 func Read(fileName string) (IConfig, error) {
+	// Load ENV
+	env := os.Getenv("ENV")
+	if len(strings.TrimSpace(env)) == 0 {
+		ENV = ENV_ITEMS[0]
+	} else if slices.Contains(ENV_ITEMS, env) {
+		ENV = env
+	} else {
+		return IConfig{}, errors.New("Invalid ENV key: " + env)
+	}
+
+	// Load YAML configs
 	var cfg *IConfig
 
 	data, readErr := os.ReadFile(fileName)

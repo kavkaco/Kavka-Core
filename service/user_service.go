@@ -4,24 +4,24 @@ import (
 	"Kavka/domain/user"
 	"Kavka/modules/session"
 	repository "Kavka/repository/user"
+	"Kavka/utils/sms_otp"
 )
 
 type UserService struct {
 	userRepo *repository.UserRepository
 	session  *session.Session
+	SmsOtp   *sms_otp.SMSOtp
 }
 
-func NewUserService(userRepo *repository.UserRepository, session *session.Session) *UserService {
-	return &UserService{userRepo, session}
+func NewUserService(userRepo *repository.UserRepository, session *session.Session, smsOtp *sms_otp.SMSOtp) *UserService {
+	return &UserService{userRepo, session, smsOtp}
 }
 
 func (s *UserService) Login(phone string) (int, error) {
-	newUser, findErr := s.userRepo.FindByPhone(phone)
-	if findErr != nil {
-		return 0, findErr
-	}
+	_, findErr := s.userRepo.FindByPhone(phone)
 
-	if newUser == nil {
+	if findErr != nil {
+		// Creating a new user with entered Phone
 		_, createErr := s.userRepo.Create(&user.CreateUserData{
 			Name:     "guest",
 			LastName: "guest",
