@@ -2,7 +2,7 @@ package service
 
 import (
 	"Kavka/domain/user"
-	"Kavka/modules/session"
+	"Kavka/pkg/session"
 	repository "Kavka/repository/user"
 	"Kavka/utils/sms_otp"
 )

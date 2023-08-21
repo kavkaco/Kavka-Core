@@ -5,7 +5,7 @@ import (
 	"Kavka/app/router"
 	"Kavka/config"
 	"Kavka/database"
-	"Kavka/modules/session"
+	"Kavka/pkg/session"
 	repository "Kavka/repository/user"
 	"Kavka/service"
 	"Kavka/utils/sms_otp"
