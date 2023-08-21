@@ -1,8 +1,13 @@
 package main
 
 import (
+	"Kavka/app/middleware"
+	"Kavka/app/router"
 	"Kavka/config"
 	"Kavka/database"
+	"Kavka/modules/session"
+	repository "Kavka/repository/user"
+	"Kavka/service"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,25 +17,31 @@ import (
 const CONFIG_PATH string = "./config/configs.yml"
 
 func main() {
+	// Load Configs
 	configs, configErr := config.Read(CONFIG_PATH)
 	if configErr != nil {
 		panic(configErr)
 	}
 
-	_, mongoErr := database.GetMongoDBInstance(configs.Mongo)
+	// Init MongoDB
+	mongoDB, mongoErr := database.GetMongoDBInstance(configs.Mongo)
 	if mongoErr != nil {
 		panic(mongoErr)
 	}
 
-	// TODO - move
+	// Init RedisDB
+	redisClient := database.GetRedisDBInstance(configs.Redis)
+
+	// Init WebServer
 	app := fiber.New(
 		fiber.Config{
 			AppName:      configs.App.Name,
-			ServerHeader: configs.App.Fiber.ServerHeader,
 			Prefork:      configs.App.Fiber.Prefork,
+			ErrorHandler: middleware.ErrorHandler,
 		},
 	)
 
+	// Config WebServer
 	app.Use(cors.New(
 		cors.Config{
 			AllowOrigins:     configs.App.Fiber.CORS.AllowOrigins,
@@ -38,6 +49,14 @@ func main() {
 		},
 	))
 
+	// ----- Init Services -----
+	session := session.NewSession(redisClient, configs.App.Auth)
+
+	userRepo := repository.NewUserRepository(mongoDB)
+	userService := service.NewUserService(userRepo, session)
+	router.NewUserRouter(app.Group("/users"), userService)
+
+	// Everything almost done!
 	log.Fatal(
 		app.Listen(configs.App.HTTP.Address),
 	)

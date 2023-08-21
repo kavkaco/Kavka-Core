@@ -1,9 +1,9 @@
 package service
 
 import (
-	"Kavka/internal/domain/user"
-	"Kavka/internal/modules/session"
-	repository "Kavka/internal/repository/user"
+	"Kavka/domain/user"
+	"Kavka/modules/session"
+	repository "Kavka/repository/user"
 )
 
 type UserService struct {
