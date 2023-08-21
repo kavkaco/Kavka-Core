@@ -6,18 +6,17 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var jwtManager = NewJwtManager(config.Auth{JWTSecretKey: "sample_secret", OTP_EXPIRE_MINUTE: 1 * time.Second})
+var jwtManager = NewJwtManager(config.Auth{SECRET: "sample_secret", OTP_EXPIRE_SECONDS: 1 * time.Second})
 
-func TestJWTGenerateAndVerify(t *testing.T) {
-	staticID := primitive.NewObjectID()
+const phone = "sample_phone_number"
 
-	token, generateErr := jwtManager.Generate(staticID)
+func TestJWTGenerateAndVerifyRefreshToken(t *testing.T) {
+	refreshToken, tokenErr := jwtManager.Generate(RefreshToken, phone)
 
-	assert.Empty(t, generateErr)
-	assert.NotEmpty(t, token)
+	assert.Empty(t, tokenErr)
+	assert.NotEmpty(t, refreshToken)
 
 	cases := []struct {
 		name  string
@@ -26,7 +25,7 @@ func TestJWTGenerateAndVerify(t *testing.T) {
 	}{
 		{
 			name:  "valid",
-			token: token,
+			token: refreshToken,
 			err:   nil,
 		},
 		{
@@ -38,7 +37,8 @@ func TestJWTGenerateAndVerify(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			_, verifyErr := jwtManager.Verify(tt.token)
+			_, verifyErr := jwtManager.Verify(tt.token, RefreshToken)
+
 			assert.Equal(t, verifyErr, tt.err)
 		})
 	}

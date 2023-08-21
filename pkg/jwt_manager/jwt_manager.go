@@ -6,7 +6,11 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+var (
+	RF_EXPIRE_DAY = 60 * 24 * time.Hour // 60 days
+	AT_EXPIRE_DAY = 24 * time.Hour      // 1 days
 )
 
 var JWT_ALGORITHM = jwt.SigningMethodHS256
@@ -14,12 +18,13 @@ var JWT_ALGORITHM = jwt.SigningMethodHS256
 // define errors
 var (
 	ErrInvalidToken            = errors.New("invalid token")
-	ErrInvalidTokenPayload     = errors.New("invalid token payload")
+	ErrInvalidTokenType        = errors.New("invalid token type")
 	ErrUnexpectedSigningMethod = errors.New("unexpected token signing method")
 )
 
-type UserPayload struct {
-	staticID primitive.ObjectID
+type JwtClaims struct {
+	TokenType string
+	Phone     string
 	jwt.StandardClaims
 }
 
@@ -29,26 +34,33 @@ type JwtManager struct {
 }
 
 type IJwtManager interface {
-	Verify(token string) (*UserPayload, error)
-	Generate(staticID primitive.ObjectID) (string, error)
+	Verify(token string) (*JwtClaims, error)
+	Generate(phone string) (string, error)
 }
 
-func NewJwtManager(config config.Auth) IJwtManager {
+const (
+	RefreshToken string = "refresh"
+	AccessToken  string = "access"
+)
+
+func NewJwtManager(configs config.Auth) *JwtManager {
 	return &JwtManager{
-		secretKey: config.JWTSecretKey,
-		ttl:       config.OTP_EXPIRE_MINUTE,
+		secretKey: configs.SECRET,
+		ttl:       time.Duration(configs.OTP_EXPIRE_SECONDS * time.Second),
 	}
 }
 
-func (m *JwtManager) Generate(staticID primitive.ObjectID) (string, error) {
-	payload := UserPayload{staticID: staticID}
+func (m *JwtManager) Generate(tokenType string, phone string) (string, error) {
+	claims := &JwtClaims{Phone: phone, TokenType: tokenType}
 
-	token := jwt.NewWithClaims(JWT_ALGORITHM, payload)
+	token := jwt.NewWithClaims(JWT_ALGORITHM, claims)
 	return token.SignedString([]byte(m.secretKey))
 }
 
-func (m *JwtManager) Verify(accessToken string) (*UserPayload, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &UserPayload{},
+func (m *JwtManager) Verify(userToken string, tokenType string) (*JwtClaims, error) {
+	claims := &JwtClaims{}
+
+	token, err := jwt.ParseWithClaims(userToken, claims,
 		func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, ErrUnexpectedSigningMethod
@@ -62,10 +74,13 @@ func (m *JwtManager) Verify(accessToken string) (*UserPayload, error) {
 		return nil, ErrInvalidToken
 	}
 
-	payload, ok := token.Claims.(*UserPayload)
-	if !ok {
-		return nil, ErrInvalidTokenPayload
+	if token.Valid {
+		if claims.TokenType != tokenType {
+			return nil, ErrInvalidTokenType
+		}
+
+		return claims, nil
 	}
 
-	return payload, nil
+	return nil, ErrInvalidToken
 }

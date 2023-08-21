@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var Cwd string
 var ENV_ITEMS = []string{"devel", "prod"}
 var ENV string
 
@@ -32,9 +33,8 @@ type (
 		Address string `yaml:"ADDRESS"`
 	}
 	Auth struct {
-		JWTSecretKey      string        `json:"JWT_SECRET_KEY"`
-		OTP_EXPIRE_MINUTE time.Duration `json:"OTP_EXPIRE_MINUTE"`
-		TOKEN_EXPIRE_DAY  time.Duration `json:"TOKEN_EXPIRE_DAY"`
+		SECRET             string
+		OTP_EXPIRE_SECONDS time.Duration `json:"OTP_EXPIRE_SECONDS"`
 	}
 	Fiber struct {
 		ServerHeader string `yaml:"SERVER_HEADER"`
@@ -63,6 +63,11 @@ type (
 	SMS struct{}
 )
 
+func SetCwd() {
+	wd, _ := os.Getwd()
+	Cwd = wd
+}
+
 func Read(fileName string) (IConfig, error) {
 	// Load ENV
 	env := os.Getenv("ENV")
@@ -79,13 +84,20 @@ func Read(fileName string) (IConfig, error) {
 
 	data, readErr := os.ReadFile(fileName)
 	if readErr != nil {
-		return IConfig{}, readErr
+
 	}
 
 	parseErr := yaml.Unmarshal(data, &cfg)
 	if parseErr != nil {
 		return IConfig{}, parseErr
 	}
+
+	// Load RSA keys
+	secretData, secretErr := os.ReadFile(Cwd + "/config/jwt_secret.pem")
+	if secretErr != nil {
+		return IConfig{}, secretErr
+	}
+	cfg.App.Auth.SECRET = strings.TrimSpace(string(secretData))
 
 	return *cfg, nil
 }

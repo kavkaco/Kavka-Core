@@ -10,6 +10,8 @@ import (
 func TestRead(t *testing.T) {
 	wd, _ := os.Getwd()
 
+	Cwd = wd + "/../"
+
 	_, err := Read(wd + "/configs.yml")
 	assert.NoError(t, err)
 

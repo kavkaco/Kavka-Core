@@ -3,6 +3,7 @@ package session
 import (
 	"Kavka/config"
 	"Kavka/database"
+	"fmt"
 	"os"
 	"testing"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-const CONFIG_PATH = "/../../../config/configs.yml"
 const PHONE = "sample_phone_number"
 
 type MyTestSuite struct {
@@ -23,8 +23,11 @@ func (s *MyTestSuite) SetupSuite() {
 	// Get wd
 	var wd, _ = os.Getwd()
 
+	// Set Cwd
+	config.Cwd = wd + "/../../"
+
 	// Load configs
-	var configs, configsErr = config.Read(wd + CONFIG_PATH)
+	var configs, configsErr = config.Read(config.Cwd + "/config/configs.yml")
 	if configsErr != nil {
 		panic(configsErr)
 	}
@@ -41,7 +44,6 @@ func (s *MyTestSuite) TestLogin() {
 	s.generatedOTP = otp
 
 	s.NoError(loginErr)
-	s.T().Log(otp)
 }
 
 func (s *MyTestSuite) TestVerifyOTP() {
@@ -64,8 +66,16 @@ func (s *MyTestSuite) TestVerifyOTP() {
 
 	for _, tt := range cases {
 		s.T().Run(tt.name, func(t *testing.T) {
-			result := s.session.VerifyOTP(PHONE, tt.otp)
-			assert.Equal(s.T(), result, tt.result)
+			tokens, ok := s.session.VerifyOTP(PHONE, tt.otp)
+
+			assert.Equal(s.T(), ok, tt.result, fmt.Sprintf("Invalid OTP: %d", tt.otp))
+
+			if ok {
+				assert.NotEmpty(t, tokens.AccessToken, "Token is empty")
+				assert.NotEmpty(t, tokens.RefreshToken, "Token is empty")
+
+				t.Log(tokens)
+			}
 		})
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"Kavka/utils/random"
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -14,18 +15,8 @@ type ISession interface {
 	Login(phone string) (int, error)
 	VerifyOTP(phone string, otp string) bool
 	Logout(staticID string) error
-	SaveToken(token string, payload jwt_manager.UserPayload) error
+	SaveToken(token string, payload jwt_manager.JwtClaims) error
 	DestroyToken(token string) error
-}
-
-type loginPayload struct {
-	OTP int `json:"otp_code"`
-}
-
-type Session struct {
-	redisClient *redis.Client
-	authConfigs config.Auth
-	jwtManager  jwt_manager.IJwtManager
 }
 
 func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
@@ -33,10 +24,25 @@ func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
 	return &Session{redisClient, authConfigs, jwtManager}
 }
 
-func (session *Session) SaveToken(token string, userPayload jwt_manager.UserPayload) error {
-	payload, _ := json.Marshal(userPayload)
+// "makeExpiration" returns the expiration time for a given token type.
+func makeExpiration(tokenType string) time.Duration {
+	var expiration time.Duration
 
-	err := session.redisClient.Set(context.Background(), token, payload, session.authConfigs.OTP_EXPIRE_MINUTE).Err()
+	if tokenType == jwt_manager.RefreshToken {
+		expiration = jwt_manager.RF_EXPIRE_DAY
+	}
+
+	if tokenType == jwt_manager.AccessToken {
+		expiration = jwt_manager.AT_EXPIRE_DAY
+	}
+
+	return expiration
+}
+
+func (session *Session) saveToken(token string, tokenType string) error {
+	expireTime := makeExpiration(tokenType)
+
+	err := session.redisClient.Set(context.Background(), token, nil, expireTime).Err()
 	if err != nil {
 		return err
 	}
@@ -44,7 +50,7 @@ func (session *Session) SaveToken(token string, userPayload jwt_manager.UserPayl
 	return nil
 }
 
-func (session *Session) DestroyToken(token string) error {
+func (session *Session) destroyToken(token string) error {
 	err := session.redisClient.Del(context.Background(), token).Err()
 	if err != nil {
 		return err
@@ -58,8 +64,9 @@ func (session *Session) DestroyToken(token string) error {
 func (session *Session) Login(phone string) (int, error) {
 	otp := random.GenerateOTP()
 	payload, _ := json.Marshal(loginPayload{OTP: otp})
+	expiration := session.authConfigs.OTP_EXPIRE_SECONDS * time.Second
 
-	err := session.redisClient.Set(context.Background(), phone, payload, session.authConfigs.OTP_EXPIRE_MINUTE).Err()
+	err := session.redisClient.Set(context.Background(), phone, payload, expiration).Err()
 	if err != nil {
 		return 0, err
 	}
@@ -69,21 +76,46 @@ func (session *Session) Login(phone string) (int, error) {
 
 // VerifyOTP function is used to compare the stored otp code and the entered otp code by the user
 // and then returns a boolean values thats gonna tell that otp is valid or not.
-func (session *Session) VerifyOTP(phone string, otp int) bool {
+func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
 	payload, getErr := session.redisClient.Get(context.Background(), phone).Result()
 	if getErr != nil {
-		return false
+		return LoginTokens{}, false
 	}
 
 	var data loginPayload
 	unmarshalErr := json.Unmarshal([]byte(payload), &data)
 	if unmarshalErr != nil {
-		return false
+		return LoginTokens{}, false
 	}
 
 	if otp == data.OTP {
-		return true
+		tokens, ok := session.RefreshToken(phone)
+
+		if !ok {
+			return LoginTokens{}, false
+		}
+
+		return tokens, true
 	}
 
-	return false
+	return LoginTokens{}, false
+}
+
+func (session *Session) RefreshToken(phone string) (LoginTokens, bool) {
+	// Generate Tokens
+	rfToken, rfErr := session.jwtManager.Generate(jwt_manager.RefreshToken, phone)
+	atToken, atErr := session.jwtManager.Generate(jwt_manager.AccessToken, phone)
+
+	if atErr != nil && rfErr != nil {
+		return LoginTokens{}, false
+	}
+
+	rfSaveErr := session.saveToken(atToken, jwt_manager.RefreshToken)
+	atSaveErr := session.saveToken(atToken, jwt_manager.AccessToken)
+
+	if atSaveErr != nil && rfSaveErr != nil {
+		return LoginTokens{}, false
+	}
+
+	return LoginTokens{rfToken, atToken}, true
 }
