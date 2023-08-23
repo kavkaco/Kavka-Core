@@ -15,6 +15,7 @@ import (
 var (
 	ErrUserNotFound      = errors.New("user not found")
 	ErrPhoneAlreadyTaken = errors.New("phone already taken")
+	ErrInvalidOtpCode    = errors.New("Invalid Otp Code")
 )
 
 type UserRepository struct {
@@ -84,4 +85,25 @@ func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, e
 func (repo *UserRepository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.D{{Key: "phone", Value: phone}}
 	return repo.findBy(filter)
+}
+
+func (repo *UserRepository) FindOrCreateGuestUser(phone string) (*user.User, error) {
+	foundUser, findErr := repo.FindByPhone(phone)
+
+	if findErr != nil {
+		// Creating a new user with entered Phone
+		newUser, createErr := repo.Create(&user.CreateUserData{
+			Name:     "guest",
+			LastName: "guest",
+			Phone:    phone,
+		})
+
+		if createErr != nil {
+			return nil, createErr
+		}
+
+		return newUser, nil
+	}
+
+	return foundUser, nil
 }

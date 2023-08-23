@@ -15,14 +15,22 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-const (
-	// YAML config file path
-	CONFIG_PATH string = "./config/configs.yml"
-	// Define templates path (used by: SmsOtpService)
-	templatesPath = "./app/views/mail/"
-)
+// const (
+// 	// YAML config file path
+// 	CONFIG_PATH string = "./config/configs.yml"
+// 	// Define templates path (used by: SmsOtpService)
+// 	templatesPath = "./app/views/mail/"
+// )
 
 func main() {
+	config.SetCwd()
+
+	// Define paths
+	var (
+		CONFIG_PATH    string = config.Cwd + "/config/configs.yml"
+		TEMPLATES_PATH        = config.Cwd + "/app/views/mail/"
+	)
+
 	// Load Configs
 	configs, configErr := config.Read(CONFIG_PATH)
 	if configErr != nil {
@@ -57,7 +65,7 @@ func main() {
 
 	// ----- Init Services -----
 	session := session.NewSession(redisClient, configs.App.Auth)
-	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, templatesPath)
+	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, TEMPLATES_PATH)
 
 	userRepo := repository.NewUserRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsOtp)

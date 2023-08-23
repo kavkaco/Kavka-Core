@@ -13,7 +13,7 @@ var (
 	AT_EXPIRE_DAY = 24 * time.Hour      // 1 days
 )
 
-var JWT_ALGORITHM = jwt.SigningMethodHS256
+var JWT_ALGORITHM = jwt.SigningMethodHS512
 
 // define errors
 var (
@@ -25,6 +25,7 @@ var (
 type JwtClaims struct {
 	TokenType string
 	Phone     string
+	CreatedAt time.Time
 	jwt.StandardClaims
 }
 
@@ -51,7 +52,8 @@ func NewJwtManager(configs config.Auth) *JwtManager {
 }
 
 func (m *JwtManager) Generate(tokenType string, phone string) (string, error) {
-	claims := &JwtClaims{Phone: phone, TokenType: tokenType}
+	createdAt := time.Now()
+	claims := &JwtClaims{Phone: phone, TokenType: tokenType, CreatedAt: createdAt}
 
 	token := jwt.NewWithClaims(JWT_ALGORITHM, claims)
 	return token.SignedString([]byte(m.secretKey))

@@ -73,8 +73,6 @@ func (s *MyTestSuite) TestVerifyOTP() {
 			if ok {
 				assert.NotEmpty(t, tokens.AccessToken, "Token is empty")
 				assert.NotEmpty(t, tokens.RefreshToken, "Token is empty")
-
-				t.Log(tokens)
 			}
 		})
 	}

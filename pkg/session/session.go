@@ -11,14 +11,6 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-type ISession interface {
-	Login(phone string) (int, error)
-	VerifyOTP(phone string, otp string) bool
-	Logout(staticID string) error
-	SaveToken(token string, payload jwt_manager.JwtClaims) error
-	DestroyToken(token string) error
-}
-
 func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
 	jwtManager := jwt_manager.NewJwtManager(authConfigs)
 	return &Session{redisClient, authConfigs, jwtManager}
@@ -40,9 +32,17 @@ func makeExpiration(tokenType string) time.Duration {
 }
 
 func (session *Session) saveToken(token string, tokenType string) error {
+	payload := struct {
+		TokenType string `json:"token_type"`
+	}{
+		TokenType: tokenType,
+	}
+
+	payloadJson, _ := json.Marshal(payload)
+
 	expireTime := makeExpiration(tokenType)
 
-	err := session.redisClient.Set(context.Background(), token, nil, expireTime).Err()
+	err := session.redisClient.Set(context.TODO(), token, payloadJson, expireTime).Err()
 	if err != nil {
 		return err
 	}
@@ -50,8 +50,17 @@ func (session *Session) saveToken(token string, tokenType string) error {
 	return nil
 }
 
-func (session *Session) destroyToken(token string) error {
+func (session *Session) Destroy(token string) error {
 	err := session.redisClient.Del(context.Background(), token).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (session *Session) DestroyOTP(phone string) error {
+	err := session.redisClient.Del(context.Background(), phone).Err()
 	if err != nil {
 		return err
 	}
@@ -74,8 +83,7 @@ func (session *Session) Login(phone string) (int, error) {
 	return otp, nil
 }
 
-// VerifyOTP function is used to compare the stored otp code and the entered otp code by the user
-// and then returns a boolean values thats gonna tell that otp is valid or not.
+// Verify the generated otp code in Login method, if it was correct returns new tokens (Access, Refresh)
 func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
 	payload, getErr := session.redisClient.Get(context.Background(), phone).Result()
 	if getErr != nil {
@@ -89,33 +97,62 @@ func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
 	}
 
 	if otp == data.OTP {
-		tokens, ok := session.RefreshToken(phone)
-
-		if !ok {
+		// tokens, ok := session.RefreshToken(phone)
+		accessToken, atOk := session.NewAccessToken(phone)
+		if !atOk {
 			return LoginTokens{}, false
 		}
 
-		return tokens, true
+		refreshToken, rfOk := session.NewRefreshToken(phone)
+		if !rfOk {
+			return LoginTokens{}, false
+		}
+
+		session.DestroyOTP(phone)
+
+		return LoginTokens{AccessToken: accessToken, RefreshToken: refreshToken}, true
 	}
 
 	return LoginTokens{}, false
 }
 
-func (session *Session) RefreshToken(phone string) (LoginTokens, bool) {
-	// Generate Tokens
-	rfToken, rfErr := session.jwtManager.Generate(jwt_manager.RefreshToken, phone)
-	atToken, atErr := session.jwtManager.Generate(jwt_manager.AccessToken, phone)
+func (session *Session) newToken(phone string, tokenType string) (string, bool) {
+	// Generate Token
+	token, err := session.jwtManager.Generate(tokenType, phone)
 
-	if atErr != nil && rfErr != nil {
-		return LoginTokens{}, false
+	if err != nil {
+		return "", false
 	}
 
-	rfSaveErr := session.saveToken(atToken, jwt_manager.RefreshToken)
-	atSaveErr := session.saveToken(atToken, jwt_manager.AccessToken)
+	saveErr := session.saveToken(token, tokenType)
 
-	if atSaveErr != nil && rfSaveErr != nil {
-		return LoginTokens{}, false
+	if saveErr != nil {
+		return "", false
 	}
 
-	return LoginTokens{rfToken, atToken}, true
+	return token, true
+}
+
+// Generates and stores a new access token with given phone
+func (session *Session) NewAccessToken(phone string) (string, bool) {
+	return session.newToken(phone, jwt_manager.AccessToken)
+}
+
+// Generates and stores a new refresh token with given phone
+func (session *Session) NewRefreshToken(phone string) (string, bool) {
+	return session.newToken(phone, jwt_manager.RefreshToken)
+}
+
+func (session *Session) DecodeToken(token string, tokenType string) (*jwt_manager.JwtClaims, error) {
+	_, getErr := session.redisClient.Get(context.TODO(), token).Result()
+	if getErr != nil {
+		return nil, jwt_manager.ErrInvalidToken
+	}
+
+	claims, err := session.jwtManager.Verify(token, tokenType)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
 }

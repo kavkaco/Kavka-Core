@@ -1,7 +1,7 @@
 package validator
 
 import (
-	"Kavka/app/middleware"
+	"Kavka/app/presenters"
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
@@ -27,7 +27,7 @@ func Validate[Dto interface{}](ctx *fiber.Ctx) *Dto {
 	body := new(Dto)
 
 	if err := ctx.BodyParser(body); err != nil {
-		middleware.ResponseBadRequest(ctx)
+		presenters.ResponseBadRequest(ctx)
 		return nil
 	}
 
