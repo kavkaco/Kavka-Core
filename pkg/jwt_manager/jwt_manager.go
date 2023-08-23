@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var (
@@ -24,7 +25,7 @@ var (
 
 type JwtClaims struct {
 	TokenType string
-	Phone     string
+	StaticID  primitive.ObjectID
 	CreatedAt time.Time
 	jwt.StandardClaims
 }
@@ -32,11 +33,6 @@ type JwtClaims struct {
 type JwtManager struct {
 	secretKey string
 	ttl       time.Duration
-}
-
-type IJwtManager interface {
-	Verify(token string) (*JwtClaims, error)
-	Generate(phone string) (string, error)
 }
 
 const (
@@ -51,9 +47,9 @@ func NewJwtManager(configs config.Auth) *JwtManager {
 	}
 }
 
-func (m *JwtManager) Generate(tokenType string, phone string) (string, error) {
+func (m *JwtManager) Generate(tokenType string, staticID primitive.ObjectID) (string, error) {
 	createdAt := time.Now()
-	claims := &JwtClaims{Phone: phone, TokenType: tokenType, CreatedAt: createdAt}
+	claims := &JwtClaims{StaticID: staticID, TokenType: tokenType, CreatedAt: createdAt}
 
 	token := jwt.NewWithClaims(JWT_ALGORITHM, claims)
 	return token.SignedString([]byte(m.secretKey))

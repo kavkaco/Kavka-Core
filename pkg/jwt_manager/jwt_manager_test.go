@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var jwtManager = NewJwtManager(config.Auth{SECRET: "sample_secret", OTP_EXPIRE_SECONDS: 1 * time.Second})
 
-const phone = "sample_phone_number"
+var StaticID = primitive.NewObjectID()
 
 func TestJWTGenerateAndVerifyRefreshToken(t *testing.T) {
-	refreshToken, tokenErr := jwtManager.Generate(RefreshToken, phone)
+	refreshToken, tokenErr := jwtManager.Generate(RefreshToken, StaticID)
 
 	assert.Empty(t, tokenErr)
 	assert.NotEmpty(t, refreshToken)

@@ -19,6 +19,7 @@ func NewUserRouter(router fiber.Router, service *service.UserService) *UserRoute
 	router.Post("/login", ctrl.HandleLogin)
 	router.Post("/verify_otp", ctrl.HandleVerifyOTP)
 	router.Post("/refresh_token", ctrl.HandleRefreshToken)
+	router.Post("/authenticate", ctrl.HandleAuthenticate)
 
 	return &UserRouter{service, ctrl, &router}
 }

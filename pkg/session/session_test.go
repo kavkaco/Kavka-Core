@@ -9,9 +9,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const PHONE = "sample_phone_number"
+
+var STATIC_ID = primitive.NewObjectID()
 
 type MyTestSuite struct {
 	suite.Suite
@@ -66,7 +69,7 @@ func (s *MyTestSuite) TestVerifyOTP() {
 
 	for _, tt := range cases {
 		s.T().Run(tt.name, func(t *testing.T) {
-			tokens, ok := s.session.VerifyOTP(PHONE, tt.otp)
+			tokens, ok := s.session.VerifyOTP(PHONE, tt.otp, STATIC_ID)
 
 			assert.Equal(s.T(), ok, tt.result, fmt.Sprintf("Invalid OTP: %d", tt.otp))
 

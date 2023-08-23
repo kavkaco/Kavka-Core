@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
@@ -84,7 +85,7 @@ func (session *Session) Login(phone string) (int, error) {
 }
 
 // Verify the generated otp code in Login method, if it was correct returns new tokens (Access, Refresh)
-func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
+func (session *Session) VerifyOTP(phone string, otp int, staticID primitive.ObjectID) (LoginTokens, bool) {
 	payload, getErr := session.redisClient.Get(context.Background(), phone).Result()
 	if getErr != nil {
 		return LoginTokens{}, false
@@ -97,13 +98,12 @@ func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
 	}
 
 	if otp == data.OTP {
-		// tokens, ok := session.RefreshToken(phone)
-		accessToken, atOk := session.NewAccessToken(phone)
+		accessToken, atOk := session.NewAccessToken(staticID)
 		if !atOk {
 			return LoginTokens{}, false
 		}
 
-		refreshToken, rfOk := session.NewRefreshToken(phone)
+		refreshToken, rfOk := session.NewRefreshToken(staticID)
 		if !rfOk {
 			return LoginTokens{}, false
 		}
@@ -116,9 +116,9 @@ func (session *Session) VerifyOTP(phone string, otp int) (LoginTokens, bool) {
 	return LoginTokens{}, false
 }
 
-func (session *Session) newToken(phone string, tokenType string) (string, bool) {
+func (session *Session) newToken(staticID primitive.ObjectID, tokenType string) (string, bool) {
 	// Generate Token
-	token, err := session.jwtManager.Generate(tokenType, phone)
+	token, err := session.jwtManager.Generate(tokenType, staticID)
 
 	if err != nil {
 		return "", false
@@ -134,13 +134,13 @@ func (session *Session) newToken(phone string, tokenType string) (string, bool) 
 }
 
 // Generates and stores a new access token with given phone
-func (session *Session) NewAccessToken(phone string) (string, bool) {
-	return session.newToken(phone, jwt_manager.AccessToken)
+func (session *Session) NewAccessToken(staticID primitive.ObjectID) (string, bool) {
+	return session.newToken(staticID, jwt_manager.AccessToken)
 }
 
 // Generates and stores a new refresh token with given phone
-func (session *Session) NewRefreshToken(phone string) (string, bool) {
-	return session.newToken(phone, jwt_manager.RefreshToken)
+func (session *Session) NewRefreshToken(staticID primitive.ObjectID) (string, bool) {
+	return session.newToken(staticID, jwt_manager.RefreshToken)
 }
 
 func (session *Session) DecodeToken(token string, tokenType string) (*jwt_manager.JwtClaims, error) {

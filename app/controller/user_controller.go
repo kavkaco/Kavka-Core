@@ -82,3 +82,21 @@ func (ctrl *UserController) HandleRefreshToken(ctx *fiber.Ctx) error {
 
 	return nil
 }
+
+func (ctrl *UserController) HandleAuthenticate(ctx *fiber.Ctx) error {
+	headers := ctx.GetReqHeaders()
+	accessToken := bearer.ExtractFromHeader(headers["Authorization"])
+
+	if len(accessToken) == 0 {
+		return presenters.ResponseBadRequest(ctx)
+	}
+
+	userInfo, err := ctrl.userService.Authenticate(accessToken)
+	if err != nil {
+		return err
+	}
+
+	presenters.ResponseUserInfo(ctx, userInfo)
+
+	return nil
+}

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"Kavka/domain/user"
 	"Kavka/pkg/jwt_manager"
 	"Kavka/pkg/session"
 	repository "Kavka/repository/user"
@@ -33,12 +34,12 @@ func (s *UserService) Login(phone string) (int, error) {
 }
 
 func (s *UserService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
-	_, err := s.userRepo.FindByPhone(phone)
+	user, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
 		return nil, repository.ErrUserNotFound
 	}
 
-	tokens, ok := s.session.VerifyOTP(phone, otp)
+	tokens, ok := s.session.VerifyOTP(phone, otp, user.StaticID)
 	if !ok {
 		return nil, repository.ErrInvalidOtpCode
 	}
@@ -59,10 +60,13 @@ func (s *UserService) RefreshToken(refreshToken string, accessToken string) (str
 		return "", errors.New("invalid access token")
 	}
 
-	phone := payload.Phone
+	user, findErr := s.userRepo.FindByID(payload.StaticID)
+	if findErr != nil {
+		return "", findErr
+	}
 
 	// Generate & Refresh current access token
-	newAccessToken, ok := s.session.NewAccessToken(phone)
+	newAccessToken, ok := s.session.NewAccessToken(user.StaticID)
 	if !ok {
 		return "", errors.New("refreshing token failed")
 	}
@@ -74,4 +78,18 @@ func (s *UserService) RefreshToken(refreshToken string, accessToken string) (str
 	}
 
 	return newAccessToken, nil
+}
+
+func (s *UserService) Authenticate(accessToken string) (*user.User, error) {
+	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
+	if decodeErr != nil {
+		return nil, errors.New("invalid access token")
+	}
+
+	user, findErr := s.userRepo.FindByID(payload.StaticID)
+	if findErr != nil {
+		return nil, jwt_manager.ErrInvalidToken
+	}
+
+	return user, nil
 }
