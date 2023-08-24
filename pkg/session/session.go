@@ -17,7 +17,7 @@ func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
 	return &Session{redisClient, authConfigs, jwtManager}
 }
 
-// "makeExpiration" returns the expiration time for a given token type.
+// makeExpiration function returns the expiration time for a given token type.
 func makeExpiration(tokenType string) time.Duration {
 	var expiration time.Duration
 
@@ -51,6 +51,7 @@ func (session *Session) saveToken(token string, tokenType string) error {
 	return nil
 }
 
+// Destroys token in the redis store.
 func (session *Session) Destroy(token string) error {
 	err := session.redisClient.Del(context.Background(), token).Err()
 	if err != nil {
@@ -60,6 +61,7 @@ func (session *Session) Destroy(token string) error {
 	return nil
 }
 
+// Destroys otp code of the mentioned phone in the redis store.
 func (session *Session) DestroyOTP(phone string) error {
 	err := session.redisClient.Del(context.Background(), phone).Err()
 	if err != nil {
@@ -133,16 +135,17 @@ func (session *Session) newToken(staticID primitive.ObjectID, tokenType string) 
 	return token, true
 }
 
-// Generates and stores a new access token with given phone
+// Generates and stores a new access token with mentioned phone
 func (session *Session) NewAccessToken(staticID primitive.ObjectID) (string, bool) {
 	return session.newToken(staticID, jwt_manager.AccessToken)
 }
 
-// Generates and stores a new refresh token with given phone
+// Generates and stores a new refresh token with mentioned phone
 func (session *Session) NewRefreshToken(staticID primitive.ObjectID) (string, bool) {
 	return session.newToken(staticID, jwt_manager.RefreshToken)
 }
 
+// Decodes token and returns an instance of `*jwt_manager.JwtClaims` and an error.
 func (session *Session) DecodeToken(token string, tokenType string) (*jwt_manager.JwtClaims, error) {
 	_, getErr := session.redisClient.Get(context.TODO(), token).Result()
 	if getErr != nil {
