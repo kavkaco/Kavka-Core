@@ -19,6 +19,8 @@ func NewUserService(userRepo *repository.UserRepository, session *session.Sessio
 	return &UserService{userRepo, session, smsOtp}
 }
 
+// Login function gets user's phone and find it or created it in the database,
+// then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`
 func (s *UserService) Login(phone string) (int, error) {
 	_, err := s.userRepo.FindOrCreateGuestUser(phone)
 	if err != nil {
@@ -33,6 +35,8 @@ func (s *UserService) Login(phone string) (int, error) {
 	return otp, nil
 }
 
+// VerifyOTP function gets phone and otp code and checks if the otp code was correct for
+// mentioned phone, its gonna return an instance of *session.LoginTokens and an error.
 func (s *UserService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
 	user, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
@@ -47,7 +51,7 @@ func (s *UserService) VerifyOTP(phone string, otp int) (*session.LoginTokens, er
 	return &tokens, nil
 }
 
-// Refreshes access tokens and returns it
+// RefreshToken function is used to refresh `Access Token`, It's returns a new `Access Token` and an error.
 func (s *UserService) RefreshToken(refreshToken string, accessToken string) (string, error) {
 	// Decode tokens and detect user phone
 	payload, decodeRfErr := s.session.DecodeToken(refreshToken, jwt_manager.RefreshToken)
@@ -80,6 +84,7 @@ func (s *UserService) RefreshToken(refreshToken string, accessToken string) (str
 	return newAccessToken, nil
 }
 
+// `Authenticate` function is used to authenticate a user and returns a `*user.User` and an error.
 func (s *UserService) Authenticate(accessToken string) (*user.User, error) {
 	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
 	if decodeErr != nil {
