@@ -2,7 +2,7 @@ package repository
 
 import (
 	"Kavka/database"
-	"Kavka/domain/user"
+	"Kavka/internal/domain/user"
 	"Kavka/utils"
 	"context"
 	"errors"

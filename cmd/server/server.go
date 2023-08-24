@@ -3,12 +3,12 @@ package main
 import (
 	"Kavka/app/middleware"
 	"Kavka/app/router"
+	"Kavka/app/socket"
 	"Kavka/config"
 	"Kavka/database"
+	repository "Kavka/internal/repository/user"
+	"Kavka/internal/service"
 	"Kavka/pkg/session"
-	repository "Kavka/repository/user"
-	"Kavka/service"
-	"Kavka/socket"
 	"Kavka/utils/sms_otp"
 	"log"
 

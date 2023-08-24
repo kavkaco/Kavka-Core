@@ -2,7 +2,7 @@ package router
 
 import (
 	"Kavka/app/controller"
-	"Kavka/service"
+	"Kavka/internal/service"
 
 	"github.com/gofiber/fiber/v2"
 )

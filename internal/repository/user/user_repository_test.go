@@ -3,7 +3,7 @@ package repository
 import (
 	"Kavka/config"
 	"Kavka/database"
-	"Kavka/domain/user"
+	"Kavka/internal/domain/user"
 	"context"
 	"os"
 	"testing"

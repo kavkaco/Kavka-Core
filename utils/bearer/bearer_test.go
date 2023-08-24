@@ -10,7 +10,7 @@ func TestExtractFromHeader(t *testing.T) {
 	sampleToken := "Hello_World"
 	authorizationToken := "Bearer " + sampleToken
 
-	token := ExtractFromHeader(authorizationToken)
+	token := extractTokenFromHeader(authorizationToken)
 
 	assert.Equal(t, token, sampleToken)
 }

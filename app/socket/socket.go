@@ -1,7 +1,7 @@
 package socket
 
 import (
-	"Kavka/service"
+	"Kavka/internal/service"
 	"Kavka/utils/bearer"
 	"log"
 

@@ -3,8 +3,8 @@ package controller
 import (
 	"Kavka/app/presenters"
 	validator "Kavka/app/validators"
+	"Kavka/internal/service"
 	"Kavka/pkg/session"
-	"Kavka/service"
 	"Kavka/utils/bearer"
 	"fmt"
 

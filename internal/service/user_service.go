@@ -1,10 +1,10 @@
 package service
 
 import (
-	"Kavka/domain/user"
+	"Kavka/internal/domain/user"
+	repository "Kavka/internal/repository/user"
 	"Kavka/pkg/jwt_manager"
 	"Kavka/pkg/session"
-	repository "Kavka/repository/user"
 	"Kavka/utils/sms_otp"
 	"errors"
 )

@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"Kavka/domain/user"
+	"Kavka/internal/domain/user"
 	"Kavka/pkg/session"
 	"fmt"
 
