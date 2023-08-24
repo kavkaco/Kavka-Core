@@ -11,23 +11,16 @@ import (
 
 func TestRedis(t *testing.T) {
 	// Read configs
-
-	cfg, err := config.Read("../config/configs.yml")
-
-	assert.NoError(t, err)
+	configs := config.Read()
 
 	// Establish connection
-
-	redisClient := GetRedisDBInstance(cfg.Redis)
+	redisClient := GetRedisDBInstance(configs.Redis)
 
 	// Set Some Values
-
 	status := redisClient.Set(context.TODO(), "name", "Sample", time.Second*3)
-
 	assert.NoError(t, status.Err())
 
 	// Get Some Values
-
 	name, getErr := redisClient.Get(context.TODO(), "name").Result()
 
 	assert.NoError(t, getErr)

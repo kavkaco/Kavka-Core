@@ -1,19 +1,20 @@
 package config
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func TestConfigsDirPath(t *testing.T) {
+	t.Log(ConfigsDirPath())
+	t.Log(ProjectRootPath)
+}
+
 func TestRead(t *testing.T) {
-	wd, _ := os.Getwd()
+	configs := Read()
 
-	Cwd = wd + "/../"
+	assert.NotEmpty(t, configs)
 
-	_, err := Read(wd + "/configs.yml")
-	assert.NoError(t, err)
-
-	t.Log(ENV)
+	t.Log(configs)
 }

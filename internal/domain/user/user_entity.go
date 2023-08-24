@@ -27,7 +27,6 @@ func NewUser(phone string) *User {
 	u := User{}
 	u.Phone = phone
 	u.StaticID = primitive.NewObjectID()
-	u.Banned = false
 
 	// set timestamps
 	now := time.Now()
@@ -43,10 +42,4 @@ func (u *User) FullName() string {
 
 func (u User) IsBanned() bool {
 	return u.Banned
-}
-
-type CreateUserData struct {
-	Name     string
-	LastName string
-	Phone    string
 }

@@ -4,7 +4,6 @@ import (
 	"Kavka/config"
 	"Kavka/database"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,17 +22,8 @@ type MyTestSuite struct {
 }
 
 func (s *MyTestSuite) SetupSuite() {
-	// Get wd
-	var wd, _ = os.Getwd()
-
-	// Set Cwd
-	config.Cwd = wd + "/../../"
-
 	// Load configs
-	var configs, configsErr = config.Read(config.Cwd + "/config/configs.yml")
-	if configsErr != nil {
-		panic(configsErr)
-	}
+	configs := config.Read()
 
 	// Init Redis
 	var redisClient = database.GetRedisDBInstance(configs.Redis)

@@ -8,18 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const CONFIG_PATH = "/../../config/configs.yml"
-
 func TestSendSms(t *testing.T) {
 	// Get wd
 	var wd, _ = os.Getwd()
 	var templatesPath = wd + "/../../app/views/sms/"
 
 	// Load configs
-	var configs, configsErr = config.Read(wd + CONFIG_PATH)
-	if configsErr != nil {
-		panic(configsErr)
-	}
+	configs := config.Read()
 
 	receivers := []string{"+989368392346"}
 

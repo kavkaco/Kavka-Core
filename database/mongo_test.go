@@ -9,12 +9,10 @@ import (
 
 func TestMongo(t *testing.T) {
 	// Load configs
-	cfg, err := config.Read("../config/configs.yml")
-
-	assert.NoError(t, err)
+	configs := config.Read()
 
 	// Establish connection
-	mongoClient, connErr := GetMongoDBInstance(cfg.Mongo)
+	mongoClient, connErr := GetMongoDBInstance(configs.Mongo)
 
 	assert.NoError(t, connErr)
 	assert.NotEmpty(t, mongoClient)

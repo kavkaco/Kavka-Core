@@ -5,7 +5,6 @@ import (
 	"Kavka/database"
 	"Kavka/internal/domain/user"
 	"context"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,7 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const CONFIG_PATH = "/../../../config/configs.yml"
 const PHONE = "sample_phone_number"
 
 type MyTestSuite struct {
@@ -24,14 +22,8 @@ type MyTestSuite struct {
 }
 
 func (s *MyTestSuite) SetupSuite() {
-	// Get wd
-	var wd, _ = os.Getwd()
-
 	// Load configs
-	var configs, configsErr = config.Read(wd + CONFIG_PATH)
-	if configsErr != nil {
-		panic(configsErr)
-	}
+	configs := config.Read()
 
 	configs.Mongo.DBName = "test"
 
@@ -46,16 +38,16 @@ func (s *MyTestSuite) SetupSuite() {
 }
 
 func (s *MyTestSuite) TestCreate() {
-	incomingData := &user.CreateUserData{
-		Name: "John", LastName: "Doe", Phone: PHONE,
-	}
-
-	user, err := s.userRepo.Create(incomingData)
+	var (
+		name     = "John"
+		lastName = "Doe"
+	)
+	user, err := s.userRepo.Create(name, lastName, PHONE)
 
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), user.Name, incomingData.Name)
-	assert.Equal(s.T(), user.LastName, incomingData.LastName)
-	assert.Equal(s.T(), user.Phone, incomingData.Phone)
+	assert.Equal(s.T(), user.Name, name)
+	assert.Equal(s.T(), user.LastName, lastName)
+	assert.Equal(s.T(), user.Phone, PHONE)
 	assert.NotEmpty(s.T(), user.StaticID)
 
 	s.sampleUser = *user
@@ -144,6 +136,8 @@ func (s *MyTestSuite) TestFindByPhone() {
 	for _, tt := range cases {
 		s.T().Run(tt.name, func(t *testing.T) {
 			user, err := s.userRepo.FindByPhone(tt.phone)
+
+			s.T().Log(err)
 
 			if tt.exist {
 				assert.NoError(s.T(), err)

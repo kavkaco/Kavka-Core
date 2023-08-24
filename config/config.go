@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -10,7 +12,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var Cwd string
 var ENV_ITEMS = []string{"devel", "prod"}
 var ENV string
 
@@ -63,12 +64,20 @@ type (
 	SMS struct{}
 )
 
-func SetCwd() {
-	wd, _ := os.Getwd()
-	Cwd = wd
+const defaultEnvPath = "/config/configs.yml"
+
+var ProjectRootPath = ConfigsDirPath() + "/../"
+
+func ConfigsDirPath() string {
+	_, f, _, ok := runtime.Caller(0)
+	if !ok {
+		panic("Error in generating env dir")
+	}
+
+	return filepath.Dir(f)
 }
 
-func Read(fileName string) (IConfig, error) {
+func Read() *IConfig {
 	// Load ENV
 	env := os.Getenv("ENV")
 	if len(strings.TrimSpace(env)) == 0 {
@@ -76,28 +85,29 @@ func Read(fileName string) (IConfig, error) {
 	} else if slices.Contains(ENV_ITEMS, env) {
 		ENV = env
 	} else {
-		return IConfig{}, errors.New("Invalid ENV key: " + env)
+		panic(errors.New("Invalid ENV key: " + env))
 	}
 
 	// Load YAML configs
 	var cfg *IConfig
 
-	data, readErr := os.ReadFile(fileName)
+	data, readErr := os.ReadFile(ConfigsDirPath() + "/configs.yml")
 	if readErr != nil {
-
+		panic(readErr)
 	}
 
 	parseErr := yaml.Unmarshal(data, &cfg)
 	if parseErr != nil {
-		return IConfig{}, parseErr
+		panic(parseErr)
 	}
 
-	// Load RSA keys
-	secretData, secretErr := os.ReadFile(Cwd + "/config/jwt_secret.pem")
+	// Load JwtSecret keys
+	secretData, secretErr := os.ReadFile(ConfigsDirPath() + "/jwt_secret.pem")
 	if secretErr != nil {
-		return IConfig{}, secretErr
+		panic(secretErr)
 	}
+
 	cfg.App.Auth.SECRET = strings.TrimSpace(string(secretData))
 
-	return *cfg, nil
+	return cfg
 }

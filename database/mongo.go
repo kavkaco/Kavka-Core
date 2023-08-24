@@ -18,7 +18,8 @@ var (
 )
 
 var (
-	UsersCollection = "users"
+	UsersCollection    = "users"
+	MessagesCollection = "messages"
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {
