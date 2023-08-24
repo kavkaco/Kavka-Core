@@ -8,6 +8,7 @@ import (
 	"Kavka/pkg/session"
 	repository "Kavka/repository/user"
 	"Kavka/service"
+	"Kavka/socket"
 	"Kavka/utils/sms_otp"
 	"log"
 
@@ -70,6 +71,9 @@ func main() {
 	userRepo := repository.NewUserRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsOtp)
 	router.NewUserRouter(app.Group("/users"), userService)
+
+	// Init Socket Server
+	socket.NewSocketService(app, userService)
 
 	// Everything almost done!
 	log.Fatal(

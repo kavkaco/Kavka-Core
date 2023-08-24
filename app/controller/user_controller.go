@@ -61,42 +61,43 @@ func (ctrl *UserController) HandleVerifyOTP(ctx *fiber.Ctx) error {
 func (ctrl *UserController) HandleRefreshToken(ctx *fiber.Ctx) error {
 	headers := ctx.GetReqHeaders()
 	refreshToken := headers["Refresh"]
-	accessToken := bearer.ExtractFromHeader(headers["Authorization"])
 
-	if len(refreshToken) == 0 || len(accessToken) == 0 {
-		return presenters.ResponseBadRequest(ctx)
+	refreshToken, bearerRfOk := bearer.RefreshToken(ctx)
+
+	if bearerRfOk {
+		accessToken, bearerAtOk := bearer.AccessToken(ctx)
+
+		if bearerAtOk {
+
+			newAccessToken, refErr := ctrl.userService.RefreshToken(refreshToken, accessToken)
+			if refErr != nil {
+				return refErr
+			}
+
+			newTokens := session.LoginTokens{AccessToken: newAccessToken, RefreshToken: refreshToken}
+			presenters.SendTokensHeader(ctx, newTokens)
+
+			ctx.JSON(presenters.SimpleMessage{
+				Code:    200,
+				Message: "Tokens refreshed successfully",
+			})
+		}
 	}
-
-	newAccessToken, refErr := ctrl.userService.RefreshToken(refreshToken, accessToken)
-	if refErr != nil {
-		return refErr
-	}
-
-	newTokens := session.LoginTokens{AccessToken: newAccessToken, RefreshToken: refreshToken}
-	presenters.SendTokensHeader(ctx, newTokens)
-
-	ctx.JSON(presenters.SimpleMessage{
-		Code:    200,
-		Message: "Tokens refreshed successfully",
-	})
 
 	return nil
 }
 
 func (ctrl *UserController) HandleAuthenticate(ctx *fiber.Ctx) error {
-	headers := ctx.GetReqHeaders()
-	accessToken := bearer.ExtractFromHeader(headers["Authorization"])
+	accessToken, bearerOk := bearer.AccessToken(ctx)
 
-	if len(accessToken) == 0 {
-		return presenters.ResponseBadRequest(ctx)
+	if bearerOk {
+		userInfo, err := ctrl.userService.Authenticate(accessToken)
+		if err != nil {
+			return err
+		}
+
+		presenters.ResponseUserInfo(ctx, userInfo)
 	}
-
-	userInfo, err := ctrl.userService.Authenticate(accessToken)
-	if err != nil {
-		return err
-	}
-
-	presenters.ResponseUserInfo(ctx, userInfo)
 
 	return nil
 }
