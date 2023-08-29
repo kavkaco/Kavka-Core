@@ -18,8 +18,8 @@ var (
 )
 
 var (
-	UsersCollection    = "users"
-	MessagesCollection = "messages"
+	UsersCollection = "users"
+	ChatsCollection = "chats"
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {
@@ -63,6 +63,18 @@ func IsDuplicateKeyError(err error) bool {
 	if errors.As(err, &e) {
 		for _, we := range e.WriteErrors {
 			if we.Code == 11000 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func IsRowExistsError(err error) bool {
+	var e mongo.WriteException
+	if errors.As(err, &e) {
+		for _, we := range e.WriteErrors {
+			if we.Code == 121 {
 				return true
 			}
 		}

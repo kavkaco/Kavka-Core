@@ -6,6 +6,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	TypeTextMessage  = "text"
+	TypeImageMessage = "image"
+)
+
 type Message struct {
 	MessageID primitive.ObjectID `bson:"_id"`
 	CreatedAt time.Time
@@ -29,7 +34,9 @@ type ImageMessage struct {
 func NewMessage(messageType string, content interface{}) *Message {
 	m := &Message{}
 
+	m.Type = messageType
 	m.Content = content
+	m.MessageID = primitive.NewObjectID()
 
 	// set timestamps
 	now := time.Now()
