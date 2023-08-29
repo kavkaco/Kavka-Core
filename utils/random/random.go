@@ -1,6 +1,7 @@
 package random
 
 import (
+	"encoding/hex"
 	"math"
 	"math/rand"
 	"time"
@@ -15,4 +16,13 @@ func GenerateOTP() int {
 	max := math.Pow(10, OTP_LENGTH) - 1
 
 	return rand.Intn(int(max-min) + int(min))
+}
+
+func GenerateRandomFileName(n int) string {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		return ""
+	}
+
+	return hex.EncodeToString(bytes)
 }

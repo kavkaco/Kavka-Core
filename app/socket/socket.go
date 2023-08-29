@@ -10,6 +10,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var clients []*websocket.Conn
+
 type SocketService struct {
 	userService *service.UserService
 }
@@ -43,6 +45,7 @@ func (s *SocketService) handleWebsocket(ctx *websocket.Conn) {
 			break
 		}
 
+		clients = append(clients, ctx)
 		s.handleMessages(msgData, ctx, staticID)
 	}
 }
@@ -62,7 +65,6 @@ func (s *SocketService) endpoint(ctx *fiber.Ctx) error {
 
 			ctx.Locals("StaticID", staticID)
 			ctx.Locals("Phone", phone)
-
 			ctx.Locals("allowed", true)
 
 			return ctx.Next()
