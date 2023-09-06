@@ -7,8 +7,9 @@ import (
 	"Kavka/pkg/session"
 	"Kavka/utils/bearer"
 	"fmt"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
@@ -19,48 +20,45 @@ func NewUserController(userService *service.UserService) *UserController {
 	return &UserController{userService}
 }
 
-func (ctrl *UserController) HandleLogin(ctx *fiber.Ctx) error {
+func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
 	body := validator.Validate[validator.UserLoginDto](ctx)
 	phone := body.Phone
 
 	otp, err := ctrl.userService.Login(phone)
 	if err != nil {
-		return err
+		presenters.ResponseError(ctx, err)
+		return
 	}
 
 	// FIXME - Gonna be removed after implementing SMS service.
 	fmt.Printf("OTP Code: %d\n", otp)
 
-	ctx.JSON(presenters.SimpleMessage{
+	ctx.JSON(http.StatusOK, presenters.SimpleMessageDto{
 		Code:    200,
 		Message: "OTP Code Sent",
 	})
-
-	return nil
 }
 
-func (ctrl *UserController) HandleVerifyOTP(ctx *fiber.Ctx) error {
+func (ctrl *UserController) HandleVerifyOTP(ctx *gin.Context) {
 	body := validator.Validate[validator.UserVerifyOTPDto](ctx)
 
 	tokens, err := ctrl.userService.VerifyOTP(body.Phone, body.OTP)
 
 	if err != nil {
-		return err
+		presenters.ResponseError(ctx, err)
+		return
 	}
 
 	presenters.SendTokensHeader(ctx, *tokens)
 
-	ctx.JSON(presenters.SimpleMessage{
+	ctx.JSON(http.StatusOK, presenters.SimpleMessageDto{
 		Code:    200,
 		Message: "Logged in successfully",
 	})
-
-	return nil
 }
 
-func (ctrl *UserController) HandleRefreshToken(ctx *fiber.Ctx) error {
-	headers := ctx.GetReqHeaders()
-	refreshToken := headers["Refresh"]
+func (ctrl *UserController) HandleRefreshToken(ctx *gin.Context) {
+	refreshToken := ctx.GetHeader("refresh")
 
 	refreshToken, bearerRfOk := bearer.RefreshToken(ctx)
 
@@ -71,33 +69,32 @@ func (ctrl *UserController) HandleRefreshToken(ctx *fiber.Ctx) error {
 
 			newAccessToken, refErr := ctrl.userService.RefreshToken(refreshToken, accessToken)
 			if refErr != nil {
-				return refErr
+				presenters.ResponseError(ctx, refErr)
+				return
+
 			}
 
 			newTokens := session.LoginTokens{AccessToken: newAccessToken, RefreshToken: refreshToken}
 			presenters.SendTokensHeader(ctx, newTokens)
 
-			ctx.JSON(presenters.SimpleMessage{
+			ctx.JSON(http.StatusOK, presenters.SimpleMessageDto{
 				Code:    200,
 				Message: "Tokens refreshed successfully",
 			})
 		}
 	}
-
-	return nil
 }
 
-func (ctrl *UserController) HandleAuthenticate(ctx *fiber.Ctx) error {
+func (ctrl *UserController) HandleAuthenticate(ctx *gin.Context) {
 	accessToken, bearerOk := bearer.AccessToken(ctx)
 
 	if bearerOk {
 		userInfo, err := ctrl.userService.Authenticate(accessToken)
 		if err != nil {
-			return err
+			presenters.ResponseError(ctx, err)
+			return
 		}
 
 		presenters.ResponseUserInfo(ctx, userInfo)
 	}
-
-	return nil
 }

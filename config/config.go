@@ -25,10 +25,10 @@ type (
 		MinIOCredentials
 	}
 	App struct {
-		Name  string `yaml:"NAME"`
-		HTTP  HTTP   `yaml:"HTTP"`
-		Fiber Fiber  `yaml:"FIBER"`
-		Auth  Auth   `yaml:"AUTH"`
+		Name   string `yaml:"NAME"`
+		HTTP   HTTP   `yaml:"HTTP"`
+		Server Server `yaml:"SERVER"`
+		Auth   Auth   `yaml:"AUTH"`
 	}
 	HTTP struct {
 		Host    string `yaml:"HOST"`
@@ -39,14 +39,11 @@ type (
 		SECRET             string
 		OTP_EXPIRE_SECONDS time.Duration `json:"OTP_EXPIRE_SECONDS"`
 	}
-	Fiber struct {
-		ServerHeader string `yaml:"SERVER_HEADER"`
-		Prefork      bool   `yaml:"PREFORK"`
-		CORS         CORS   `yaml:"CORS"`
+	Server struct {
+		CORS CORS `yaml:"CORS"`
 	}
 	CORS struct {
-		AllowOrigins     string `yaml:"ALLOW_ORIGINS"`
-		AllowCredentials bool   `yaml:"ALLOW_CREDENTIALS"`
+		AllowOrigins string `yaml:"ALLOW_ORIGINS"`
 	}
 	Redis struct {
 		Host     string `yaml:"HOST"`

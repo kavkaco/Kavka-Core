@@ -4,21 +4,24 @@ import (
 	"Kavka/internal/domain/user"
 	"Kavka/pkg/session"
 	"fmt"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
-func SendTokensHeader(ctx *fiber.Ctx, tokens session.LoginTokens) {
-	ctx.Response().Header.Set("Refresh", tokens.RefreshToken)
-	ctx.Response().Header.Set("Authorization", fmt.Sprintf("Bearer %s", tokens.AccessToken))
+type UserInfoDto struct {
+	Message  string     `json:"message"`
+	Code     int        `json:"code"`
+	UserInfo *user.User `json:"user"`
 }
 
-func ResponseUserInfo(ctx *fiber.Ctx, userInfo *user.User) {
-	ctx.Status(200).JSON(struct {
-		Message  string
-		Code     int
-		UserInfo *user.User `json:"User"`
-	}{
+func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
+	ctx.Header("refresh", tokens.RefreshToken)
+	ctx.Header("authorization", fmt.Sprintf("Bearer %s", tokens.AccessToken))
+}
+
+func ResponseUserInfo(ctx *gin.Context, userInfo *user.User) {
+	ctx.JSON(http.StatusOK, UserInfoDto{
 		Message:  "Success",
 		Code:     200,
 		UserInfo: userInfo,

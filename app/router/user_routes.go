@@ -4,22 +4,22 @@ import (
 	"Kavka/app/controller"
 	"Kavka/internal/service"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
 type UserRouter struct {
 	service *service.UserService
 	ctrl    *controller.UserController
-	router  *fiber.Router
+	router  *gin.RouterGroup
 }
 
-func NewUserRouter(router fiber.Router, service *service.UserService) *UserRouter {
+func NewUserRouter(router *gin.RouterGroup, service *service.UserService) *UserRouter {
 	ctrl := controller.NewUserController(service)
 
-	router.Post("/login", ctrl.HandleLogin)
-	router.Post("/verify_otp", ctrl.HandleVerifyOTP)
-	router.Post("/refresh_token", ctrl.HandleRefreshToken)
-	router.Post("/authenticate", ctrl.HandleAuthenticate)
+	router.POST("/login", ctrl.HandleLogin)
+	router.POST("/verify_otp", ctrl.HandleVerifyOTP)
+	router.POST("/refresh_token", ctrl.HandleRefreshToken)
+	router.POST("/authenticate", ctrl.HandleAuthenticate)
 
-	return &UserRouter{service, ctrl, &router}
+	return &UserRouter{service, ctrl, router}
 }

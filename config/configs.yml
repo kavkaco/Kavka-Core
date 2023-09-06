@@ -4,12 +4,9 @@ APP:
     HOST: "127.0.0.1"
     PORT: 8000
     ADDRESS: "127.0.0.1:8000"
-  FIBER:
-    SERVER_HEADER: "Fiber"
-    PREFORK: false
+  SERVER:
     CORS:
-      ALLOW_ORIGINS: "http://localhost:3000/"
-      ALLOW_CREDENTIALS: true
+      ALLOW_ORIGINS: "*"
   AUTH:
     OTP_EXPIRE_SECONDS: 100
 MONGO:

@@ -13,15 +13,15 @@ var (
 )
 
 type User struct {
-	StaticID  primitive.ObjectID `bson:"_id"`
-	Name      string
-	LastName  string `bson:"last_name"`
-	Phone     string
-	Username  string
-	Banned    bool
-	Profile   UserProfile
-	CreatedAt time.Time `bson:"created_at"`
-	UpdatedAt time.Time `bson:"updated_at"`
+	StaticID  primitive.ObjectID `bson:"_id" json:"static_id"`
+	Name      string             `json:"name"`
+	LastName  string             `bson:"last_name" json:"last_name"`
+	Phone     string             `json:"phone"`
+	Username  string             `json:"username"`
+	Banned    bool               `json:"banned"`
+	Profile   UserProfile        `json:"profile"`
+	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 }
 
 func NewUser(phone string) *User {

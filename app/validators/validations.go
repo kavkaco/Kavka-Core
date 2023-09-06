@@ -2,9 +2,10 @@ package validator
 
 import (
 	"Kavka/app/presenters"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
-	"github.com/gofiber/fiber/v2"
 )
 
 type ValidationErrorResponse struct {
@@ -21,12 +22,14 @@ type ErrorResponse struct {
 
 var validate = validator.New()
 
-func Validate[Dto interface{}](ctx *fiber.Ctx) *Dto {
+func Validate[Dto interface{}](ctx *gin.Context) *Dto {
 	validationErrors := []ErrorResponse{}
 
 	body := new(Dto)
 
-	if err := ctx.BodyParser(body); err != nil {
+	bindErr := ctx.Bind(&body)
+
+	if bindErr != nil {
 		presenters.ResponseBadRequest(ctx)
 		return nil
 	}
@@ -47,7 +50,7 @@ func Validate[Dto interface{}](ctx *fiber.Ctx) *Dto {
 	}
 
 	if len(validationErrors) > 0 {
-		ctx.JSON(ValidationErrorResponse{
+		ctx.JSON(http.StatusBadRequest, ValidationErrorResponse{
 			Success: false,
 			Errors:  validationErrors,
 		})

@@ -5,6 +5,7 @@ import (
 	"Kavka/utils/bearer"
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -78,7 +79,7 @@ func (s *SocketService) handleWebsocket(ctx *websocket.Conn) {
 	}
 }
 
-func (s *SocketService) endpoint(ctx *fiber.Ctx) error {
+func (s *SocketService) endpoint(ctx *gin.Context) error {
 	if websocket.IsWebSocketUpgrade(ctx) {
 		accessToken, bearerOk := bearer.AccessToken(ctx)
 

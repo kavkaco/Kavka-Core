@@ -4,7 +4,7 @@ import (
 	"Kavka/app/presenters"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
 func extractTokenFromHeader(authHeader string) string {
@@ -12,10 +12,9 @@ func extractTokenFromHeader(authHeader string) string {
 	return token[1]
 }
 
-func AccessToken(ctx *fiber.Ctx) (string, bool) {
-	headers := ctx.GetReqHeaders()
+func AccessToken(ctx *gin.Context) (string, bool) {
+	bearerHeader := ctx.GetHeader("Authorization")
 
-	bearerHeader := headers["Authorization"]
 	if len(bearerHeader) == 0 {
 		presenters.ResponseBadRequest(ctx)
 		return "", false
@@ -30,10 +29,9 @@ func AccessToken(ctx *fiber.Ctx) (string, bool) {
 	return accessToken, true
 }
 
-func RefreshToken(ctx *fiber.Ctx) (string, bool) {
-	headers := ctx.GetReqHeaders()
+func RefreshToken(ctx *gin.Context) (string, bool) {
+	refreshToken := ctx.GetHeader("refresh")
 
-	refreshToken := headers["Refresh"]
 	if len(refreshToken) == 0 {
 		presenters.ResponseBadRequest(ctx)
 		return "", false
