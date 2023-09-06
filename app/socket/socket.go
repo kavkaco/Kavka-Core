@@ -21,8 +21,11 @@ type SocketMessage struct {
 	Data  map[string]interface{} `json:"Data"`
 }
 
-func (s *SocketService) handleMessages(message *SocketMessage, conn *websocket.Conn, staticID string) {
-	NewMessagesHandler(message, conn.Conn, staticID)
+type MessageHandlerArgs struct {
+	message       *SocketMessage
+	conn          *websocket.Conn
+	staticID      string
+	socketService *SocketService
 }
 
 func NewSocketService(app *fiber.App, userService *service.UserService) *SocketService {
@@ -32,6 +35,31 @@ func NewSocketService(app *fiber.App, userService *service.UserService) *SocketS
 	app.Get("/ws", websocket.New(socketService.handleWebsocket))
 
 	return socketService
+}
+
+func (s *SocketService) handleMessages(args MessageHandlerArgs) {
+	var handled bool = false
+
+	handlers := []func(MessageHandlerArgs) bool{
+		NewChatsHandler,
+		NewMessagesHandler,
+	}
+
+	for _, handler := range handlers {
+		result := handler(args)
+		if result {
+			handled = true
+			return
+		}
+	}
+
+	if !handled {
+		args.conn.WriteJSON(struct {
+			Message string
+		}{
+			Message: "Invalid Event",
+		})
+	}
 }
 
 func (s *SocketService) handleWebsocket(ctx *websocket.Conn) {
@@ -46,7 +74,7 @@ func (s *SocketService) handleWebsocket(ctx *websocket.Conn) {
 		}
 
 		clients = append(clients, ctx)
-		s.handleMessages(msgData, ctx, staticID)
+		s.handleMessages(MessageHandlerArgs{msgData, ctx, staticID, s})
 	}
 }
 

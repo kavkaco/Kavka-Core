@@ -56,6 +56,16 @@ func collectionsConfigurations(db *mongo.Database) {
 		Keys:    bson.D{{Key: "phone", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	})
+
+	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.D{{Key: "username", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	})
+
+	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.D{{Key: "username", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	})
 }
 
 func IsDuplicateKeyError(err error) bool {

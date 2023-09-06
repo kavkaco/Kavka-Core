@@ -51,6 +51,11 @@ func main() {
 		},
 	))
 
+	app.Use(func(ctx *fiber.Ctx) error {
+		ctx.Response().Header.Add("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Refresh, Authorization")
+		return ctx.Next()
+	})
+
 	// ----- Init Services -----
 	session := session.NewSession(redisClient, configs.App.Auth)
 	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, TEMPLATES_PATH)

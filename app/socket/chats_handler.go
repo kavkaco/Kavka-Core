@@ -1,21 +1,21 @@
 package socket
 
-import (
-	"fmt"
-
-	"github.com/fasthttp/websocket"
-)
-
-func NewChatsHandler(message *SocketMessage, conn *websocket.Conn, staticID string) {
-	event := message.Event
+func NewChatsHandler(args MessageHandlerArgs) bool {
+	event := args.message.Event
 
 	switch event {
-	case "NewChat":
-		NewChat(message, conn, staticID)
+	case "new_chat":
+		return NewChat(args)
 	}
+
+	return false
 }
 
-func NewChat(message *SocketMessage, conn *websocket.Conn, staticID string) {
-	content := message.Data["Content"]
-	fmt.Println(content.(string))
+func NewChat(args MessageHandlerArgs) bool {
+	// username := args.message.Data["Username"]
+
+	// Search in channels & groups
+	// TODO
+
+	return true
 }

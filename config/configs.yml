@@ -8,7 +8,7 @@ APP:
     SERVER_HEADER: "Fiber"
     PREFORK: false
     CORS:
-      ALLOW_ORIGINS: "*"
+      ALLOW_ORIGINS: "http://localhost:3000/"
       ALLOW_CREDENTIALS: true
   AUTH:
     OTP_EXPIRE_SECONDS: 100

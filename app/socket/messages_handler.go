@@ -6,16 +6,20 @@ import (
 	"github.com/fasthttp/websocket"
 )
 
-func NewMessagesHandler(message *SocketMessage, conn *websocket.Conn, staticID string) {
-	event := message.Event
+func NewMessagesHandler(args MessageHandlerArgs) bool {
+	event := args.message.Event
 
 	switch event {
 	case "insert":
-		InsertMessage(message, conn, staticID)
+		return InsertMessage(args.message, args.conn.Conn, args.staticID)
 	}
+
+	return false
 }
 
-func InsertMessage(message *SocketMessage, conn *websocket.Conn, staticID string) {
+func InsertMessage(message *SocketMessage, conn *websocket.Conn, staticID string) bool {
 	content := message.Data["Content"]
 	fmt.Println(content.(string))
+
+	return true
 }

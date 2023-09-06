@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"math"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -15,7 +16,13 @@ func GenerateOTP() int {
 	min := math.Pow(10, OTP_LENGTH-1)
 	max := math.Pow(10, OTP_LENGTH) - 1
 
-	return rand.Intn(int(max-min) + int(min))
+	number := rand.Intn(int(max-min) + int(min))
+
+	if len(strconv.Itoa(number)) != OTP_LENGTH {
+		number = GenerateOTP()
+	}
+
+	return number
 }
 
 func GenerateRandomFileName(n int) string {

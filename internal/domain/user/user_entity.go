@@ -17,6 +17,7 @@ type User struct {
 	Name      string
 	LastName  string `bson:"last_name"`
 	Phone     string
+	Username  string
 	Banned    bool
 	Profile   UserProfile
 	CreatedAt time.Time `bson:"created_at"`
