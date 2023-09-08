@@ -2,6 +2,7 @@ package random
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
@@ -23,6 +24,10 @@ func GenerateOTP() int {
 	}
 
 	return number
+}
+
+func GenerateUsername() string {
+	return fmt.Sprintf("guest_%d", GenerateOTP())
 }
 
 func GenerateRandomFileName(n int) string {

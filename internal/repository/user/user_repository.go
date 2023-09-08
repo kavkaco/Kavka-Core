@@ -3,7 +3,6 @@ package repository
 import (
 	"Kavka/database"
 	"Kavka/internal/domain/user"
-	"Kavka/utils"
 	"context"
 	"errors"
 
@@ -29,29 +28,17 @@ func NewUserRepository(db *mongo.Database) *UserRepository {
 }
 
 func (repo *UserRepository) Create(name string, lastName string, phone string) (*user.User, error) {
-	dataToInsert := struct {
-		Name     string
-		LastName string
-		Phone    string
-	}{
-		Name:     name,
-		LastName: lastName,
-		Phone:    phone,
-	}
+	user := user.NewUser(phone)
 
-	result, err := repo.usersCollection.InsertOne(context.TODO(), dataToInsert)
+	user.Name = name
+	user.LastName = lastName
+
+	_, err := repo.usersCollection.InsertOne(context.TODO(), user)
 	if database.IsDuplicateKeyError(err) {
 		return nil, ErrPhoneAlreadyTaken
 	} else if err != nil {
 		return nil, err
 	}
-
-	user, convertErr := utils.TypeConverter[user.User](dataToInsert)
-	if convertErr != nil {
-		return nil, convertErr
-	}
-
-	user.StaticID = result.InsertedID.(primitive.ObjectID)
 
 	return user, nil
 }
@@ -89,6 +76,11 @@ func (repo *UserRepository) findBy(filter bson.D) (*user.User, error) {
 
 func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.D{{Key: "_id", Value: staticID}}
+	return repo.findBy(filter)
+}
+
+func (repo *UserRepository) FindByUsername(username string) (*user.User, error) {
+	filter := bson.D{{Key: "username", Value: username}}
 	return repo.findBy(filter)
 }
 

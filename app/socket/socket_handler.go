@@ -18,6 +18,7 @@ var handlers = []func(MessageHandlerArgs) bool{
 
 type SocketService struct {
 	userService *service.UserService
+	chatService *service.ChatService
 }
 
 type SocketMessage struct {
@@ -28,14 +29,14 @@ type SocketMessage struct {
 type MessageHandlerArgs struct {
 	message       *SocketMessage
 	conn          *websocket.Conn
-	staticID      string
+	staticID      primitive.ObjectID
 	socketService *SocketService
 }
 
 var upgrader = websocket.Upgrader{}
 
-func NewSocketService(app *gin.Engine, userService *service.UserService) *SocketService {
-	socketService := &SocketService{userService}
+func NewSocketService(app *gin.Engine, userService *service.UserService, chatService *service.ChatService) *SocketService {
+	socketService := &SocketService{userService, chatService}
 
 	app.GET("/ws", socketService.handleWebsocket)
 
@@ -75,7 +76,7 @@ func (s *SocketService) handleWebsocket(ctx *gin.Context) {
 		}
 
 		clients = append(clients, conn)
-		s.handleMessages(&MessageHandlerArgs{msgData, conn, staticID.String(), s})
+		s.handleMessages(&MessageHandlerArgs{msgData, conn, staticID, s})
 	}
 }
 

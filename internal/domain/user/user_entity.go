@@ -1,6 +1,7 @@
 package user
 
 import (
+	"Kavka/utils/random"
 	"errors"
 	"time"
 
@@ -28,6 +29,7 @@ func NewUser(phone string) *User {
 	u := User{}
 	u.Phone = phone
 	u.StaticID = primitive.NewObjectID()
+	u.Username = random.GenerateUsername()
 
 	// set timestamps
 	now := time.Now()

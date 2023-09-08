@@ -62,7 +62,7 @@ func collectionsConfigurations(db *mongo.Database) {
 		Options: options.Index().SetUnique(true),
 	})
 
-	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	db.Collection(ChatsCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys:    bson.D{{Key: "username", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	})

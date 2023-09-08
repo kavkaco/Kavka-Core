@@ -7,6 +7,8 @@ import (
 	"Kavka/pkg/session"
 	"Kavka/utils/sms_otp"
 	"errors"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type UserService struct {
@@ -17,6 +19,19 @@ type UserService struct {
 
 func NewUserService(userRepo *repository.UserRepository, session *session.Session, smsOtp *sms_otp.SMSOtp) *UserService {
 	return &UserService{userRepo, session, smsOtp}
+}
+
+func (s *UserService) FindByUsername(username string) (*user.User, error) {
+	users, err := s.userRepo.Where(bson.D{{Key: "username", Value: username}})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(users) > 0 && users[0] != nil {
+		return users[0], nil
+	}
+
+	return nil, repository.ErrUserNotFound
 }
 
 // Login function gets user's phone and find it or created it in the database,

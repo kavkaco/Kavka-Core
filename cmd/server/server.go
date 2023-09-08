@@ -5,7 +5,8 @@ import (
 	"Kavka/app/socket"
 	"Kavka/config"
 	"Kavka/database"
-	repository "Kavka/internal/repository/user"
+	chatRepository "Kavka/internal/repository/chat"
+	userRepository "Kavka/internal/repository/user"
 	"Kavka/internal/service"
 	"Kavka/pkg/session"
 	"Kavka/utils/sms_otp"
@@ -48,12 +49,15 @@ func main() {
 	session := session.NewSession(redisClient, configs.App.Auth)
 	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, TEMPLATES_PATH)
 
-	userRepo := repository.NewUserRepository(mongoDB)
+	userRepo := userRepository.NewUserRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsOtp)
 	router.NewUserRouter(app.Group("/users"), userService)
 
+	chatRepo := chatRepository.NewChatRepository(mongoDB)
+	chatService := service.NewChatService(chatRepo, userRepo)
+
 	// Init Socket Server
-	socket.NewSocketService(app, userService)
+	socket.NewSocketService(app, userService, chatService)
 
 	// Everything almost done!
 	app.Run(configs.App.HTTP.Address)

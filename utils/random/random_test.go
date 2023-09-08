@@ -12,3 +12,8 @@ func TestGenerateOTP(t *testing.T) {
 
 	t.Log(otp)
 }
+func TestGenerateUsername(t *testing.T) {
+	username := GenerateUsername()
+
+	t.Log(username)
+}

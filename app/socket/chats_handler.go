@@ -1,25 +1,46 @@
 package socket
 
-import "log"
+import (
+	"Kavka/app/presenters"
+	"Kavka/internal/domain/chat"
+	"log"
+)
 
 func NewChatsHandler(args MessageHandlerArgs) bool {
 	event := args.message.Event
 
 	switch event {
-	case "new_chat":
-		return NewChat(args)
+	case "get_or_create_chat":
+		return GetOrCreateChat(event, args)
 	}
 
 	return false
 }
 
-func NewChat(args MessageHandlerArgs) bool {
+func GetOrCreateChat(event string, args MessageHandlerArgs) bool {
+	chatType := args.message.Data["chat_type"]
 	username := args.message.Data["username"]
 
-	log.Println(username)
+	if chatType != nil && username != nil {
+		if chatType == chat.ChatTypeDirect {
+			chat, err := args.socketService.chatService.GetOrCreateChat(chatType.(string), username.(string), args.staticID)
 
-	// Search in channels & groups
-	// TODO
+			if err != nil {
+				log.Println("GetOrCreateChat error in socket:", err)
+				return false
+			}
 
-	return true
+			args.conn.WriteJSON(presenters.ChatDto{
+				Event: event,
+				Chat:  chat,
+			})
+
+			return true
+		} else if chatType == chat.ChatTypeGroup || chatType == chat.ChatTypeChannel {
+			println(username)
+			return true
+		}
+	}
+
+	return false
 }

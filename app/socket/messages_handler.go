@@ -2,15 +2,13 @@ package socket
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gorilla/websocket"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func NewMessagesHandler(args MessageHandlerArgs) bool {
 	event := args.message.Event
-
-	log.Println(event)
 
 	switch event {
 	case "insert":
@@ -20,7 +18,7 @@ func NewMessagesHandler(args MessageHandlerArgs) bool {
 	return false
 }
 
-func InsertMessage(message *SocketMessage, conn *websocket.Conn, staticID string) bool {
+func InsertMessage(message *SocketMessage, conn *websocket.Conn, staticID primitive.ObjectID) bool {
 	content := message.Data["content"]
 
 	fmt.Println(content)
