@@ -6,20 +6,23 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofiber/contrib/websocket"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var clients []*websocket.Conn
+var handlers = []func(MessageHandlerArgs) bool{
+	NewChatsHandler,
+	NewMessagesHandler,
+}
 
 type SocketService struct {
 	userService *service.UserService
 }
 
 type SocketMessage struct {
-	Event string                 `json:"Event"`
-	Data  map[string]interface{} `json:"Data"`
+	Event string                 `json:"event"`
+	Data  map[string]interface{} `json:"data"`
 }
 
 type MessageHandlerArgs struct {
@@ -29,28 +32,61 @@ type MessageHandlerArgs struct {
 	socketService *SocketService
 }
 
-func NewSocketService(app *fiber.App, userService *service.UserService) *SocketService {
+var upgrader = websocket.Upgrader{}
+
+func NewSocketService(app *gin.Engine, userService *service.UserService) *SocketService {
 	socketService := &SocketService{userService}
 
-	app.Use("/ws", socketService.endpoint)
-	app.Get("/ws", websocket.New(socketService.handleWebsocket))
+	app.GET("/ws", socketService.handleWebsocket)
 
 	return socketService
 }
+func (s *SocketService) handleWebsocket(ctx *gin.Context) {
+	// Authenticate
+	accessToken, bearerOk := bearer.AccessToken(ctx)
 
-func (s *SocketService) handleMessages(args MessageHandlerArgs) {
-	var handled bool = false
+	var staticID primitive.ObjectID
 
-	handlers := []func(MessageHandlerArgs) bool{
-		NewChatsHandler,
-		NewMessagesHandler,
+	if bearerOk {
+		userInfo, err := s.userService.Authenticate(accessToken)
+		if err != nil {
+			ctx.Next()
+			return
+		}
+
+		staticID = userInfo.StaticID
 	}
 
+	// Upgrade
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		ctx.Next()
+		return
+	}
+
+	defer conn.Close()
+
+	for {
+		var msgData *SocketMessage
+
+		if err := conn.ReadJSON(&msgData); err != nil {
+			log.Println("Unmarshal json error in socket:", err)
+			break
+		}
+
+		clients = append(clients, conn)
+		s.handleMessages(&MessageHandlerArgs{msgData, conn, staticID.String(), s})
+	}
+}
+
+func (s *SocketService) handleMessages(args *MessageHandlerArgs) {
+	var handled bool = false
+
 	for _, handler := range handlers {
-		result := handler(args)
+		result := handler(*args)
 		if result {
 			handled = true
-			return
+			break
 		}
 	}
 
@@ -58,47 +94,7 @@ func (s *SocketService) handleMessages(args MessageHandlerArgs) {
 		args.conn.WriteJSON(struct {
 			Message string
 		}{
-			Message: "Invalid Event",
+			Message: "Invalid event",
 		})
 	}
-}
-
-func (s *SocketService) handleWebsocket(ctx *websocket.Conn) {
-	staticID := ctx.Locals("StaticID").(primitive.ObjectID).Hex()
-
-	for {
-		var msgData *SocketMessage
-
-		if err := ctx.ReadJSON(&msgData); err != nil {
-			log.Println(err)
-			break
-		}
-
-		clients = append(clients, ctx)
-		s.handleMessages(MessageHandlerArgs{msgData, ctx, staticID, s})
-	}
-}
-
-func (s *SocketService) endpoint(ctx *gin.Context) error {
-	if websocket.IsWebSocketUpgrade(ctx) {
-		accessToken, bearerOk := bearer.AccessToken(ctx)
-
-		if bearerOk {
-			userInfo, err := s.userService.Authenticate(accessToken)
-			if err != nil {
-				return fiber.ErrUpgradeRequired
-			}
-
-			staticID := userInfo.StaticID
-			phone := userInfo.Phone
-
-			ctx.Locals("StaticID", staticID)
-			ctx.Locals("Phone", phone)
-			ctx.Locals("allowed", true)
-
-			return ctx.Next()
-		}
-	}
-
-	return fiber.ErrUpgradeRequired
 }

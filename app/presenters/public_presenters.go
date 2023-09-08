@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofiber/fiber/v2"
 )
 
 type SimpleMessageDto struct {
@@ -13,7 +12,7 @@ type SimpleMessageDto struct {
 }
 
 func ResponseBadRequest(ctx *gin.Context) error {
-	code := fiber.ErrBadRequest.Code
+	code := http.StatusBadRequest
 
 	ctx.JSON(http.StatusBadRequest, SimpleMessageDto{
 		Code:    code,

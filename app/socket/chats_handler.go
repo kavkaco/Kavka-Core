@@ -1,5 +1,7 @@
 package socket
 
+import "log"
+
 func NewChatsHandler(args MessageHandlerArgs) bool {
 	event := args.message.Event
 
@@ -12,7 +14,9 @@ func NewChatsHandler(args MessageHandlerArgs) bool {
 }
 
 func NewChat(args MessageHandlerArgs) bool {
-	// username := args.message.Data["Username"]
+	username := args.message.Data["username"]
+
+	log.Println(username)
 
 	// Search in channels & groups
 	// TODO

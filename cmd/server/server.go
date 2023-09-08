@@ -2,6 +2,7 @@ package main
 
 import (
 	"Kavka/app/router"
+	"Kavka/app/socket"
 	"Kavka/config"
 	"Kavka/database"
 	repository "Kavka/internal/repository/user"
@@ -52,7 +53,7 @@ func main() {
 	router.NewUserRouter(app.Group("/users"), userService)
 
 	// Init Socket Server
-	// socket.NewSocketService(app, userService)
+	socket.NewSocketService(app, userService)
 
 	// Everything almost done!
 	app.Run(configs.App.HTTP.Address)
