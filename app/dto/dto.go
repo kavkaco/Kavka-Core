@@ -1,4 +1,4 @@
-package validator
+package dto
 
 import (
 	"Kavka/app/presenters"
@@ -8,12 +8,12 @@ import (
 	"github.com/go-playground/validator"
 )
 
-type ValidationErrorResponse struct {
+type validationErrorResponse struct {
 	Success bool            `json:"success"`
-	Errors  []ErrorResponse `json:"errors"`
+	Errors  []errorResponse `json:"errors"`
 }
 
-type ErrorResponse struct {
+type errorResponse struct {
 	Error       bool
 	FailedField string
 	Tag         string
@@ -23,7 +23,7 @@ type ErrorResponse struct {
 var validate = validator.New()
 
 func Validate[Dto interface{}](ctx *gin.Context) *Dto {
-	validationErrors := []ErrorResponse{}
+	validationErrors := []errorResponse{}
 
 	body := new(Dto)
 
@@ -38,7 +38,7 @@ func Validate[Dto interface{}](ctx *gin.Context) *Dto {
 
 	if errs != nil {
 		for _, err := range errs.(validator.ValidationErrors) {
-			var elem ErrorResponse
+			var elem errorResponse
 
 			elem.FailedField = err.Field()
 			elem.Tag = err.Tag()
@@ -50,7 +50,7 @@ func Validate[Dto interface{}](ctx *gin.Context) *Dto {
 	}
 
 	if len(validationErrors) > 0 {
-		ctx.JSON(http.StatusBadRequest, ValidationErrorResponse{
+		ctx.JSON(http.StatusBadRequest, validationErrorResponse{
 			Success: false,
 			Errors:  validationErrors,
 		})

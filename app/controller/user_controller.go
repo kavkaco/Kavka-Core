@@ -1,8 +1,8 @@
 package controller
 
 import (
+	dto "Kavka/app/dto"
 	"Kavka/app/presenters"
-	validator "Kavka/app/validators"
 	"Kavka/internal/service"
 	"Kavka/pkg/session"
 	"Kavka/utils/bearer"
@@ -21,7 +21,7 @@ func NewUserController(userService *service.UserService) *UserController {
 }
 
 func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
-	body := validator.Validate[validator.UserLoginDto](ctx)
+	body := dto.Validate[dto.UserLoginDto](ctx)
 	phone := body.Phone
 
 	otp, err := ctrl.userService.Login(phone)
@@ -40,7 +40,7 @@ func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
 }
 
 func (ctrl *UserController) HandleVerifyOTP(ctx *gin.Context) {
-	body := validator.Validate[validator.UserVerifyOTPDto](ctx)
+	body := dto.Validate[dto.UserVerifyOTPDto](ctx)
 
 	tokens, err := ctrl.userService.VerifyOTP(body.Phone, body.OTP)
 
