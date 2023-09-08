@@ -97,9 +97,7 @@ func (repo *ChatRepository) FindByUsername(username string) (*chat.Chat, error) 
 
 func (repo *ChatRepository) FindBySides(sides [2]*primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{
-		"chat_detail.sides": bson.M{
-			"$all": sides,
-		},
+		"chat_detail.sides":     sides,
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},
 	}
 

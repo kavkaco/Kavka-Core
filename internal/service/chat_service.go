@@ -42,7 +42,29 @@ func (s *ChatService) GetOrCreateChat(chatType string, chatUsername string, user
 		} else {
 			return nil, foundChatErr
 		}
+	} else {
+
 	}
 
 	return nil, nil
+}
+
+func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
+		Title:       title,
+		Username:    username,
+		Members:     []*primitive.ObjectID{&userStaticID},
+		Admins:      []*primitive.ObjectID{&userStaticID},
+		Description: description,
+	})
+}
+
+func (s *ChatService) CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
+		Title:       title,
+		Username:    username,
+		Members:     []*primitive.ObjectID{&userStaticID},
+		Admins:      []*primitive.ObjectID{&userStaticID},
+		Description: description,
+	})
 }

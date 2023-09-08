@@ -13,33 +13,35 @@ const (
 )
 
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"_id"`
-	ChatType   string             `bson:"chat_type"`
-	ChatDetail interface{}        `bson:"chat_detail"`
-	Messages   []*message.Message
+	ChatID     primitive.ObjectID `bson:"_id" json:"chat_id"`
+	ChatType   string             `bson:"chat_type" json:"chat_type"`
+	ChatDetail interface{}        `bson:"chat_detail" json:"chat_detail"`
+	Messages   []*message.Message `json:"messages"`
 }
 
 // Chat Detail
 
 type ChannelChatDetail struct {
-	Members      []*primitive.ObjectID
-	Admins       []*primitive.ObjectID
-	RemovedUsers []*primitive.ObjectID `bson:"removed_users"`
-	Username     string
-	Description  string
+	Title        string                `json:"title"`
+	Members      []*primitive.ObjectID `json:"members"`
+	Admins       []*primitive.ObjectID `json:"admins"`
+	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
+	Username     string                `json:"username"`
+	Description  string                `json:"description"`
 }
 
 type GroupChatDetail struct {
-	Members      []*primitive.ObjectID
-	Admins       []*primitive.ObjectID
-	RemovedUsers []*primitive.ObjectID `bson:"removed_users"`
-	Username     string
-	Description  string
+	Title        string                `json:"title"`
+	Members      []*primitive.ObjectID `json:"members"`
+	Admins       []*primitive.ObjectID `json:"admins"`
+	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
+	Username     string                `json:"username"`
+	Description  string                `json:"description"`
 }
 
 type DirectChatDetail struct {
 	// ID of the users that chats with each other
-	Sides [2]*primitive.ObjectID
+	Sides [2]*primitive.ObjectID `json:"sides"`
 }
 
 func (c *Chat) GetMessageByID(id primitive.ObjectID) *message.Message {

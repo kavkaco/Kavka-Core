@@ -12,6 +12,8 @@ func NewChatsHandler(args MessageHandlerArgs) bool {
 	switch event {
 	case "get_or_create_chat":
 		return GetOrCreateChat(event, args)
+	case "create_group":
+		return CreateGroup(event, args)
 	}
 
 	return false
@@ -30,16 +32,32 @@ func GetOrCreateChat(event string, args MessageHandlerArgs) bool {
 				return false
 			}
 
-			args.conn.WriteJSON(presenters.ChatDto{
-				Event: event,
-				Chat:  chat,
-			})
+			args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
 			return true
 		} else if chatType == chat.ChatTypeGroup || chatType == chat.ChatTypeChannel {
 			println(username)
 			return true
 		}
+	}
+
+	return false
+}
+
+func CreateGroup(event string, args MessageHandlerArgs) bool {
+	title := args.message.Data["title"]
+	username := args.message.Data["username"]
+	description := args.message.Data["description"]
+
+	if title != nil && username != nil && description != nil {
+		chat, err := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
+		if err != nil {
+			return false
+		}
+
+		args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+
+		return true
 	}
 
 	return false
