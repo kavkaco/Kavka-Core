@@ -30,3 +30,12 @@ func ResponseError(ctx *gin.Context, err error) {
 		Message: err.Error(),
 	})
 }
+
+func ResponseInternalServerError(ctx *gin.Context) {
+	code := http.StatusInternalServerError
+
+	ctx.JSON(code, SimpleMessageDto{
+		Code:    code,
+		Message: "Internal Server Error",
+	})
+}

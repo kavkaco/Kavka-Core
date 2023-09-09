@@ -17,36 +17,29 @@ func NewChatService(chatRepo *chatRepository.ChatRepository, userRepo *userRepos
 	return &ChatService{chatRepo, userRepo}
 }
 
-// The function `GetOrCreateChat` checks the chat type and username, and if the chat type is direct, it gets or creates a chat.
-// but if chat type was not direct and was group or channel we just can get that from repo and deliver it to user.
-// this means that we can't create a group or channel in this function and it should be handled on another function.
-func (s *ChatService) GetOrCreateChat(chatType string, chatUsername string, userStaticID primitive.ObjectID) (*chat.Chat, error) {
-	if chatType == chat.ChatTypeDirect {
-		foundUser, foundUserErr := s.userRepo.FindByUsername(chatUsername)
-		if foundUserErr != nil {
-			return nil, foundUserErr
-		}
-
-		foundChat, foundChatErr := s.chatRepo.FindBySides([2]*primitive.ObjectID{
-			&userStaticID,
-			&foundUser.StaticID,
-		})
-		if foundChatErr == chatRepository.ErrChatNotFound {
-			// Create a new direct chat
-			return s.chatRepo.Create(chat.ChatTypeDirect, &chat.DirectChatDetail{
-				Sides: [2]*primitive.ObjectID{&foundUser.StaticID, &userStaticID},
-			})
-		} else if foundChatErr == nil {
-			// Chat already exists and there is no needed to create a new one
-			return foundChat, nil
-		} else {
-			return nil, foundChatErr
-		}
-	} else {
-
+func (s *ChatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
+	foundChat, foundChatErr := s.chatRepo.FindChatOrSidesByStaticID(&staticID)
+	if foundChatErr != nil {
+		return nil, foundChatErr
 	}
 
-	return nil, nil
+	return foundChat, nil
+}
+
+func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {
+	sides := [2]*primitive.ObjectID{
+		&userStaticID,
+		&targetStaticID,
+	}
+
+	dup, _ := s.chatRepo.FindBySides(sides)
+	if dup != nil {
+		return nil, chatRepository.ErrChatAlreadyExists
+	}
+
+	return s.chatRepo.Create(chat.ChatTypeDirect, &chat.DirectChatDetail{
+		Sides: sides,
+	})
 }
 
 func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {

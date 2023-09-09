@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	ErrChatNotFound = errors.New("chat not found")
+	ErrChatNotFound      = errors.New("chat not found")
+	ErrChatAlreadyExists = errors.New("chat already exists")
 )
 
 type ChatRepository struct {
@@ -84,12 +85,12 @@ func (repo *ChatRepository) FindByID(staticID primitive.ObjectID) (*chat.Chat, e
 	return repo.findBy(filter)
 }
 
-func (repo *ChatRepository) FindByUsername(username string) (*chat.Chat, error) {
-	// Select those chats thats have usernames
-	// - DirectChat does not have username
+func (repo *ChatRepository) FindChatOrSidesByStaticID(staticID *primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{
-		"chat_detail.username":  username,
-		"chat_detail.chat_type": bson.M{"$ne": "direct"},
+		"$or": []interface{}{
+			bson.M{"chat_detail.sides": bson.M{"$in": []*primitive.ObjectID{staticID}}},
+			bson.M{"_id": staticID},
+		},
 	}
 
 	return repo.findBy(filter)
