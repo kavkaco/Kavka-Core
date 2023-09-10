@@ -6,6 +6,7 @@ import (
 	"Kavka/config"
 	"Kavka/database"
 	chatRepository "Kavka/internal/repository/chat"
+	messageRepository "Kavka/internal/repository/message"
 	userRepository "Kavka/internal/repository/user"
 	"Kavka/internal/service"
 	"Kavka/pkg/session"
@@ -56,8 +57,11 @@ func main() {
 	chatRepo := chatRepository.NewChatRepository(mongoDB)
 	chatService := service.NewChatService(chatRepo, userRepo)
 
+	msgRepo := messageRepository.NewMessageRepository(mongoDB)
+	msgService := service.NewMessageService(msgRepo, chatRepo)
+
 	// Init Socket Server
-	socket.NewSocketService(app, userService, chatService)
+	socket.NewSocketService(app, userService, chatService, msgService)
 
 	// Everything almost done!
 	app.Run(configs.App.HTTP.Address)

@@ -23,6 +23,7 @@ func NewChatsHandler(args MessageHandlerArgs) bool {
 
 	return false
 }
+
 func CreateDirect(event string, args MessageHandlerArgs) bool {
 	staticID := args.message.Data["static_id"]
 

@@ -25,6 +25,7 @@ type ChannelChatDetail struct {
 	Title        string                `json:"title"`
 	Members      []*primitive.ObjectID `json:"members"`
 	Admins       []*primitive.ObjectID `json:"admins"`
+	Owner        *primitive.ObjectID   `json:"owner" bson:"owner"`
 	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
 	Username     string                `json:"username"`
 	Description  string                `json:"description"`
@@ -34,6 +35,7 @@ type GroupChatDetail struct {
 	Title        string                `json:"title"`
 	Members      []*primitive.ObjectID `json:"members"`
 	Admins       []*primitive.ObjectID `json:"admins"`
+	Owner        *primitive.ObjectID   `json:"owner" bson:"owner"`
 	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
 	Username     string                `json:"username"`
 	Description  string                `json:"description"`
@@ -44,14 +46,15 @@ type DirectChatDetail struct {
 	Sides [2]*primitive.ObjectID `json:"sides"`
 }
 
-func (c *Chat) GetMessageByID(id primitive.ObjectID) *message.Message {
-	for _, v := range c.Messages {
-		if v.MessageID == id {
-			return v
+func (d *DirectChatDetail) HasSide(staticID primitive.ObjectID) bool {
+	has := false
+	for _, v := range d.Sides {
+		if *v == staticID {
+			has = true
+			break
 		}
 	}
-
-	return nil
+	return has
 }
 
 func NewChat(chatType string, chatDetail interface{}) *Chat {

@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrChatNotFound = errors.New("chat not found")
+	ErrNoAccess     = errors.New("no access")
 )
 
 type MessageRepository struct {
