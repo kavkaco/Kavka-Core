@@ -12,8 +12,9 @@ const (
 )
 
 type Message struct {
-	MessageID primitive.ObjectID `bson:"_id"`
-	CreatedAt time.Time
+	MessageID primitive.ObjectID `bson:"message_id" json:"message_id"`
+	SenderID  primitive.ObjectID `bson:"sender_id" json:"sender_id"`
+	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	Edited    bool
 	Seen      bool
 
@@ -31,12 +32,13 @@ type ImageMessage struct {
 	Caption  string
 }
 
-func NewMessage(messageType string, content interface{}) *Message {
+func NewMessage(senderID primitive.ObjectID, messageType string, content interface{}) *Message {
 	m := &Message{}
 
 	m.Type = messageType
 	m.Content = content
 	m.MessageID = primitive.NewObjectID()
+	m.SenderID = senderID
 
 	// set timestamps
 	now := time.Now()

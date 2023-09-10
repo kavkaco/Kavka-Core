@@ -57,9 +57,9 @@ func (repo *ChatRepository) Where(filter any) ([]*chat.Chat, error) {
 
 	var chats []*chat.Chat
 
-	err = cursor.All(context.Background(), &chats)
-	if err != nil {
-		return nil, err
+	decodeErr := cursor.All(context.Background(), &chats)
+	if decodeErr != nil {
+		return nil, decodeErr
 	}
 
 	return chats, nil
