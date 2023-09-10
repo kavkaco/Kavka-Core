@@ -6,8 +6,8 @@ import (
 	chatRepository "Kavka/internal/repository/chat"
 	messageRepository "Kavka/internal/repository/message"
 	"log"
-	"reflect"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/slices"
 )
@@ -28,52 +28,38 @@ func (s *MessageService) hasAccessToSendMessage(chatID primitive.ObjectID, stati
 		return false, chatErr
 	}
 
-	// if foundChat.ChatType == chat.ChatTypeDirect {
-	// 	hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
-	// 	return hasSide, nil
-	// } else if foundChat.ChatType == chat.ChatTypeChannel {
-	// 	admins := foundChat.ChatDetail.(*chat.ChannelChatDetail).Admins
-	// 	isAdmin := slices.Contains(admins, &staticID)
-	// 	return isAdmin, nil
-	// } else
-	if foundChat.ChatType == chat.ChatTypeGroup {
-		log.Println(reflect.TypeOf(foundChat.ChatDetail).Name())
-		// members := foundChat.ChatDetail.(*chat.GroupChatDetail).Members
-		// isMember := slices.Contains(members, &staticID)
-		// return isMember, nil
-		// FIXME
-		// log.Println(foundChat.(chat.Chat).ChatDetail.(chat.GroupChatDetail))
-		return true, nil
+	if foundChat == nil {
+		return false, chatRepository.ErrChatNotFound
 	}
 
-	return false, nil
-}
-
-// This function is used to check that user can delete message or not
-func (s *MessageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(chatID)
-	if chatErr != nil {
-		return false, chatErr
-	}
+	log.Println(foundChat)
 
 	if foundChat.ChatType == chat.ChatTypeDirect {
 		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
 		return hasSide, nil
-	}
+	} else if foundChat.ChatType == chat.ChatTypeChannel {
+		var chatDetail chat.ChannelChatDetail
 
-	if foundChat.ChatType == chat.ChatTypeChannel {
-		admins := foundChat.ChatDetail.(chat.ChannelChatDetail).Admins
+		chatDetailBSON, _ := chat.GetChatDetailBSON(foundChat.ChatDetail)
+		bson.Unmarshal(chatDetailBSON, &chatDetail)
+
+		admins := chatDetail.Admins
 		isAdmin := slices.Contains(admins, &staticID)
-		return isAdmin, nil
-	}
 
-	if foundChat.ChatType == chat.ChatTypeGroup {
-		members := foundChat.ChatDetail.(chat.GroupChatDetail).Members
+		return isAdmin, nil
+	} else if foundChat.ChatType == chat.ChatTypeGroup {
+		var chatDetail chat.GroupChatDetail
+
+		chatDetailBSON, _ := chat.GetChatDetailBSON(foundChat.ChatDetail)
+		bson.Unmarshal(chatDetailBSON, &chatDetail)
+
+		members := chatDetail.Members
 		isMember := slices.Contains(members, &staticID)
+
 		return isMember, nil
 	}
 
-	return false, nil
+	return true, nil
 }
 
 func (s *MessageService) InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error) {

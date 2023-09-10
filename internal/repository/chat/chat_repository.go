@@ -49,17 +49,17 @@ func (repo *ChatRepository) Destroy(chatID primitive.ObjectID) error {
 	return nil
 }
 
-func (repo *ChatRepository) Where(filter any) ([]*chat.Chat, error) {
+func (repo *ChatRepository) Where(filter any) ([]chat.Chat, error) {
 	cursor, err := repo.chatsCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
 	}
 
-	var chats []*chat.Chat
+	var chats []chat.Chat
 
-	decodeErr := cursor.All(context.Background(), &chats)
-	if decodeErr != nil {
-		return nil, decodeErr
+	cursorErr := cursor.All(context.TODO(), &chats)
+	if cursorErr != nil {
+		return nil, cursorErr
 	}
 
 	return chats, nil
@@ -74,7 +74,7 @@ func (repo *ChatRepository) findBy(filter any) (*chat.Chat, error) {
 	if len(result) > 0 {
 		user := result[len(result)-1]
 
-		return user, nil
+		return &user, nil
 	}
 
 	return nil, ErrChatNotFound

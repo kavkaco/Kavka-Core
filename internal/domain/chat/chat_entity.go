@@ -3,6 +3,7 @@ package chat
 import (
 	"Kavka/internal/domain/message"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -66,4 +67,15 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.Messages = []*message.Message{}
 
 	return m
+}
+
+func GetChatDetailBSON(chatDetail interface{}) ([]byte, error) {
+	chatDetailD := chatDetail.(primitive.D)
+
+	chatDetailBSON, marshalErr := bson.Marshal(chatDetailD)
+	if marshalErr != nil {
+		return nil, marshalErr
+	}
+
+	return chatDetailBSON, nil
 }

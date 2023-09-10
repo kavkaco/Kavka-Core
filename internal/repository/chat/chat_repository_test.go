@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -56,7 +57,20 @@ func (s *MyTestSuite) TestA_CreateChannel() {
 	s.savedChat = savedChat
 }
 
-func (s *MyTestSuite) TestB_CreateDirect() {
+func (s *MyTestSuite) TestB_Where() {
+	chats, err := s.chatRepo.Where(bson.M{"_id": s.savedChat.ChatID})
+
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), len(chats), 1)
+
+	var chatDetail chat.GroupChatDetail
+	chatDetailBSON, _ := chat.GetChatDetailBSON(chats[0].ChatDetail)
+	bson.Unmarshal(chatDetailBSON, &chatDetail)
+
+	assert.Equal(s.T(), len(chatDetail.Admins), 1)
+}
+
+func (s *MyTestSuite) TestC_CreateDirect() {
 	savedChat, saveErr := s.chatRepo.Create(chat.ChatTypeDirect, chat.DirectChatDetail{
 		Sides: [2]*primitive.ObjectID{
 			&SampleSides[0],
@@ -70,13 +84,13 @@ func (s *MyTestSuite) TestB_CreateDirect() {
 	s.savedDirectChat = savedChat
 }
 
-func (s *MyTestSuite) TestC_FindByID() {
+func (s *MyTestSuite) TestD_FindByID() {
 	chat, err := s.chatRepo.FindByID(s.savedChat.ChatID)
 
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), chat.ChatID, s.savedChat.ChatID)
 }
-func (s *MyTestSuite) TestD_FindChatOrSidesByStaticID() {
+func (s *MyTestSuite) TestE_FindChatOrSidesByStaticID() {
 	findByChatID, findByChatIDErr := s.chatRepo.FindChatOrSidesByStaticID(&s.savedDirectChat.ChatID)
 
 	assert.NoError(s.T(), findByChatIDErr)
@@ -88,7 +102,7 @@ func (s *MyTestSuite) TestD_FindChatOrSidesByStaticID() {
 	assert.Equal(s.T(), findBySides.ChatID, s.savedDirectChat.ChatID)
 }
 
-func (s *MyTestSuite) TestE_FindBySides() {
+func (s *MyTestSuite) TestF_FindBySides() {
 	chat, err := s.chatRepo.FindBySides([2]*primitive.ObjectID{
 		&SampleSides[0],
 		&SampleSides[1],
@@ -98,7 +112,7 @@ func (s *MyTestSuite) TestE_FindBySides() {
 	assert.Equal(s.T(), chat.ChatID, s.savedDirectChat.ChatID)
 }
 
-func (s *MyTestSuite) TestF_Destroy() {
+func (s *MyTestSuite) TestG_Destroy() {
 	// destroy only created chat for test
 	err := s.chatRepo.Destroy(s.savedChat.ChatID)
 	assert.NoError(s.T(), err)
