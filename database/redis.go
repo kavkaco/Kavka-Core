@@ -1,9 +1,10 @@
 package database
 
 import (
-	"Kavka/config"
 	"fmt"
 	"sync"
+
+	"Kavka/config"
 
 	"github.com/go-redis/redis/v8"
 )

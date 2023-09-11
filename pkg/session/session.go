@@ -1,12 +1,13 @@
 package session
 
 import (
-	"Kavka/config"
-	"Kavka/pkg/jwt_manager"
-	"Kavka/utils/random"
 	"context"
 	"encoding/json"
 	"time"
+
+	"Kavka/config"
+	"Kavka/pkg/jwt_manager"
+	"Kavka/utils/random"
 
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -39,11 +40,14 @@ func (session *Session) saveToken(token string, tokenType string) error {
 		TokenType: tokenType,
 	}
 
-	payloadJson, _ := json.Marshal(payload)
+	payloadJSON, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
 
 	expireTime := makeExpiration(tokenType)
 
-	err := session.redisClient.Set(context.TODO(), token, payloadJson, expireTime).Err()
+	err = session.redisClient.Set(context.TODO(), token, payloadJSON, expireTime).Err()
 	if err != nil {
 		return err
 	}
@@ -75,10 +79,13 @@ func (session *Session) DestroyOTP(phone string) error {
 // It's just generate an OTP code then saves it in redis store with the key `phone`.
 func (session *Session) Login(phone string) (int, error) {
 	otp := random.GenerateOTP()
-	payload, _ := json.Marshal(loginPayload{OTP: otp})
-	expiration := session.authConfigs.OTP_EXPIRE_SECONDS * time.Second
+	payload, err := json.Marshal(loginPayload{OTP: otp})
+	if err != nil {
+		return 0, err
+	}
+	expiration := session.authConfigs.OTP_EXPIRE_SECONDS * time.Second //nolint
 
-	err := session.redisClient.Set(context.Background(), phone, payload, expiration).Err()
+	err = session.redisClient.Set(context.Background(), phone, payload, expiration).Err()
 	if err != nil {
 		return 0, err
 	}
@@ -86,7 +93,7 @@ func (session *Session) Login(phone string) (int, error) {
 	return otp, nil
 }
 
-// Verify the generated otp code in Login method, if it was correct returns new tokens (Access, Refresh)
+// Verify the generated otp code in Login method, if it was correct returns new tokens (Access, Refresh).
 func (session *Session) VerifyOTP(phone string, otp int, staticID primitive.ObjectID) (LoginTokens, bool) {
 	payload, getErr := session.redisClient.Get(context.Background(), phone).Result()
 	if getErr != nil {
@@ -110,7 +117,10 @@ func (session *Session) VerifyOTP(phone string, otp int, staticID primitive.Obje
 			return LoginTokens{}, false
 		}
 
-		session.DestroyOTP(phone)
+		err := session.DestroyOTP(phone)
+		if err != nil {
+			return LoginTokens{}, false
+		}
 
 		return LoginTokens{AccessToken: accessToken, RefreshToken: refreshToken}, true
 	}
@@ -121,7 +131,6 @@ func (session *Session) VerifyOTP(phone string, otp int, staticID primitive.Obje
 func (session *Session) newToken(staticID primitive.ObjectID, tokenType string) (string, bool) {
 	// Generate Token
 	token, err := session.jwtManager.Generate(tokenType, staticID)
-
 	if err != nil {
 		return "", false
 	}
@@ -135,12 +144,12 @@ func (session *Session) newToken(staticID primitive.ObjectID, tokenType string) 
 	return token, true
 }
 
-// Generates and stores a new access token with mentioned phone
+// Generates and stores a new access token with mentioned phone.
 func (session *Session) NewAccessToken(staticID primitive.ObjectID) (string, bool) {
 	return session.newToken(staticID, jwt_manager.AccessToken)
 }
 
-// Generates and stores a new refresh token with mentioned phone
+// Generates and stores a new refresh token with mentioned phone.
 func (session *Session) NewRefreshToken(staticID primitive.ObjectID) (string, bool) {
 	return session.newToken(staticID, jwt_manager.RefreshToken)
 }

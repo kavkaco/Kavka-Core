@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"fmt"
+	"net/http"
+
 	dto "Kavka/app/dto"
 	"Kavka/app/presenters"
 	"Kavka/internal/service"
 	"Kavka/pkg/session"
 	"Kavka/utils/bearer"
-	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -43,7 +44,6 @@ func (ctrl *UserController) HandleVerifyOTP(ctx *gin.Context) {
 	body := dto.Validate[dto.UserVerifyOTPDto](ctx)
 
 	tokens, err := ctrl.userService.VerifyOTP(body.Phone, body.OTP)
-
 	if err != nil {
 		presenters.ResponseError(ctx, err)
 		return
@@ -58,7 +58,7 @@ func (ctrl *UserController) HandleVerifyOTP(ctx *gin.Context) {
 }
 
 func (ctrl *UserController) HandleRefreshToken(ctx *gin.Context) {
-	refreshToken := ctx.GetHeader("refresh")
+	refreshToken := ctx.GetHeader("refresh") //nolint
 
 	refreshToken, bearerRfOk := bearer.RefreshToken(ctx)
 
@@ -66,12 +66,10 @@ func (ctrl *UserController) HandleRefreshToken(ctx *gin.Context) {
 		accessToken, bearerAtOk := bearer.AccessToken(ctx)
 
 		if bearerAtOk {
-
 			newAccessToken, refErr := ctrl.userService.RefreshToken(refreshToken, accessToken)
 			if refErr != nil {
 				presenters.ResponseError(ctx, refErr)
 				return
-
 			}
 
 			newTokens := session.LoginTokens{AccessToken: newAccessToken, RefreshToken: refreshToken}

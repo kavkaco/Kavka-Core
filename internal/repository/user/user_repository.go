@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"Kavka/database"
-	"Kavka/internal/domain/user"
 	"context"
 	"errors"
+
+	"Kavka/database"
+	"Kavka/internal/domain/user"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,7 +15,7 @@ import (
 var (
 	ErrUserNotFound      = errors.New("user not found")
 	ErrPhoneAlreadyTaken = errors.New("phone already taken")
-	ErrInvalidOtpCode    = errors.New("Invalid Otp Code")
+	ErrInvalidOtpCode    = errors.New("invalid otp Code")
 )
 
 type UserRepository struct {

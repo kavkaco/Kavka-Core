@@ -1,10 +1,11 @@
 package database
 
 import (
-	"Kavka/config"
 	"context"
 	"testing"
 	"time"
+
+	"Kavka/config"
 
 	"github.com/stretchr/testify/assert"
 )

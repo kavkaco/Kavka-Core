@@ -1,9 +1,10 @@
 package jwt_manager
 
 import (
-	"Kavka/config"
 	"errors"
 	"time"
+
+	"Kavka/config"
 
 	"github.com/golang-jwt/jwt/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,7 +17,7 @@ var (
 
 var JWT_ALGORITHM = jwt.SigningMethodHS512
 
-// define errors
+// define errors.
 var (
 	ErrInvalidToken            = errors.New("invalid token")
 	ErrInvalidTokenType        = errors.New("invalid token type")
@@ -43,7 +44,7 @@ const (
 func NewJwtManager(configs config.Auth) *JwtManager {
 	return &JwtManager{
 		secretKey: configs.SECRET,
-		ttl:       time.Duration(configs.OTP_EXPIRE_SECONDS * time.Second),
+		ttl:       configs.OTP_EXPIRE_SECONDS * time.Second, //nolint
 	}
 }
 
@@ -67,7 +68,6 @@ func (m *JwtManager) Verify(userToken string, tokenType string) (*JwtClaims, err
 			return []byte(m.secretKey), nil
 		},
 	)
-
 	if err != nil {
 		return nil, ErrInvalidToken
 	}

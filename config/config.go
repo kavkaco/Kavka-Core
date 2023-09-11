@@ -13,62 +13,64 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var ENV_ITEMS = []string{"devel", "prod"}
-var ENV string
+var (
+	ENV_ITEMS = []string{"devel", "prod"}
+	ENV       string
+)
 
 type (
 	IConfig struct {
-		App   App   `yaml:"APP"`
-		Mongo Mongo `yaml:"MONGO"`
-		Redis Redis `yaml:"REDIS"`
-		SMS   `yaml:"SMS"`
+		App   App   `yaml:"app"`
+		Mongo Mongo `yaml:"mongo"`
+		Redis Redis `yaml:"redis"`
+		SMS   `yaml:"sms"`
 		MinIOCredentials
 	}
 	App struct {
-		Name   string `yaml:"NAME"`
-		HTTP   HTTP   `yaml:"HTTP"`
-		Server Server `yaml:"SERVER"`
-		Auth   Auth   `yaml:"AUTH"`
+		Name   string `yaml:"name"`
+		HTTP   HTTP   `yaml:"http"`
+		Server Server `yaml:"server"`
+		Auth   Auth   `yaml:"auth"`
 	}
 	HTTP struct {
-		Host    string `yaml:"HOST"`
-		Port    int    `yaml:"PORT"`
-		Address string `yaml:"ADDRESS"`
+		Host    string `yaml:"host"`
+		Port    int    `yaml:"port"`
+		Address string `yaml:"address"`
 	}
 	Auth struct {
-		SECRET             string
-		OTP_EXPIRE_SECONDS time.Duration `json:"OTP_EXPIRE_SECONDS"`
+		SECRET             string        `yaml:"secret"`
+		OTP_EXPIRE_SECONDS time.Duration `json:"otp_expire_seconds" yaml:"otp_expire_seconds"`
 	}
 	Server struct {
-		CORS CORS `yaml:"CORS"`
+		CORS CORS `yaml:"cors"`
 	}
 	CORS struct {
-		AllowOrigins string `yaml:"ALLOW_ORIGINS"`
+		AllowOrigins string `yaml:"allow_origins"`
 	}
 	Redis struct {
-		Host     string `yaml:"HOST"`
-		Username string `yaml:"USERNAME"`
-		Password string `yaml:"PASSWORD"`
-		Port     int    `yaml:"PORT"`
-		DB       int    `yaml:"DB"`
+		Host     string `yaml:"host"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+		Port     int    `yaml:"port"`
+		DB       int    `yaml:"db"`
 	}
 	Mongo struct {
-		Host     string `yaml:"HOST"`
-		Username string `yaml:"USERNAME"`
-		Password string `yaml:"PASSWORD"`
-		Port     int    `yaml:"PORT"`
-		DBName   string `yaml:"DB_NAME"`
+		Host     string `yaml:"host"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+		Port     int    `yaml:"port"`
+		DBName   string `yaml:"db_name"`
 	}
 	MinIOCredentials struct {
-		Endpoint  string `json:"endpoint"`
-		AccessKey string `json:"accessKey"`
-		SecretKey string `json:"secretKey"`
+		Endpoint  string `json:"endpoint"   yaml:"endpoint"`
+		AccessKey string `json:"access_key" yaml:"access_key"`
+		SecretKey string `json:"secret_key" yaml:"secret_key"`
 	}
-	// TODO - Add sms-service's configs
+	// TODO - Add sms-service's configs.
 	SMS struct{}
 )
 
-const defaultEnvPath = "/config/configs.yml"
+const _ = "/config/configs.yml"
 
 var ProjectRootPath = ConfigsDirPath() + "/../"
 

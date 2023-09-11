@@ -1,9 +1,10 @@
 package jwt_manager
 
 import (
-	"Kavka/config"
 	"testing"
 	"time"
+
+	"Kavka/config"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"

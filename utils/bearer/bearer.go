@@ -1,8 +1,9 @@
 package bearer
 
 import (
-	"Kavka/app/presenters"
 	"strings"
+
+	"Kavka/app/presenters"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,13 +17,19 @@ func AccessToken(ctx *gin.Context) (string, bool) {
 	bearerHeader := ctx.GetHeader("Authorization")
 
 	if len(bearerHeader) == 0 {
-		presenters.ResponseBadRequest(ctx)
+		err := presenters.ResponseBadRequest(ctx)
+		if err != nil {
+			return "", false
+		}
 		return "", false
 	}
 
 	accessToken := extractTokenFromHeader(bearerHeader)
 	if len(accessToken) == 0 {
-		presenters.ResponseBadRequest(ctx)
+		err := presenters.ResponseBadRequest(ctx)
+		if err != nil {
+			return "", false
+		}
 		return "", false
 	}
 
@@ -33,7 +40,10 @@ func RefreshToken(ctx *gin.Context) (string, bool) {
 	refreshToken := ctx.GetHeader("refresh")
 
 	if len(refreshToken) == 0 {
-		presenters.ResponseBadRequest(ctx)
+		err := presenters.ResponseBadRequest(ctx)
+		if err != nil {
+			return "", false
+		}
 		return "", false
 	}
 

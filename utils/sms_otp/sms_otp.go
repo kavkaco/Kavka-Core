@@ -1,12 +1,13 @@
 package sms_otp
 
 import (
-	"Kavka/config"
 	"bytes"
 	"fmt"
 	"os"
 	"strings"
 	"text/template"
+
+	"Kavka/config"
 )
 
 const TEMPLATE_FORMAT = "txt"
@@ -35,7 +36,7 @@ func (s *SMSOtp) SendSMS(msg string, receivers []string) error {
 	return nil
 }
 
-// Parses and returns the template
+// Parses and returns the template.
 func (s *SMSOtp) Template(name string, args interface{}) (string, error) {
 	filename := fmt.Sprintf("%s/%s.%s", s.templatesPath, name, TEMPLATE_FORMAT)
 
@@ -47,7 +48,10 @@ func (s *SMSOtp) Template(name string, args interface{}) (string, error) {
 	renderedFile := new(bytes.Buffer)
 
 	t := template.Must(template.New(name).Parse(string(fileData)))
-	t.Execute(renderedFile, args)
+	err := t.Execute(renderedFile, args)
+	if err != nil {
+		return "", err
+	}
 
 	return renderedFile.String(), nil
 }

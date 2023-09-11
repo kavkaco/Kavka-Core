@@ -1,49 +1,55 @@
 package socket
 
 import (
+	"log"
+
 	"Kavka/internal/service"
 	"Kavka/utils/bearer"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var clients []*websocket.Conn
-var handlers = []func(MessageHandlerArgs) bool{
-	NewChatsHandler,
-	NewMessagesHandler,
-}
+var (
+	clients  []*websocket.Conn
+	handlers = []func(MessageHandlerArgs) bool{
+		NewChatsHandler,
+		NewMessagesHandler,
+	}
+)
 
-type SocketService struct {
+type Service struct {
 	userService *service.UserService
 	chatService *service.ChatService
 	msgService  *service.MessageService
 }
 
-type SocketMessage struct {
+type Message struct {
 	Event string                 `json:"event"`
 	Data  map[string]interface{} `json:"data"`
 }
 
 type MessageHandlerArgs struct {
-	message       *SocketMessage
+	message       *Message
 	conn          *websocket.Conn
 	staticID      primitive.ObjectID
-	socketService *SocketService
+	socketService *Service
 }
 
 var upgrader = websocket.Upgrader{}
 
-func NewSocketService(app *gin.Engine, userService *service.UserService, chatService *service.ChatService, msgService *service.MessageService) *SocketService {
-	socketService := &SocketService{userService, chatService, msgService}
+func NewSocketService(app *gin.Engine, userService *service.UserService,
+	chatService *service.ChatService, msgService *service.MessageService,
+) *Service {
+	socketService := &Service{userService, chatService, msgService}
 
 	app.GET("/ws", socketService.handleWebsocket)
 
 	return socketService
 }
-func (s *SocketService) handleWebsocket(ctx *gin.Context) {
+
+func (s *Service) handleWebsocket(ctx *gin.Context) {
 	// Authenticate
 	accessToken, bearerOk := bearer.AccessToken(ctx)
 
@@ -69,7 +75,7 @@ func (s *SocketService) handleWebsocket(ctx *gin.Context) {
 	defer conn.Close()
 
 	for {
-		var msgData *SocketMessage
+		var msgData *Message
 
 		if err := conn.ReadJSON(&msgData); err != nil {
 			log.Println("Unmarshal json error in socket:", err)
@@ -81,8 +87,8 @@ func (s *SocketService) handleWebsocket(ctx *gin.Context) {
 	}
 }
 
-func (s *SocketService) handleMessages(args *MessageHandlerArgs) {
-	var handled bool = false
+func (s *Service) handleMessages(args *MessageHandlerArgs) {
+	handled := false
 
 	for _, handler := range handlers {
 		result := handler(*args)
@@ -93,7 +99,7 @@ func (s *SocketService) handleMessages(args *MessageHandlerArgs) {
 	}
 
 	if !handled {
-		args.conn.WriteJSON(struct {
+		args.conn.WriteJSON(struct { //nolint
 			Message string
 		}{
 			Message: "Invalid event",

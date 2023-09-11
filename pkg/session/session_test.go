@@ -1,10 +1,11 @@
 package session
 
 import (
-	"Kavka/config"
-	"Kavka/database"
 	"fmt"
 	"testing"
+
+	"Kavka/config"
+	"Kavka/database"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -26,7 +27,7 @@ func (s *MyTestSuite) SetupSuite() {
 	configs := config.Read()
 
 	// Init Redis
-	var redisClient = database.GetRedisDBInstance(configs.Redis)
+	redisClient := database.GetRedisDBInstance(configs.Redis)
 
 	s.session = NewSession(redisClient, configs.App.Auth)
 }

@@ -9,7 +9,7 @@ type ChatDto struct {
 	Chat  *chat.Chat `json:"chat"`
 }
 
-func ChatAsJSON(event string, obj *chat.Chat) interface{} {
+func ChatAsJSON(_ string, obj *chat.Chat) interface{} {
 	if obj.ChatType == chat.ChatTypeDirect {
 		obj.ChatDetail = nil
 	}

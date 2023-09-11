@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"Kavka/database"
-	"Kavka/internal/domain/message"
 	"context"
 	"errors"
+
+	"Kavka/database"
+	"Kavka/internal/domain/message"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -41,8 +42,10 @@ func (repo *MessageRepository) Insert(chatID primitive.ObjectID, msg *message.Me
 	return msg, nil
 }
 
-// REVIEW - fieldsToUpdate
-func (repo *MessageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error {
+// REVIEW - fieldsToUpdate.
+func (repo *MessageRepository) Update(chatID primitive.ObjectID,
+	messageID primitive.ObjectID, fieldsToUpdate bson.M,
+) error {
 	filter := bson.M{"_id": chatID, "messages._id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
