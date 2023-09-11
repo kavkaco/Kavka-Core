@@ -19,9 +19,8 @@ import (
 
 func main() {
 	// Define paths
-	var (
-		TEMPLATES_PATH = config.ProjectRootPath + "/app/views/mail/"
-	)
+
+	TEMPLATES_PATH := config.ProjectRootPath + "/app/views/mail/"
 
 	// Load Configs
 	configs := config.Read()
@@ -64,5 +63,8 @@ func main() {
 	socket.NewSocketService(app, userService, chatService, msgService)
 
 	// Everything almost done!
-	app.Run(configs.App.HTTP.Address)
+	err := app.Run(configs.App.HTTP.Address)
+	if err != nil {
+		panic(err)
+	}
 }

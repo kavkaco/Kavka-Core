@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"Kavka/database"
-	"Kavka/internal/domain/chat"
 	"context"
 	"errors"
+
+	"Kavka/database"
+	"Kavka/internal/domain/chat"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

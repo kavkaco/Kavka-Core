@@ -26,7 +26,9 @@ func (s *ChatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
 	return foundChat, nil
 }
 
-func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {
+func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID,
+	targetStaticID primitive.ObjectID,
+) (*chat.Chat, error) {
 	sides := [2]*primitive.ObjectID{
 		&userStaticID,
 		&targetStaticID,
@@ -42,7 +44,9 @@ func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID, targetStatic
 	})
 }
 
-func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID,
+	title string, username string, description string,
+) (*chat.Chat, error) {
 	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,
@@ -52,7 +56,9 @@ func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID, title string,
 	})
 }
 
-func (s *ChatService) CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+func (s *ChatService) CreateChannel(userStaticID primitive.ObjectID,
+	title string, username string, description string,
+) (*chat.Chat, error) {
 	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,

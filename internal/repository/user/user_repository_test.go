@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"context"
+	"testing"
+
 	"Kavka/config"
 	"Kavka/database"
 	"Kavka/internal/domain/user"
-	"context"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -32,7 +33,10 @@ func (s *MyTestSuite) SetupSuite() {
 		panic(connErr)
 	}
 
-	mongoClient.Drop(context.TODO())
+	err := mongoClient.Drop(context.TODO())
+	if err != nil {
+		panic(err)
+	}
 
 	s.userRepo = NewUserRepository(mongoClient)
 }

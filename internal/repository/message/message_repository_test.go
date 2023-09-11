@@ -1,12 +1,13 @@
 package repository
 
 import (
+	"testing"
+
 	"Kavka/config"
 	"Kavka/database"
 	"Kavka/internal/domain/chat"
 	"Kavka/internal/domain/message"
 	repository "Kavka/internal/repository/chat"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -66,8 +67,10 @@ func (s *MyTestSuite) TestB_Insert() {
 	})
 
 	savedMsg, saveErr := s.messageRepo.Insert(s.savedChat.ChatID, msg)
-	s.messageRepo.Insert(s.savedChat.ChatID, msg2)
-	s.messageRepo.Insert(s.savedChat.ChatID, msg3)
+	_, err := s.messageRepo.Insert(s.savedChat.ChatID, msg2)
+	assert.NoError(s.T(), err)
+	_, err = s.messageRepo.Insert(s.savedChat.ChatID, msg3)
+	assert.NoError(s.T(), err)
 
 	s.savedMsg = savedMsg
 

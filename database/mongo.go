@@ -1,11 +1,12 @@
 package database
 
 import (
-	"Kavka/config"
 	"context"
 	"errors"
 	"fmt"
 	"sync"
+
+	"Kavka/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +24,7 @@ var (
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {
-	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port) //nolint
 }
 
 func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
@@ -52,12 +53,12 @@ func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
 }
 
 func collectionsConfigurations(db *mongo.Database) {
-	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
 		Keys:    bson.D{{Key: "phone", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	})
 
-	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
 		Keys:    bson.D{{Key: "username", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	})

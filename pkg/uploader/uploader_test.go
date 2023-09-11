@@ -1,9 +1,10 @@
 package uploader
 
 import (
-	"Kavka/config"
 	"os"
 	"testing"
+
+	"Kavka/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -13,7 +14,7 @@ const BUCKET_NAME = "profile-photos"
 
 type MyTestSuite struct {
 	suite.Suite
-	uploadService      *UploaderService
+	uploadService      *Service
 	uploadedObjectName string
 }
 
@@ -32,7 +33,8 @@ func (s *MyTestSuite) TestA_UploadFile() {
 	file, fileErr := os.Create(filePath)
 	assert.NoError(s.T(), fileErr)
 	defer file.Close()
-	file.WriteString("Hello Bucket!\n")
+	_, err := file.WriteString("Hello Bucket!\n")
+	assert.NoError(s.T(), err)
 
 	// Uploading File
 	uploaded, err := s.uploadService.UploadFile(BUCKET_NAME, filePath, nil)

@@ -6,5 +6,5 @@ type UserLoginDto struct {
 
 type UserVerifyOTPDto struct {
 	Phone string `json:"phone" validate:"required"`
-	OTP   int    `json:"otp" validate:"required"`
+	OTP   int    `json:"otp"   validate:"required"`
 }

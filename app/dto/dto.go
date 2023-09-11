@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"Kavka/app/presenters"
 	"net/http"
+
+	"Kavka/app/presenters"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -30,14 +31,14 @@ func Validate[Dto interface{}](ctx *gin.Context) *Dto {
 	bindErr := ctx.Bind(&body)
 
 	if bindErr != nil {
-		presenters.ResponseBadRequest(ctx)
+		presenters.ResponseBadRequest(ctx) //nolint
 		return nil
 	}
 
 	errs := validate.Struct(body)
 
 	if errs != nil {
-		for _, err := range errs.(validator.ValidationErrors) {
+		for _, err := range errs.(validator.ValidationErrors) { //nolint
 			var elem errorResponse
 
 			elem.FailedField = err.Field()

@@ -1,17 +1,18 @@
 package sms_otp
 
 import (
-	"Kavka/config"
 	"os"
 	"testing"
+
+	"Kavka/config"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSendSms(t *testing.T) {
 	// Get wd
-	var wd, _ = os.Getwd()
-	var templatesPath = wd + "/../../app/views/sms/"
+	wd, _ := os.Getwd()
+	templatesPath := wd + "/../../app/views/sms/"
 
 	// Load configs
 	configs := config.Read()

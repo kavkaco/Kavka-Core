@@ -1,10 +1,11 @@
 package presenters
 
 import (
-	"Kavka/internal/domain/user"
-	"Kavka/pkg/session"
 	"fmt"
 	"net/http"
+
+	"Kavka/internal/domain/user"
+	"Kavka/pkg/session"
 
 	"github.com/gin-gonic/gin"
 )

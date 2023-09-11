@@ -1,32 +1,35 @@
 package uploader
 
 import (
-	"Kavka/config"
-	"Kavka/utils/random"
 	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"Kavka/config"
+	"Kavka/utils/random"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-const RANDOM_FILENAME_LENGTH = 25
-const UPLOAD_TMP_DIR = "/tmp/uploads"
-
-var (
-	ErrMaxFileSize = errors.New("maximum file size")
+const (
+	RANDOM_FILENAME_LENGTH = 25
+	UPLOAD_TMP_DIR         = "/tmp/uploads"
 )
 
-type UploaderService struct{ minioClient *minio.Client }
-type FileUploaded struct {
-	Name string
-	Size int64
-}
+var ErrMaxFileSize = errors.New("maximum file size")
 
-func NewUploaderService(config *config.IConfig) *UploaderService {
+type (
+	Service      struct{ minioClient *minio.Client }
+	FileUploaded struct {
+		Name string
+		Size int64
+	}
+)
+
+func NewUploaderService(config *config.IConfig) *Service {
 	minioCredentials := config.MinIOCredentials
 
 	endpoint := minioCredentials.Endpoint
@@ -42,10 +45,10 @@ func NewUploaderService(config *config.IConfig) *UploaderService {
 		panic(err)
 	}
 
-	return &UploaderService{minioClient}
+	return &Service{minioClient}
 }
 
-func (s *UploaderService) UploadFile(bucketName string, filePath string, maxFileSize *int64) (*FileUploaded, error) {
+func (s *Service) UploadFile(bucketName string, filePath string, maxFileSize *int64) (*FileUploaded, error) {
 	// Collect objectName, contentType and filePath
 	fileInfo, statErr := os.Stat(filePath)
 	if statErr != nil {
@@ -62,7 +65,8 @@ func (s *UploaderService) UploadFile(bucketName string, filePath string, maxFile
 	contentType := filepath.Ext(filePath)
 
 	// Upload the file
-	_, err := s.minioClient.FPutObject(context.Background(), bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
+	_, err := s.minioClient.FPutObject(context.Background(), bucketName,
+		objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +77,7 @@ func (s *UploaderService) UploadFile(bucketName string, filePath string, maxFile
 	}, err
 }
 
-func (s *UploaderService) DeleteFile(bucketName string, objectName string) error {
+func (s *Service) DeleteFile(bucketName string, objectName string) error {
 	// Delete the file
 	opts := minio.RemoveObjectOptions{GovernanceBypass: true}
 	err := s.minioClient.RemoveObject(context.Background(), bucketName, objectName, opts)
@@ -84,6 +88,6 @@ func (s *UploaderService) DeleteFile(bucketName string, objectName string) error
 	return nil
 }
 
-func (s *UploaderService) GenerateTMPFilePath(fileName string) string {
+func (s *Service) GenerateTMPFilePath(fileName string) string {
 	return fmt.Sprintf("%s/..%s/%s", config.ConfigsDirPath(), UPLOAD_TMP_DIR, fileName)
 }

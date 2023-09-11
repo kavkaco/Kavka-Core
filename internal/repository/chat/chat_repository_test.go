@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"context"
+	"testing"
+
 	"Kavka/config"
 	"Kavka/database"
 	"Kavka/internal/domain/chat"
-	"context"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -37,7 +38,10 @@ func (s *MyTestSuite) SetupSuite() {
 		panic(connErr)
 	}
 
-	mongoClient.Collection(database.ChatsCollection).Drop(context.Background())
+	err := mongoClient.Collection(database.ChatsCollection).Drop(context.Background())
+	if err != nil {
+		panic(err)
+	}
 
 	s.chatRepo = NewChatRepository(mongoClient)
 }
@@ -76,6 +80,7 @@ func (s *MyTestSuite) TestC_FindByID() {
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), chat.ChatID, s.savedChat.ChatID)
 }
+
 func (s *MyTestSuite) TestD_FindChatOrSidesByStaticID() {
 	findByChatID, findByChatIDErr := s.chatRepo.FindChatOrSidesByStaticID(&s.savedDirectChat.ChatID)
 

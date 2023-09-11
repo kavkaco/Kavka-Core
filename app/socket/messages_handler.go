@@ -15,7 +15,7 @@ func NewMessagesHandler(args MessageHandlerArgs) bool {
 	return false
 }
 
-func InsertTextMessage(event string, args MessageHandlerArgs) bool {
+func InsertTextMessage(_ string, args MessageHandlerArgs) bool {
 	chatID := args.message.Data["chat_id"]
 	messageContent := args.message.Data["message_content"]
 
@@ -24,12 +24,16 @@ func InsertTextMessage(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	args.socketService.msgService.InsertTextMessage(chatID.(primitive.ObjectID), args.staticID, messageContent.(string))
+	_, err := args.socketService.msgService.InsertTextMessage(chatID.(primitive.ObjectID),
+		args.staticID, messageContent.(string))
+	if err != nil {
+		return false
+	}
 
 	return true
 }
 
-func DeleteMessage(event string, args MessageHandlerArgs) bool {
+func DeleteMessage(_ string, args MessageHandlerArgs) bool {
 	chatID := args.message.Data["chat_id"]
 	messageID := args.message.Data["message_id"]
 
@@ -43,7 +47,10 @@ func DeleteMessage(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	args.socketService.msgService.DeleteMessage(chatID.(primitive.ObjectID), messageID.(primitive.ObjectID))
+	err := args.socketService.msgService.DeleteMessage(chatID.(primitive.ObjectID), messageID.(primitive.ObjectID))
+	if err != nil {
+		return false
+	}
 
 	return true
 }

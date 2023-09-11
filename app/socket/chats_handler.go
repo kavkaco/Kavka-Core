@@ -1,8 +1,9 @@
 package socket
 
 import (
-	"Kavka/app/presenters"
 	"log"
+
+	"Kavka/app/presenters"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -37,7 +38,10 @@ func CreateDirect(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	if err != nil {
+		return false
+	}
 
 	return true
 }
@@ -56,7 +60,10 @@ func GetChat(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	if err != nil {
+		return false
+	}
 
 	return true
 }
@@ -67,12 +74,16 @@ func CreateGroup(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, err := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
+		chat, err := args.socketService.chatService.CreateGroup(args.staticID,
+			title.(string), username.(string), description.(string))
 		if err != nil {
 			return false
 		}
 
-		args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		if err != nil {
+			return false
+		}
 
 		return true
 	}
@@ -86,12 +97,16 @@ func CreateChannel(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, err := args.socketService.chatService.CreateChannel(args.staticID, title.(string), username.(string), description.(string))
+		chat, err := args.socketService.chatService.CreateChannel(args.staticID, title.(string),
+			username.(string), description.(string))
 		if err != nil {
 			return false
 		}
 
-		args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		if err != nil {
+			return false
+		}
 
 		return true
 	}

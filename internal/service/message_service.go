@@ -1,12 +1,13 @@
 package service
 
 import (
+	"log"
+	"reflect"
+
 	"Kavka/internal/domain/chat"
 	"Kavka/internal/domain/message"
 	chatRepository "Kavka/internal/repository/chat"
 	messageRepository "Kavka/internal/repository/message"
-	"log"
-	"reflect"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/slices"
@@ -17,12 +18,14 @@ type MessageService struct {
 	chatRepo *chatRepository.ChatRepository
 }
 
-func NewMessageService(msgRepo *messageRepository.MessageRepository, chatRepo *chatRepository.ChatRepository) *MessageService {
+func NewMessageService(msgRepo *messageRepository.MessageRepository,
+	chatRepo *chatRepository.ChatRepository,
+) *MessageService {
 	return &MessageService{msgRepo, chatRepo}
 }
 
-// This function is used to check that user can send message or not
-func (s *MessageService) hasAccessToSendMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
+// This function is used to check that user can send message or not.
+func (s *MessageService) hasAccessToSendMessage(chatID primitive.ObjectID, _ primitive.ObjectID) (bool, error) {
 	foundChat, chatErr := s.chatRepo.FindByID(chatID)
 	if chatErr != nil {
 		return false, chatErr
@@ -49,8 +52,10 @@ func (s *MessageService) hasAccessToSendMessage(chatID primitive.ObjectID, stati
 	return false, nil
 }
 
-// This function is used to check that user can delete message or not
-func (s *MessageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
+// This function is used to check that user can delete message or not.
+func (s *MessageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, //nolint
+	staticID primitive.ObjectID,
+) (bool, error) {
 	foundChat, chatErr := s.chatRepo.FindByID(chatID)
 	if chatErr != nil {
 		return false, chatErr
@@ -76,7 +81,9 @@ func (s *MessageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, sta
 	return false, nil
 }
 
-func (s *MessageService) InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error) {
+func (s *MessageService) InsertTextMessage(chatID primitive.ObjectID,
+	staticID primitive.ObjectID, messageContent string,
+) (*message.Message, error) {
 	hasAccess, hasAccessErr := s.hasAccessToSendMessage(chatID, staticID)
 	if hasAccessErr != nil {
 		return nil, hasAccessErr

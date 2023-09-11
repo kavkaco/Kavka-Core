@@ -12,12 +12,12 @@ import (
 const OTP_LENGTH = 6
 
 func GenerateOTP() int {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano()) //nolint
 
 	min := math.Pow(10, OTP_LENGTH-1)
 	max := math.Pow(10, OTP_LENGTH) - 1
 
-	number := rand.Intn(int(max-min) + int(min))
+	number := rand.Intn(int(max-min) + int(min)) //nolint
 
 	if len(strconv.Itoa(number)) != OTP_LENGTH {
 		number = GenerateOTP()
@@ -32,7 +32,7 @@ func GenerateUsername() string {
 
 func GenerateRandomFileName(n int) string {
 	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil {
+	if _, err := rand.Read(bytes); err != nil { //nolint
 		return ""
 	}
 

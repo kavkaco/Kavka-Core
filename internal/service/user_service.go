@@ -1,12 +1,13 @@
 package service
 
 import (
+	"errors"
+
 	"Kavka/internal/domain/user"
 	repository "Kavka/internal/repository/user"
 	"Kavka/pkg/jwt_manager"
 	"Kavka/pkg/session"
 	"Kavka/utils/sms_otp"
-	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -17,7 +18,9 @@ type UserService struct {
 	SmsOtp   *sms_otp.SMSOtp
 }
 
-func NewUserService(userRepo *repository.UserRepository, session *session.Session, smsOtp *sms_otp.SMSOtp) *UserService {
+func NewUserService(userRepo *repository.UserRepository,
+	session *session.Session, smsOtp *sms_otp.SMSOtp,
+) *UserService {
 	return &UserService{userRepo, session, smsOtp}
 }
 
@@ -35,7 +38,7 @@ func (s *UserService) FindByUsername(username string) (*user.User, error) {
 }
 
 // Login function gets user's phone and find it or created it in the database,
-// then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`
+// then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`.
 func (s *UserService) Login(phone string) (int, error) {
 	_, err := s.userRepo.FindOrCreateGuestUser(phone)
 	if err != nil {

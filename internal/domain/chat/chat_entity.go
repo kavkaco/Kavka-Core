@@ -13,8 +13,8 @@ const (
 )
 
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"_id" json:"chat_id"`
-	ChatType   string             `bson:"chat_type" json:"chat_type"`
+	ChatID     primitive.ObjectID `bson:"_id"         json:"chat_id"`
+	ChatType   string             `bson:"chat_type"   json:"chat_type"`
 	ChatDetail interface{}        `bson:"chat_detail" json:"chat_detail"`
 	Messages   []*message.Message `json:"messages"`
 }
@@ -25,7 +25,7 @@ type ChannelChatDetail struct {
 	Title        string                `json:"title"`
 	Members      []*primitive.ObjectID `json:"members"`
 	Admins       []*primitive.ObjectID `json:"admins"`
-	Owner        *primitive.ObjectID   `json:"owner" bson:"owner"`
+	Owner        *primitive.ObjectID   `bson:"owner"         json:"owner"`
 	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
 	Username     string                `json:"username"`
 	Description  string                `json:"description"`
@@ -35,7 +35,7 @@ type GroupChatDetail struct {
 	Title        string                `json:"title"`
 	Members      []*primitive.ObjectID `json:"members"`
 	Admins       []*primitive.ObjectID `json:"admins"`
-	Owner        *primitive.ObjectID   `json:"owner" bson:"owner"`
+	Owner        *primitive.ObjectID   `bson:"owner"         json:"owner"`
 	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
 	Username     string                `json:"username"`
 	Description  string                `json:"description"`
