@@ -43,7 +43,7 @@ func DeleteMessage(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	args.socketService.msgService.DeleteMessage(chatID.(primitive.ObjectID), messageID.(primitive.ObjectID))
+	args.socketService.msgService.DeleteMessage(chatID.(primitive.ObjectID), args.staticID, messageID.(primitive.ObjectID))
 
 	return true
 }

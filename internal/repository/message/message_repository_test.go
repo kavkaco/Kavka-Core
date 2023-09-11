@@ -41,8 +41,8 @@ func (s *MyTestSuite) SetupSuite() {
 func (s *MyTestSuite) TestA_CreateChat() {
 	// Creating a sample channel
 	chat, saveChatErr := s.chatRepo.Create(chat.ChatTypeChannel, chat.ChannelChatDetail{
-		Members: []*primitive.ObjectID{&StaticID},
-		Admins:  []*primitive.ObjectID{&StaticID},
+		Members: []primitive.ObjectID{StaticID},
+		Admins:  []primitive.ObjectID{StaticID},
 	})
 
 	s.T().Log("ChatID:", chat.ChatID)
@@ -99,6 +99,10 @@ func (s *MyTestSuite) TestB_Insert() {
 
 func (s *MyTestSuite) TestD_Delete() {
 	err := s.messageRepo.Delete(s.savedChat.ChatID, s.savedMsg.MessageID)
+
+	// Update chat
+	chat, _ := s.chatRepo.FindByID(s.savedChat.ChatID)
+	assert.Equal(s.T(), len(chat.Messages), 2)
 
 	assert.NoError(s.T(), err)
 }

@@ -45,8 +45,8 @@ func (s *MyTestSuite) SetupSuite() {
 
 func (s *MyTestSuite) TestA_CreateChannel() {
 	savedChat, saveErr := s.chatRepo.Create(chat.ChatTypeChannel, chat.ChannelChatDetail{
-		Members:  []*primitive.ObjectID{&StaticID},
-		Admins:   []*primitive.ObjectID{&StaticID},
+		Members:  []primitive.ObjectID{StaticID},
+		Admins:   []primitive.ObjectID{StaticID},
 		Username: "sample",
 	})
 
@@ -85,10 +85,10 @@ func (s *MyTestSuite) TestC_CreateDirect() {
 }
 
 func (s *MyTestSuite) TestD_FindByID() {
-	chat, err := s.chatRepo.FindByID(s.savedChat.ChatID)
+	foundChat, err := s.chatRepo.FindByID(s.savedChat.ChatID)
 
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), chat.ChatID, s.savedChat.ChatID)
+	assert.Equal(s.T(), foundChat.ChatID, s.savedChat.ChatID)
 }
 func (s *MyTestSuite) TestE_FindChatOrSidesByStaticID() {
 	findByChatID, findByChatIDErr := s.chatRepo.FindChatOrSidesByStaticID(&s.savedDirectChat.ChatID)

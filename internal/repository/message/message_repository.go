@@ -12,8 +12,11 @@ import (
 )
 
 var (
-	ErrChatNotFound = errors.New("chat not found")
-	ErrNoAccess     = errors.New("no access")
+	ErrChatNotFound         = errors.New("chat not found")
+	ErrNoAccess             = errors.New("no access")
+	ErrMessageNotFound      = errors.New("message not found")
+	ErrIsNotUsersOwnMessage = errors.New("is not users own message")
+	ErrIsNotAMember         = errors.New("is not a member")
 )
 
 type MessageRepository struct {
@@ -60,7 +63,7 @@ func (repo *MessageRepository) Update(chatID primitive.ObjectID, messageID primi
 
 func (repo *MessageRepository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
 	filter := bson.M{"_id": chatID}
-	update := bson.M{"$pull": bson.M{"messages": bson.M{"_id": messageID}}}
+	update := bson.M{"$pull": bson.M{"messages": bson.M{"message_id": messageID}}}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {

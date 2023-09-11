@@ -46,8 +46,8 @@ func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID, title string,
 	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,
-		Members:     []*primitive.ObjectID{&userStaticID},
-		Admins:      []*primitive.ObjectID{&userStaticID},
+		Members:     []primitive.ObjectID{userStaticID},
+		Admins:      []primitive.ObjectID{userStaticID},
 		Description: description,
 	})
 }
@@ -56,8 +56,8 @@ func (s *ChatService) CreateChannel(userStaticID primitive.ObjectID, title strin
 	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,
-		Members:     []*primitive.ObjectID{&userStaticID},
-		Admins:      []*primitive.ObjectID{&userStaticID},
+		Members:     []primitive.ObjectID{userStaticID},
+		Admins:      []primitive.ObjectID{userStaticID},
 		Description: description,
 	})
 }
