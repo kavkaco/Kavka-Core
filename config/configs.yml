@@ -1,24 +1,24 @@
-APP:
-  NAME: "kavka"
-  HTTP:
-    HOST: "127.0.0.1"
-    PORT: 8000
-    ADDRESS: "127.0.0.1:8000"
-  SERVER:
-    CORS:
-      ALLOW_ORIGINS: "*"
-  AUTH:
-    SECRET: "secret-key"
-MONGO:
-  HOST: "127.0.0.1"
-  USERNAME: "mongo"
-  PASSWORD: "mongo"
-  PORT: 27017
-  DB_NAME: "kavka"
-REDIS:
-  HOST: "127.0.0.1"
-  USERNAME: "redis"
-  PASSWORD:
-  PORT: 6379
-  DB: 0
-SMS:
+app:
+  name: "kavka"
+  http:
+    host: "127.0.0.1"
+    port: 8000
+    address: "127.0.0.1:8000"
+  server:
+    cors:
+      allow_origins: "*"
+  auth:
+    secret: "secret-key"
+mongo:
+  host: "127.0.0.1"
+  username: "mongo"
+  password: "mongo"
+  port: 27017
+  db_name: "kavka"
+redis:
+  host: "127.0.0.1"
+  username: "redis"
+  password:
+  port: 6379
+  db: 0
+sms:
