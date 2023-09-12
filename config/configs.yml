@@ -8,7 +8,7 @@ APP:
     CORS:
       ALLOW_ORIGINS: "*"
   AUTH:
-    OTP_EXPIRE_SECONDS: 100
+    SECRET: "secret-key"
 MONGO:
   HOST: "127.0.0.1"
   USERNAME: "mongo"

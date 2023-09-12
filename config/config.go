@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
@@ -20,51 +19,50 @@ var (
 
 type (
 	IConfig struct {
-		App   App   `yaml:"app"`
-		Mongo Mongo `yaml:"mongo"`
-		Redis Redis `yaml:"redis"`
-		SMS   `yaml:"sms"`
+		App   App   `json:"app" yaml:"APP"`
+		Mongo Mongo `json:"mongo" yaml:"MONGO"`
+		Redis Redis `json:"redis" yaml:"REDIS"`
+		SMS   `json:"sms" yaml:"SMS"`
 		MinIOCredentials
 	}
 	App struct {
-		Name   string `yaml:"name"`
-		HTTP   HTTP   `yaml:"http"`
-		Server Server `yaml:"server"`
-		Auth   Auth   `yaml:"auth"`
+		Name   string `json:"name" yaml:"NAME"`
+		HTTP   HTTP   `json:"http" yaml:"HTTP"`
+		Server Server `json:"server" yaml:"SERVER"`
+		Auth   Auth   `json:"auth" yaml:"AUTH"`
 	}
 	HTTP struct {
-		Host    string `yaml:"host"`
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
+		Host    string `json:"host" yaml:"HOST"`
+		Port    int    `json:"port" yaml:"PORT"`
+		Address string `json:"address" yaml:"ADDRESS"`
 	}
 	Auth struct {
-		SECRET             string        `yaml:"secret"`
-		OTP_EXPIRE_SECONDS time.Duration `json:"otp_expire_seconds" yaml:"otp_expire_seconds"`
+		SECRET string `json:"secret" yaml:"SECRET"`
 	}
 	Server struct {
-		CORS CORS `yaml:"cors"`
+		CORS CORS `json:"cors" yaml:"CORS"`
 	}
 	CORS struct {
-		AllowOrigins string `yaml:"allow_origins"`
+		AllowOrigins string `json:"allow_origins" yaml:"ALLOW_ORIGINS"`
 	}
 	Redis struct {
-		Host     string `yaml:"host"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		Port     int    `yaml:"port"`
-		DB       int    `yaml:"db"`
+		Host     string `json:"host" yaml:"HOST"`
+		Username string `json:"username" yaml:"USERNAME"`
+		Password string `json:"password" yaml:"PASSWORD"`
+		Port     int    `json:"port" yaml:"PORT"`
+		DB       int    `json:"db" yaml:"DB"`
 	}
 	Mongo struct {
-		Host     string `yaml:"host"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		Port     int    `yaml:"port"`
-		DBName   string `yaml:"db_name"`
+		Host     string `json:"host" yaml:"HOST"`
+		Username string `json:"username" yaml:"USERNAME"`
+		Password string `json:"password" yaml:"PASSWORD"`
+		Port     int    `json:"port" yaml:"PORT"`
+		DBName   string `json:"db_name" yaml:"DB_NAME"`
 	}
 	MinIOCredentials struct {
-		Endpoint  string `json:"endpoint"   yaml:"endpoint"`
-		AccessKey string `json:"access_key" yaml:"access_key"`
-		SecretKey string `json:"secret_key" yaml:"secret_key"`
+		Endpoint  string `json:"ENDPOINT"   yaml:"ENDPOINT"`
+		AccessKey string `json:"ACCESS_KEY" yaml:"ACCESS_KEY"`
+		SecretKey string `json:"SECRET_KEY" yaml:"SECRET_KEY"`
 	}
 	// TODO - Add sms-service's configs.
 	SMS struct{}
