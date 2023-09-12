@@ -41,10 +41,12 @@ const (
 	AccessToken  string = "access"
 )
 
-func NewJwtManager(configs config.Auth) *JwtManager {
+const DEFAULT_OTP_EXPIRE = 120 * time.Second
+
+func NewJwtManager(configs config.Auth, otpExpire time.Duration) *JwtManager {
 	return &JwtManager{
 		secretKey: configs.SECRET,
-		ttl:       configs.OTP_EXPIRE_SECONDS * time.Second, //nolint
+		ttl:       otpExpire,
 	}
 }
 
