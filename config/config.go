@@ -19,45 +19,45 @@ var (
 
 type (
 	IConfig struct {
-		App   App   `yaml:"APP"`
-		Mongo Mongo `yaml:"MONGO"`
-		Redis Redis `yaml:"REDIS"`
-		SMS   `yaml:"SMS"`
+		App   App   `json:"app" yaml:"APP"`
+		Mongo Mongo `json:"mongo" yaml:"MONGO"`
+		Redis Redis `json:"redis" yaml:"REDIS"`
+		SMS   `json:"sms" yaml:"SMS"`
 		MinIOCredentials
 	}
 	App struct {
-		Name   string `yaml:"NAME"`
-		HTTP   HTTP   `yaml:"HTTP"`
-		Server Server `yaml:"SERVER"`
-		Auth   Auth   `yaml:"AUTH"`
+		Name   string `json:"name" yaml:"NAME"`
+		HTTP   HTTP   `json:"http" yaml:"HTTP"`
+		Server Server `json:"server" yaml:"SERVER"`
+		Auth   Auth   `json:"auth" yaml:"AUTH"`
 	}
 	HTTP struct {
-		Host    string `yaml:"HOST"`
-		Port    int    `yaml:"PORT"`
-		Address string `yaml:"ADDRESS"`
+		Host    string `json:"host" yaml:"HOST"`
+		Port    int    `json:"port" yaml:"PORT"`
+		Address string `json:"address" yaml:"ADDRESS"`
 	}
 	Auth struct {
-		SECRET             string        `yaml:"SECRET"`
+		SECRET string `json:"secret" yaml:"SECRET"`
 	}
 	Server struct {
-		CORS CORS `yaml:"CORS"`
+		CORS CORS `json:"cors" yaml:"CORS"`
 	}
 	CORS struct {
-		AllowOrigins string `yaml:"ALLOW_ORIGINS"`
+		AllowOrigins string `json:"allow_origins" yaml:"ALLOW_ORIGINS"`
 	}
 	Redis struct {
-		Host     string `yaml:"HOST"`
-		Username string `yaml:"USERNAME"`
-		Password string `yaml:"PASSWORD"`
-		Port     int    `yaml:"PORT"`
-		DB       int    `yaml:"DB"`
+		Host     string `json:"host" yaml:"HOST"`
+		Username string `json:"username" yaml:"USERNAME"`
+		Password string `json:"password" yaml:"PASSWORD"`
+		Port     int    `json:"port" yaml:"PORT"`
+		DB       int    `json:"db" yaml:"DB"`
 	}
 	Mongo struct {
-		Host     string `yaml:"HOST"`
-		Username string `yaml:"USERNAME"`
-		Password string `yaml:"PASSWORD"`
-		Port     int    `yaml:"PORT"`
-		DBName   string `yaml:"DB_NAME"`
+		Host     string `json:"host" yaml:"HOST"`
+		Username string `json:"username" yaml:"USERNAME"`
+		Password string `json:"password" yaml:"PASSWORD"`
+		Port     int    `json:"port" yaml:"PORT"`
+		DBName   string `json:"db_name" yaml:"DB_NAME"`
 	}
 	MinIOCredentials struct {
 		Endpoint  string `json:"ENDPOINT"   yaml:"ENDPOINT"`
