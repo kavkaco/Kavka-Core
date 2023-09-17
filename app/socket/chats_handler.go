@@ -3,7 +3,7 @@ package socket
 import (
 	"log"
 
-	"Kavka/app/presenters"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

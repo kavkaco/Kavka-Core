@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"Kavka/config"
-	"Kavka/pkg/jwt_manager"
-	"Kavka/utils/random"
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
+	"github.com/kavkaco/Kavka-Core/utils/random"
 
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"Kavka/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 )
 
 type ChatDto struct {

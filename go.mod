@@ -1,4 +1,4 @@
-module Kavka
+module github.com/kavkaco/Kavka-Core
 
 go 1.21
 

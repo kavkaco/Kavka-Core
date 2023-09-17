@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"Kavka/config"
+	"github.com/kavkaco/Kavka-Core/config"
 )
 
 const TEMPLATE_FORMAT = "txt"

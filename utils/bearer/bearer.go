@@ -3,7 +3,7 @@ package bearer
 import (
 	"strings"
 
-	"Kavka/app/presenters"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
 
 	"github.com/gin-gonic/gin"
 )
