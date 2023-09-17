@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"Kavka/database"
-	"Kavka/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/database"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

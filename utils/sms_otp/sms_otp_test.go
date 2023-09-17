@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"Kavka/config"
+	"github.com/kavkaco/Kavka-Core/config"
 
 	"github.com/stretchr/testify/assert"
 )

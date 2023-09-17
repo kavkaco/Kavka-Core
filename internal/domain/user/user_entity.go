@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"Kavka/utils/random"
+	"github.com/kavkaco/Kavka-Core/utils/random"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

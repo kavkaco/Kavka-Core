@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"Kavka/config"
-	"Kavka/utils/random"
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/utils/random"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

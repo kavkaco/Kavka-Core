@@ -3,7 +3,7 @@ package dto
 import (
 	"net/http"
 
-	"Kavka/app/presenters"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"

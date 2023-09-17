@@ -1,8 +1,8 @@
 package session
 
 import (
-	"Kavka/config"
-	"Kavka/pkg/jwt_manager"
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 
 	"github.com/go-redis/redis/v8"
 )

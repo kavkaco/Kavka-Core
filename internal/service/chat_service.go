@@ -1,9 +1,9 @@
 package service
 
 import (
-	"Kavka/internal/domain/chat"
-	chatRepository "Kavka/internal/repository/chat"
-	userRepository "Kavka/internal/repository/user"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
+	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
