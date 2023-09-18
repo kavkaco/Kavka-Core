@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"Kavka/internal/domain/user"
-	"Kavka/pkg/session"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/pkg/session"
 
 	"github.com/gin-gonic/gin"
 )

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	dto "Kavka/app/dto"
-	"Kavka/app/presenters"
-	"Kavka/internal/service"
-	"Kavka/pkg/session"
-	"Kavka/utils/bearer"
+	dto "github.com/kavkaco/Kavka-Core/app/dto"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
+	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/pkg/session"
+	"github.com/kavkaco/Kavka-Core/utils/bearer"
 
 	"github.com/gin-gonic/gin"
 )

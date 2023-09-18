@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"Kavka/internal/domain/message"
+	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

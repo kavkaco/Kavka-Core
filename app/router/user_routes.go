@@ -1,8 +1,8 @@
 package router
 
 import (
-	"Kavka/app/controller"
-	"Kavka/internal/service"
+	"github.com/kavkaco/Kavka-Core/app/controller"
+	"github.com/kavkaco/Kavka-Core/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

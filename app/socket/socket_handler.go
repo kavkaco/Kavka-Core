@@ -3,8 +3,8 @@ package socket
 import (
 	"log"
 
-	"Kavka/internal/service"
-	"Kavka/utils/bearer"
+	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/utils/bearer"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

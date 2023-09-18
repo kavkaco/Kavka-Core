@@ -4,10 +4,10 @@ import (
 	"log"
 	"reflect"
 
-	"Kavka/internal/domain/chat"
-	"Kavka/internal/domain/message"
-	chatRepository "Kavka/internal/repository/chat"
-	messageRepository "Kavka/internal/repository/message"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/message"
+	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
+	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/exp/slices"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"Kavka/config"
+	"github.com/kavkaco/Kavka-Core/config"
 
 	"github.com/go-redis/redis/v8"
 )

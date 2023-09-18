@@ -1,13 +1,13 @@
 package main
 
 import (
-	"Kavka/app/router"
-	"Kavka/config"
-	"Kavka/database"
-	userRepository "Kavka/internal/repository/user"
-	"Kavka/internal/service"
-	"Kavka/pkg/session"
-	"Kavka/utils/sms_otp"
+	"github.com/kavkaco/Kavka-Core/app/router"
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/database"
+	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
+	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/pkg/session"
+	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
 
 	"github.com/gin-contrib/cors"
 

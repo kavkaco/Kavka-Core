@@ -3,11 +3,11 @@ package service
 import (
 	"errors"
 
-	"Kavka/internal/domain/user"
-	repository "Kavka/internal/repository/user"
-	"Kavka/pkg/jwt_manager"
-	"Kavka/pkg/session"
-	"Kavka/utils/sms_otp"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
+	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
+	"github.com/kavkaco/Kavka-Core/pkg/session"
+	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
 )
 
 type UserService struct {
