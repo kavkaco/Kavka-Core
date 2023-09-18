@@ -18,17 +18,15 @@ var (
 	ErrInvalidOtpCode    = errors.New("invalid otp Code")
 )
 
-type UserRepository struct {
+type userRepository struct {
 	usersCollection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) *UserRepository {
-	return &UserRepository{
-		db.Collection(database.UsersCollection),
-	}
+func NewUserRepository(db *mongo.Database) user.UserRepository {
+	return &userRepository{db.Collection(database.UsersCollection)}
 }
 
-func (repo *UserRepository) Create(name string, lastName string, phone string) (*user.User, error) {
+func (repo *userRepository) Create(name string, lastName string, phone string) (*user.User, error) {
 	user := user.NewUser(phone)
 
 	user.Name = name
@@ -44,7 +42,7 @@ func (repo *UserRepository) Create(name string, lastName string, phone string) (
 	return user, nil
 }
 
-func (repo *UserRepository) Where(filter any) ([]*user.User, error) {
+func (repo *userRepository) Where(filter any) ([]*user.User, error) {
 	cursor, err := repo.usersCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -60,7 +58,7 @@ func (repo *UserRepository) Where(filter any) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *UserRepository) findBy(filter bson.D) (*user.User, error) {
+func (repo *userRepository) findBy(filter bson.D) (*user.User, error) {
 	result, err := repo.Where(filter)
 	if err != nil {
 		return nil, err
@@ -75,22 +73,22 @@ func (repo *UserRepository) findBy(filter bson.D) (*user.User, error) {
 	return nil, ErrUserNotFound
 }
 
-func (repo *UserRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
+func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.D{{Key: "_id", Value: staticID}}
 	return repo.findBy(filter)
 }
 
-func (repo *UserRepository) FindByUsername(username string) (*user.User, error) {
+func (repo *userRepository) FindByUsername(username string) (*user.User, error) {
 	filter := bson.D{{Key: "username", Value: username}}
 	return repo.findBy(filter)
 }
 
-func (repo *UserRepository) FindByPhone(phone string) (*user.User, error) {
+func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.D{{Key: "phone", Value: phone}}
 	return repo.findBy(filter)
 }
 
-func (repo *UserRepository) FindOrCreateGuestUser(phone string) (*user.User, error) {
+func (repo *userRepository) FindOrCreateGuestUser(phone string) (*user.User, error) {
 	foundUser, findErr := repo.FindByPhone(phone)
 
 	if findErr != nil {

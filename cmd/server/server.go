@@ -2,11 +2,8 @@ package main
 
 import (
 	"Kavka/app/router"
-	"Kavka/app/socket"
 	"Kavka/config"
 	"Kavka/database"
-	chatRepository "Kavka/internal/repository/chat"
-	messageRepository "Kavka/internal/repository/message"
 	userRepository "Kavka/internal/repository/user"
 	"Kavka/internal/service"
 	"Kavka/pkg/session"
@@ -53,14 +50,14 @@ func main() {
 	userService := service.NewUserService(userRepo, session, smsOtp)
 	router.NewUserRouter(app.Group("/users"), userService)
 
-	chatRepo := chatRepository.NewChatRepository(mongoDB)
-	chatService := service.NewChatService(chatRepo, userRepo)
+	// chatRepo := chatRepository.NewChatRepository(mongoDB)
+	// chatService := service.NewChatService(chatRepo, userRepo)
 
-	msgRepo := messageRepository.NewMessageRepository(mongoDB)
-	msgService := service.NewMessageService(msgRepo, chatRepo)
+	// msgRepo := messageRepository.NewMessageRepository(mongoDB)
+	// msgService := service.NewMessageService(msgRepo, chatRepo)
 
 	// Init Socket Server
-	socket.NewSocketService(app, userService, chatService, msgService)
+	// socket.NewSocketService(app, userService, chatService, msgService)
 
 	// Everything almost done!
 	err := app.Run(configs.App.HTTP.Address)

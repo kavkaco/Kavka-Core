@@ -2,9 +2,12 @@ package user
 
 import (
 	"errors"
+
 	"time"
 
+	"Kavka/pkg/session"
 	"Kavka/utils/random"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -45,4 +48,22 @@ func (u *User) FullName() string {
 
 func (u User) IsBanned() bool {
 	return u.Banned
+}
+
+// Interfaces
+
+type UserRepository interface {
+	Create(name string, lastName string, phone string) (*User, error)
+	Where(filter any) ([]*User, error)
+	FindByID(staticID primitive.ObjectID) (*User, error)
+	FindByUsername(username string) (*User, error)
+	FindByPhone(phone string) (*User, error)
+	FindOrCreateGuestUser(phone string) (*User, error)
+}
+
+type UserService interface {
+	Login(phone string) (int, error)
+	VerifyOTP(phone string, otp int) (*session.LoginTokens, error)
+	RefreshToken(refreshToken string, accessToken string) (string, error)
+	Authenticate(accessToken string) (*User, error)
 }
