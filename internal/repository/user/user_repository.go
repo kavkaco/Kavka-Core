@@ -28,7 +28,6 @@ func NewUserRepository(db *mongo.Database) user.UserRepository {
 
 func (repo *userRepository) Create(name string, lastName string, phone string) (*user.User, error) {
 	user := user.NewUser(phone)
-
 	user.Name = name
 	user.LastName = lastName
 
@@ -42,7 +41,7 @@ func (repo *userRepository) Create(name string, lastName string, phone string) (
 	return user, nil
 }
 
-func (repo *userRepository) Where(filter any) ([]*user.User, error) {
+func (repo *userRepository) Where(filter bson.M) ([]*user.User, error) {
 	cursor, err := repo.usersCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -58,7 +57,7 @@ func (repo *userRepository) Where(filter any) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *userRepository) findBy(filter bson.D) (*user.User, error) {
+func (repo *userRepository) findBy(filter bson.M) (*user.User, error) {
 	result, err := repo.Where(filter)
 	if err != nil {
 		return nil, err
@@ -74,17 +73,17 @@ func (repo *userRepository) findBy(filter bson.D) (*user.User, error) {
 }
 
 func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
-	filter := bson.D{{Key: "_id", Value: staticID}}
+	filter := bson.M{"_id": staticID}
 	return repo.findBy(filter)
 }
 
 func (repo *userRepository) FindByUsername(username string) (*user.User, error) {
-	filter := bson.D{{Key: "username", Value: username}}
+	filter := bson.M{"username": username}
 	return repo.findBy(filter)
 }
 
 func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
-	filter := bson.D{{Key: "phone", Value: phone}}
+	filter := bson.M{"phone": phone}
 	return repo.findBy(filter)
 }
 
