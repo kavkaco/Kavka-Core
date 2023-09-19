@@ -74,7 +74,7 @@ func (s *MyTestSuite) TestC_Find() {
 	}
 }
 
-func (s *MyTestSuite) Test_FindByID() {
+func (s *MyTestSuite) TestD_FindByID() {
 	cases := []struct {
 		name     string
 		StaticID primitive.ObjectID
