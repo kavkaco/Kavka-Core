@@ -52,12 +52,11 @@ func (u User) IsBanned() bool {
 // Interfaces
 
 type UserRepository interface {
-	Create(name string, lastName string, phone string) (*User, error)
+	Create(user *User) (*User, error)
 	Where(filter bson.M) ([]*User, error)
 	FindByID(staticID primitive.ObjectID) (*User, error)
 	FindByUsername(username string) (*User, error)
 	FindByPhone(phone string) (*User, error)
-	FindOrCreateGuestUser(phone string) (*User, error)
 }
 
 type UserService interface {

@@ -25,7 +25,9 @@ func NewUserService(userRepo user.UserRepository,
 // Login function gets user's phone and find it or created it in the database,
 // then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`.
 func (s *UserService) Login(phone string) (int, error) {
-	_, err := s.userRepo.FindOrCreateGuestUser(phone)
+	user := user.NewUser(phone)
+
+	_, err := s.userRepo.Create(user)
 	if err != nil {
 		return 0, err
 	}

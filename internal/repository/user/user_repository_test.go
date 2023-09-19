@@ -24,15 +24,15 @@ func (s *MyTestSuite) SetupSuite() {
 }
 
 func (s *MyTestSuite) TestA_Create() {
-	var (
-		name     = "John"
-		lastName = "Doe"
-	)
-	user, err := s.userRepo.Create(name, lastName, Phone)
+	user := user.NewUser(Phone)
+	user.Name = "John"
+	user.LastName = "Doe"
+
+	user, err := s.userRepo.Create(user)
 
 	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), user.Name, name)
-	assert.Equal(s.T(), user.LastName, lastName)
+	assert.Equal(s.T(), user.Name, user.Name)
+	assert.Equal(s.T(), user.LastName, user.LastName)
 	assert.Equal(s.T(), user.Phone, Phone)
 	assert.NotEmpty(s.T(), user.StaticID)
 

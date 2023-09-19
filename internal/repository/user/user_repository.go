@@ -26,11 +26,7 @@ func NewUserRepository(db *mongo.Database) user.UserRepository {
 	return &userRepository{db.Collection(database.UsersCollection)}
 }
 
-func (repo *userRepository) Create(name string, lastName string, phone string) (*user.User, error) {
-	user := user.NewUser(phone)
-	user.Name = name
-	user.LastName = lastName
-
+func (repo *userRepository) Create(user *user.User) (*user.User, error) {
 	_, err := repo.usersCollection.InsertOne(context.TODO(), user)
 	if database.IsDuplicateKeyError(err) {
 		return nil, ErrPhoneAlreadyTaken
@@ -85,21 +81,4 @@ func (repo *userRepository) FindByUsername(username string) (*user.User, error) 
 func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.M{"phone": phone}
 	return repo.findBy(filter)
-}
-
-func (repo *userRepository) FindOrCreateGuestUser(phone string) (*user.User, error) {
-	foundUser, findErr := repo.FindByPhone(phone)
-
-	if findErr != nil {
-		// Creating a new user with entered Phone
-		newUser, createErr := repo.Create("guest", "guest", phone)
-
-		if createErr != nil {
-			return nil, createErr
-		}
-
-		return newUser, nil
-	}
-
-	return foundUser, nil
 }

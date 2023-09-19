@@ -15,11 +15,7 @@ func NewMockUserRepository() user.UserRepository {
 	return &MockUserRepository{}
 }
 
-func (repo *MockUserRepository) Create(name string, lastName string, phone string) (*user.User, error) {
-	user := user.NewUser(phone)
-	user.Name = name
-	user.LastName = lastName
-
+func (repo *MockUserRepository) Create(user *user.User) (*user.User, error) {
 	repo.users = append(repo.users, user)
 
 	return user, nil
