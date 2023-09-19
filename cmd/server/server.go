@@ -2,8 +2,11 @@ package main
 
 import (
 	"github.com/kavkaco/Kavka-Core/app/router"
+	"github.com/kavkaco/Kavka-Core/app/socket"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
+	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
+	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
@@ -16,7 +19,6 @@ import (
 
 func main() {
 	// Define paths
-
 	TEMPLATES_PATH := config.ProjectRootPath + "/app/views/mail/"
 
 	// Load Configs
@@ -50,14 +52,14 @@ func main() {
 	userService := service.NewUserService(userRepo, session, smsOtp)
 	router.NewUserRouter(app.Group("/users"), userService)
 
-	// chatRepo := chatRepository.NewChatRepository(mongoDB)
-	// chatService := service.NewChatService(chatRepo, userRepo)
+	chatRepo := chatRepository.NewChatRepository(mongoDB)
+	chatService := service.NewChatService(chatRepo, userRepo)
 
-	// msgRepo := messageRepository.NewMessageRepository(mongoDB)
-	// msgService := service.NewMessageService(msgRepo, chatRepo)
+	messageRepo := messageRepository.NewMessageRepository(mongoDB)
+	messageRepository := service.NewMessageService(messageRepo, chatRepo)
 
 	// Init Socket Server
-	// socket.NewSocketService(app, userService, chatService, msgService)
+	socket.NewSocketService(app, userService, chatService, messageRepository)
 
 	// Everything almost done!
 	err := app.Run(configs.App.HTTP.Address)

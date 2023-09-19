@@ -3,7 +3,9 @@ package socket
 import (
 	"log"
 
-	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/message"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
 
 	"github.com/gin-gonic/gin"
@@ -20,9 +22,9 @@ var (
 )
 
 type Service struct {
-	userService *service.UserService
-	chatService *service.ChatService
-	msgService  *service.MessageService
+	userService user.UserService
+	chatService chat.ChatService
+	msgService  message.MessageService
 }
 
 type Message struct {
@@ -39,10 +41,8 @@ type MessageHandlerArgs struct {
 
 var upgrader = websocket.Upgrader{}
 
-func NewSocketService(app *gin.Engine, userService *service.UserService,
-	chatService *service.ChatService, msgService *service.MessageService,
-) *Service {
-	socketService := &Service{userService, chatService, msgService}
+func NewSocketService(app *gin.Engine, userService user.UserService, chatService chat.ChatService, messageService message.MessageService) *Service {
+	socketService := &Service{userService, chatService, messageService}
 
 	app.GET("/ws", socketService.handleWebsocket)
 

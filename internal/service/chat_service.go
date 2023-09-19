@@ -9,11 +9,11 @@ import (
 )
 
 type chatService struct {
-	chatRepo *chatRepository.ChatRepository
-	userRepo *user.UserRepository
+	chatRepo chat.ChatRepository
+	userRepo user.UserRepository
 }
 
-func NewChatService(chatRepo *chatRepository.ChatRepository, userRepo *user.UserRepository) *chatService {
+func NewChatService(chatRepo chat.ChatRepository, userRepo user.UserRepository) chat.ChatService {
 	return &chatService{chatRepo, userRepo}
 }
 

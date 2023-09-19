@@ -17,29 +17,26 @@ var (
 	ErrChatAlreadyExists = errors.New("chat already exists")
 )
 
-type ChatRepository struct {
+type chatRepository struct {
 	chatsCollection *mongo.Collection
 }
 
-func NewChatRepository(db *mongo.Database) *ChatRepository {
-	return &ChatRepository{
-		db.Collection(database.ChatsCollection),
-	}
+func NewChatRepository(db *mongo.Database) chat.ChatRepository {
+	return &chatRepository{db.Collection(database.ChatsCollection)}
 }
 
-func (repo *ChatRepository) Create(chatType string, chatDetail interface{}) (*chat.Chat, error) {
-	chat := chat.NewChat(chatType, chatDetail)
-	result, err := repo.chatsCollection.InsertOne(context.Background(), chat)
+func (repo *chatRepository) Create(newChat *chat.Chat) (*chat.Chat, error) {
+	result, err := repo.chatsCollection.InsertOne(context.Background(), newChat)
 	if err != nil {
 		return nil, err
 	}
 
-	chat.ChatID = result.InsertedID.(primitive.ObjectID)
+	newChat.ChatID = result.InsertedID.(primitive.ObjectID)
 
-	return chat, nil
+	return newChat, nil
 }
 
-func (repo *ChatRepository) Destroy(chatID primitive.ObjectID) error {
+func (repo *chatRepository) Destroy(chatID primitive.ObjectID) error {
 	filter := bson.M{"_id": chatID}
 
 	_, err := repo.chatsCollection.DeleteOne(context.TODO(), filter)
@@ -50,7 +47,7 @@ func (repo *ChatRepository) Destroy(chatID primitive.ObjectID) error {
 	return nil
 }
 
-func (repo *ChatRepository) Where(filter any) ([]*chat.Chat, error) {
+func (repo *chatRepository) Where(filter any) ([]*chat.Chat, error) {
 	cursor, err := repo.chatsCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -66,7 +63,7 @@ func (repo *ChatRepository) Where(filter any) ([]*chat.Chat, error) {
 	return chats, nil
 }
 
-func (repo *ChatRepository) findBy(filter any) (*chat.Chat, error) {
+func (repo *chatRepository) findBy(filter any) (*chat.Chat, error) {
 	result, err := repo.Where(filter)
 	if err != nil {
 		return nil, err
@@ -81,12 +78,12 @@ func (repo *ChatRepository) findBy(filter any) (*chat.Chat, error) {
 	return nil, ErrChatNotFound
 }
 
-func (repo *ChatRepository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
+func (repo *chatRepository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.D{{Key: "_id", Value: staticID}}
 	return repo.findBy(filter)
 }
 
-func (repo *ChatRepository) FindChatOrSidesByStaticID(staticID *primitive.ObjectID) (*chat.Chat, error) {
+func (repo *chatRepository) FindChatOrSidesByStaticID(staticID *primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{
 		"$or": []interface{}{
 			bson.M{"chat_detail.sides": bson.M{"$in": []*primitive.ObjectID{staticID}}},
@@ -97,7 +94,7 @@ func (repo *ChatRepository) FindChatOrSidesByStaticID(staticID *primitive.Object
 	return repo.findBy(filter)
 }
 
-func (repo *ChatRepository) FindBySides(sides [2]*primitive.ObjectID) (*chat.Chat, error) {
+func (repo *chatRepository) FindBySides(sides [2]*primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{
 		"chat_detail.sides":     sides,
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},

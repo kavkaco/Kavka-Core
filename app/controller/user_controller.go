@@ -6,7 +6,7 @@ import (
 
 	dto "github.com/kavkaco/Kavka-Core/app/dto"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
-	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
 
@@ -14,10 +14,10 @@ import (
 )
 
 type UserController struct {
-	userService *service.UserService
+	userService user.UserService
 }
 
-func NewUserController(userService *service.UserService) *UserController {
+func NewUserController(userService user.UserService) *UserController {
 	return &UserController{userService}
 }
 
