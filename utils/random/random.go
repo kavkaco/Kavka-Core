@@ -1,23 +1,26 @@
 package random
 
 import (
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"strconv"
-	"time"
 )
 
 const OTP_LENGTH = 6
 
 func GenerateOTP() int {
-	rand.Seed(time.Now().UnixNano()) //nolint
+	min := int64(math.Pow(10, OTP_LENGTH-1))
+	max := int64(math.Pow(10, OTP_LENGTH)) - 1
 
-	min := math.Pow(10, OTP_LENGTH-1)
-	max := math.Pow(10, OTP_LENGTH) - 1
+	randomNumber, err := rand.Int(rand.Reader, big.NewInt(max-min))
+	if err != nil {
+		panic(err)
+	}
 
-	number := rand.Intn(int(max-min) + int(min)) //nolint
+	number := int(randomNumber.Int64()) + int(min)
 
 	if len(strconv.Itoa(number)) != OTP_LENGTH {
 		number = GenerateOTP()
@@ -32,7 +35,7 @@ func GenerateUsername() string {
 
 func GenerateRandomFileName(n int) string {
 	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil { //nolint
+	if _, err := rand.Read(bytes); err != nil {
 		return ""
 	}
 
