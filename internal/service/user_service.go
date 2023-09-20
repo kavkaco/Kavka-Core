@@ -8,39 +8,24 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
-type UserService struct {
-	userRepo *repository.UserRepository
+type userService struct {
+	userRepo user.UserRepository
 	session  *session.Session
 	SmsOtp   *sms_otp.SMSOtp
 }
 
-func NewUserService(userRepo *repository.UserRepository,
-	session *session.Session, smsOtp *sms_otp.SMSOtp,
-) *UserService {
-	return &UserService{userRepo, session, smsOtp}
-}
-
-func (s *UserService) FindByUsername(username string) (*user.User, error) {
-	users, err := s.userRepo.Where(bson.D{{Key: "username", Value: username}})
-	if err != nil {
-		return nil, err
-	}
-
-	if len(users) > 0 && users[0] != nil {
-		return users[0], nil
-	}
-
-	return nil, repository.ErrUserNotFound
+func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_otp.SMSOtp) user.UserService {
+	return &userService{userRepo, session, smsOtp}
 }
 
 // Login function gets user's phone and find it or created it in the database,
 // then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`.
-func (s *UserService) Login(phone string) (int, error) {
-	_, err := s.userRepo.FindOrCreateGuestUser(phone)
+func (s *userService) Login(phone string) (int, error) {
+	user := user.NewUser(phone)
+
+	_, err := s.userRepo.Create(user)
 	if err != nil {
 		return 0, err
 	}
@@ -55,7 +40,7 @@ func (s *UserService) Login(phone string) (int, error) {
 
 // VerifyOTP function gets phone and otp code and checks if the otp code was correct for
 // mentioned phone, its gonna return an instance of *session.LoginTokens and an error.
-func (s *UserService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
+func (s *userService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
 	user, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
 		return nil, repository.ErrUserNotFound
@@ -70,7 +55,7 @@ func (s *UserService) VerifyOTP(phone string, otp int) (*session.LoginTokens, er
 }
 
 // RefreshToken function is used to refresh `Access Token`, It's returns a new `Access Token` and an error.
-func (s *UserService) RefreshToken(refreshToken string, accessToken string) (string, error) {
+func (s *userService) RefreshToken(refreshToken string, accessToken string) (string, error) {
 	// Decode tokens and detect user phone
 	payload, decodeRfErr := s.session.DecodeToken(refreshToken, jwt_manager.RefreshToken)
 	if decodeRfErr != nil {
@@ -103,7 +88,7 @@ func (s *UserService) RefreshToken(refreshToken string, accessToken string) (str
 }
 
 // `Authenticate` function is used to authenticate a user and returns a `*user.User` and an error.
-func (s *UserService) Authenticate(accessToken string) (*user.User, error) {
+func (s *userService) Authenticate(accessToken string) (*user.User, error) {
 	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
 	if decodeErr != nil {
 		return nil, errors.New("invalid access token")

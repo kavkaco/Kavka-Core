@@ -2,22 +2,22 @@ package service
 
 import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
-	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ChatService struct {
-	chatRepo *chatRepository.ChatRepository
-	userRepo *userRepository.UserRepository
+type chatService struct {
+	chatRepo chat.ChatRepository
+	userRepo user.UserRepository
 }
 
-func NewChatService(chatRepo *chatRepository.ChatRepository, userRepo *userRepository.UserRepository) *ChatService {
-	return &ChatService{chatRepo, userRepo}
+func NewChatService(chatRepo chat.ChatRepository, userRepo user.UserRepository) chat.ChatService {
+	return &chatService{chatRepo, userRepo}
 }
 
-func (s *ChatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
+func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
 	foundChat, foundChatErr := s.chatRepo.FindChatOrSidesByStaticID(&staticID)
 	if foundChatErr != nil {
 		return nil, foundChatErr
@@ -26,9 +26,7 @@ func (s *ChatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
 	return foundChat, nil
 }
 
-func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID,
-	targetStaticID primitive.ObjectID,
-) (*chat.Chat, error) {
+func (s *chatService) CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {
 	sides := [2]*primitive.ObjectID{
 		&userStaticID,
 		&targetStaticID,
@@ -39,31 +37,33 @@ func (s *ChatService) CreateDirect(userStaticID primitive.ObjectID,
 		return nil, chatRepository.ErrChatAlreadyExists
 	}
 
-	return s.chatRepo.Create(chat.ChatTypeDirect, &chat.DirectChatDetail{
+	newChat := chat.NewChat(chat.ChatTypeDirect, &chat.DirectChatDetail{
 		Sides: sides,
 	})
+
+	return s.chatRepo.Create(newChat)
 }
 
-func (s *ChatService) CreateGroup(userStaticID primitive.ObjectID,
-	title string, username string, description string,
-) (*chat.Chat, error) {
-	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
+func (s *chatService) CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+	newChat := chat.NewChat(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,
 		Members:     []*primitive.ObjectID{&userStaticID},
 		Admins:      []*primitive.ObjectID{&userStaticID},
 		Description: description,
 	})
+
+	return s.chatRepo.Create(newChat)
 }
 
-func (s *ChatService) CreateChannel(userStaticID primitive.ObjectID,
-	title string, username string, description string,
-) (*chat.Chat, error) {
-	return s.chatRepo.Create(chat.ChatTypeGroup, &chat.GroupChatDetail{
+func (s *chatService) CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
+	newChat := chat.NewChat(chat.ChatTypeGroup, &chat.GroupChatDetail{
 		Title:       title,
 		Username:    username,
 		Members:     []*primitive.ObjectID{&userStaticID},
 		Admins:      []*primitive.ObjectID{&userStaticID},
 		Description: description,
 	})
+
+	return s.chatRepo.Create(newChat)
 }

@@ -19,7 +19,6 @@ import (
 
 func main() {
 	// Define paths
-
 	TEMPLATES_PATH := config.ProjectRootPath + "/app/views/mail/"
 
 	// Load Configs
@@ -56,11 +55,11 @@ func main() {
 	chatRepo := chatRepository.NewChatRepository(mongoDB)
 	chatService := service.NewChatService(chatRepo, userRepo)
 
-	msgRepo := messageRepository.NewMessageRepository(mongoDB)
-	msgService := service.NewMessageService(msgRepo, chatRepo)
+	messageRepo := messageRepository.NewMessageRepository(mongoDB)
+	messageRepository := service.NewMessageService(messageRepo, chatRepo)
 
 	// Init Socket Server
-	socket.NewSocketService(app, userService, chatService, msgService)
+	socket.NewSocketService(app, userService, chatService, messageRepository)
 
 	// Everything almost done!
 	err := app.Run(configs.App.HTTP.Address)

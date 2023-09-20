@@ -17,17 +17,15 @@ var (
 	ErrNoAccess     = errors.New("no access")
 )
 
-type MessageRepository struct {
+type messageRepository struct {
 	chatsCollection *mongo.Collection
 }
 
-func NewMessageRepository(db *mongo.Database) *MessageRepository {
-	return &MessageRepository{
-		db.Collection(database.ChatsCollection),
-	}
+func NewMessageRepository(db *mongo.Database) message.MessageRepository {
+	return &messageRepository{db.Collection(database.ChatsCollection)}
 }
 
-func (repo *MessageRepository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
+func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
 	filter := bson.M{"_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 
@@ -43,9 +41,7 @@ func (repo *MessageRepository) Insert(chatID primitive.ObjectID, msg *message.Me
 }
 
 // REVIEW - fieldsToUpdate.
-func (repo *MessageRepository) Update(chatID primitive.ObjectID,
-	messageID primitive.ObjectID, fieldsToUpdate bson.M,
-) error {
+func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate []bson.M) error {
 	filter := bson.M{"_id": chatID, "messages._id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
@@ -61,7 +57,7 @@ func (repo *MessageRepository) Update(chatID primitive.ObjectID,
 	return nil
 }
 
-func (repo *MessageRepository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
+func (repo *messageRepository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
 	filter := bson.M{"_id": chatID}
 	update := bson.M{"$pull": bson.M{"messages": bson.M{"_id": messageID}}}
 

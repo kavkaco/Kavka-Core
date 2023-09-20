@@ -4,7 +4,9 @@ import (
 	"errors"
 	"time"
 
+	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/random"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -15,12 +17,12 @@ var (
 
 type User struct {
 	StaticID  primitive.ObjectID `bson:"_id"        json:"static_id"`
-	Name      string             `json:"name"`
+	Name      string             `bson:"name" json:"name"`
 	LastName  string             `bson:"last_name"  json:"last_name"`
-	Phone     string             `json:"phone"`
-	Username  string             `json:"username"`
-	Banned    bool               `json:"banned"`
-	Profile   Profile            `json:"profile"`
+	Phone     string             `bson:"phone" json:"phone"`
+	Username  string             `bson:"username" json:"username"`
+	Banned    bool               `bson:"banned" json:"banned"`
+	Profile   Profile            `bson:"profile" json:"profile"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 }
@@ -45,4 +47,21 @@ func (u *User) FullName() string {
 
 func (u User) IsBanned() bool {
 	return u.Banned
+}
+
+// Interfaces
+
+type UserRepository interface {
+	Create(user *User) (*User, error)
+	Where(filter bson.M) ([]*User, error)
+	FindByID(staticID primitive.ObjectID) (*User, error)
+	FindByUsername(username string) (*User, error)
+	FindByPhone(phone string) (*User, error)
+}
+
+type UserService interface {
+	Login(phone string) (int, error)
+	VerifyOTP(phone string, otp int) (*session.LoginTokens, error)
+	RefreshToken(refreshToken string, accessToken string) (string, error)
+	Authenticate(accessToken string) (*User, error)
 }
