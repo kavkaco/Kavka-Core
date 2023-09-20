@@ -78,7 +78,7 @@ func (repo *MockUserRepository) findBy(filter bson.M) (*user.User, error) {
 }
 
 func (repo *MockUserRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
-	filter := bson.M{"_id": staticID}
+	filter := bson.M{"id": staticID}
 	return repo.findBy(filter)
 }
 

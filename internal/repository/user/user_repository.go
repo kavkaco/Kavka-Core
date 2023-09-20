@@ -68,7 +68,7 @@ func (repo *userRepository) findBy(filter bson.M) (*user.User, error) {
 }
 
 func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
-	filter := bson.M{"_id": staticID}
+	filter := bson.M{"id": staticID}
 	return repo.findBy(filter)
 }
 
