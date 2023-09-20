@@ -7,9 +7,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/exp/slices"
 )
 
 type messageService struct {
@@ -50,31 +48,31 @@ func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, _ pri
 }
 
 // This function is used to check that user can delete message or not.
-func (s *messageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(chatID)
-	if chatErr != nil {
-		return false, chatErr
-	}
+// func (s *messageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
+// 	foundChat, chatErr := s.chatRepo.FindByID(chatID)
+// 	if chatErr != nil {
+// 		return false, chatErr
+// 	}
 
-	if foundChat.ChatType == chat.ChatTypeDirect {
-		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
-		return hasSide, nil
-	}
+// 	if foundChat.ChatType == chat.ChatTypeDirect {
+// 		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
+// 		return hasSide, nil
+// 	}
 
-	if foundChat.ChatType == chat.ChatTypeChannel {
-		admins := foundChat.ChatDetail.(chat.ChannelChatDetail).Admins
-		isAdmin := slices.Contains(admins, &staticID)
-		return isAdmin, nil
-	}
+// 	if foundChat.ChatType == chat.ChatTypeChannel {
+// 		admins := foundChat.ChatDetail.(chat.ChannelChatDetail).Admins
+// 		isAdmin := slices.Contains(admins, &staticID)
+// 		return isAdmin, nil
+// 	}
 
-	if foundChat.ChatType == chat.ChatTypeGroup {
-		members := foundChat.ChatDetail.(chat.GroupChatDetail).Members
-		isMember := slices.Contains(members, &staticID)
-		return isMember, nil
-	}
+// 	if foundChat.ChatType == chat.ChatTypeGroup {
+// 		members := foundChat.ChatDetail.(chat.GroupChatDetail).Members
+// 		isMember := slices.Contains(members, &staticID)
+// 		return isMember, nil
+// 	}
 
-	return false, nil
-}
+// 	return false, nil
+// }
 
 func (s *messageService) InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error) {
 	hasAccess, hasAccessErr := s.hasAccessToSendMessage(chatID, staticID)

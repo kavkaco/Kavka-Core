@@ -3,10 +3,9 @@ package dto
 import (
 	"net/http"
 
-	"github.com/kavkaco/Kavka-Core/app/presenters"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
 )
 
 type validationErrorResponse struct {

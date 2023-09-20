@@ -4,7 +4,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

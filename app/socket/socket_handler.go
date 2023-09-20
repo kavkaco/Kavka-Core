@@ -3,13 +3,12 @@ package socket
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

@@ -2,7 +2,6 @@ package chat
 
 import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,22 +12,22 @@ const (
 )
 
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"_id"         json:"chat_id"`
-	ChatType   string             `bson:"chat_type"   json:"chat_type"`
-	ChatDetail interface{}        `bson:"chat_detail" json:"chat_detail"`
-	Messages   []*message.Message `json:"messages"`
+	ChatID     primitive.ObjectID `bson:"id"          json:"chatId"`
+	ChatType   string             `bson:"chat_type"   json:"chatType"`
+	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
+	Messages   []*message.Message `bson:"messages"    json:"messages"`
 }
 
 // Chat Detail
 
 type ChannelChatDetail struct {
-	Title        string                `json:"title"`
-	Members      []*primitive.ObjectID `json:"members"`
-	Admins       []*primitive.ObjectID `json:"admins"`
+	Title        string                `bson:"title" json:"title"`
+	Members      []*primitive.ObjectID `bson:"members" json:"members"`
+	Admins       []*primitive.ObjectID `bson:"admins" json:"admins"`
 	Owner        *primitive.ObjectID   `bson:"owner"         json:"owner"`
-	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
-	Username     string                `json:"username"`
-	Description  string                `json:"description"`
+	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removedUsers"`
+	Username     string                `bson:"username" json:"username"`
+	Description  string                `bson:"description" json:"description"`
 }
 
 type GroupChatDetail struct {
@@ -36,7 +35,7 @@ type GroupChatDetail struct {
 	Members      []*primitive.ObjectID `json:"members"`
 	Admins       []*primitive.ObjectID `json:"admins"`
 	Owner        *primitive.ObjectID   `bson:"owner"         json:"owner"`
-	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removed_users"`
+	RemovedUsers []*primitive.ObjectID `bson:"removed_users" json:"removedUsers"`
 	Username     string                `json:"username"`
 	Description  string                `json:"description"`
 }

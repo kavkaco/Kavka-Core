@@ -6,7 +6,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

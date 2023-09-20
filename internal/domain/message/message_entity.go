@@ -13,9 +13,9 @@ const (
 )
 
 type Message struct {
-	MessageID primitive.ObjectID `bson:"message_id" json:"message_id"`
-	SenderID  primitive.ObjectID `bson:"sender_id"  json:"sender_id"`
-	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	MessageID primitive.ObjectID `bson:"message_id" json:"messageId"`
+	SenderID  primitive.ObjectID `bson:"sender_id"  json:"senderId"`
+	CreatedAt time.Time          `bson:"created_at" json:"createdAt"`
 	Edited    bool
 	Seen      bool
 

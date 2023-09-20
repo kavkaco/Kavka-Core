@@ -9,7 +9,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/utils/random"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -30,7 +29,7 @@ type (
 )
 
 func NewUploaderService(config *config.IConfig) *Service {
-	minioCredentials := config.MinIOCredentials
+	minioCredentials := config.MinIO
 
 	endpoint := minioCredentials.Endpoint
 	accessKeyID := minioCredentials.AccessKey
@@ -80,6 +79,7 @@ func (s *Service) UploadFile(bucketName string, filePath string, maxFileSize *in
 func (s *Service) DeleteFile(bucketName string, objectName string) error {
 	// Delete the file
 	opts := minio.RemoveObjectOptions{GovernanceBypass: true}
+
 	err := s.minioClient.RemoveObject(context.Background(), bucketName, objectName, opts)
 	if err != nil {
 		return err

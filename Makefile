@@ -16,6 +16,7 @@ test:
 ### Formatting, linting, and vetting
 fmt:
 	gofumpt -l -w .
+	gci write -s standard -s default ./*
 	go mod tidy
 
 check:

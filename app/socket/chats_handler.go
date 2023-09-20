@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/kavkaco/Kavka-Core/app/presenters"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -39,11 +38,8 @@ func CreateDirect(event string, args MessageHandlerArgs) bool {
 	}
 
 	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }
 
 func GetChat(event string, args MessageHandlerArgs) bool {
@@ -61,11 +57,8 @@ func GetChat(event string, args MessageHandlerArgs) bool {
 	}
 
 	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }
 
 func CreateGroup(event string, args MessageHandlerArgs) bool {
@@ -74,18 +67,14 @@ func CreateGroup(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, err := args.socketService.chatService.CreateGroup(args.staticID,
-			title.(string), username.(string), description.(string))
-		if err != nil {
+		chat, createErr := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
+		if createErr != nil {
 			return false
 		}
 
-		err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
-		if err != nil {
-			return false
-		}
+		err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		return true
+		return err == nil
 	}
 
 	return false
@@ -97,18 +86,14 @@ func CreateChannel(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, err := args.socketService.chatService.CreateChannel(args.staticID, title.(string),
-			username.(string), description.(string))
-		if err != nil {
+		chat, createErr := args.socketService.chatService.CreateChannel(args.staticID, title.(string), username.(string), description.(string))
+		if createErr != nil {
 			return false
 		}
 
-		err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
-		if err != nil {
-			return false
-		}
+		err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		return true
+		return err == nil
 	}
 
 	return false

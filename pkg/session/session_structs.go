@@ -1,14 +1,17 @@
 package session
 
 import (
+	"github.com/go-redis/redis/v8"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
-
-	"github.com/go-redis/redis/v8"
 )
 
+type sessionTokenData struct {
+	TokenType string `json:"tokenType"`
+}
+
 type loginPayload struct {
-	OTP int `json:"otp_code"`
+	OTP int `json:"otpCode"`
 }
 
 type Session struct {

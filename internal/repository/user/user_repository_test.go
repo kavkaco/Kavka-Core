@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const Phone = "user-phone"

@@ -24,13 +24,9 @@ func InsertTextMessage(_ string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	_, err := args.socketService.msgService.InsertTextMessage(chatID.(primitive.ObjectID),
-		args.staticID, messageContent.(string))
-	if err != nil {
-		return false
-	}
+	_, err := args.socketService.msgService.InsertTextMessage(chatID.(primitive.ObjectID), args.staticID, messageContent.(string))
 
-	return true
+	return err == nil
 }
 
 func DeleteMessage(_ string, args MessageHandlerArgs) bool {
@@ -48,9 +44,6 @@ func DeleteMessage(_ string, args MessageHandlerArgs) bool {
 	}
 
 	err := args.socketService.msgService.DeleteMessage(chatID.(primitive.ObjectID), messageID.(primitive.ObjectID))
-	if err != nil {
-		return false
-	}
 
-	return true
+	return err == nil
 }
