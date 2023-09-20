@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kavkaco/Kavka-Core/config"
-
 	"github.com/go-redis/redis/v8"
+	"github.com/kavkaco/Kavka-Core/config"
 )
 
 var (

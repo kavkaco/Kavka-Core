@@ -3,24 +3,24 @@ package user
 import "time"
 
 type Profile struct {
-	Biography     string         `json:"biography"`
-	ProfilePhotos []ProfilePhoto `json:"profile_photos"`
-	Devices       []Device       `json:"devices"`
-	Contacts      []string       `json:"contacts"`
-	BlockedUsers  []string       `json:"blocked_users"`
-	Setting       Setting        `json:"setting"`
-	LastSeen      time.Time      `json:"last_seen"`
+	Biography     string         `bson:"biography" json:"biography"`
+	ProfilePhotos []ProfilePhoto `bson:"profile_photos" json:"profilePhotos"`
+	Devices       []Device       `bson:"devices" json:"devices"`
+	Contacts      []string       `bson:"contacts" json:"contacts"`
+	BlockedUsers  []string       `bson:"blocked_users" json:"blockedUsers"`
+	Setting       Setting        `bson:"setting" json:"setting"`
+	LastSeen      time.Time      `bson:"last_seen" json:"lastSeen"`
 }
 
 type ProfilePhoto struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Order int    `json:"order"`
+	ID    string `bson:"id" json:"id"`
+	Name  string `bson:"name" json:"name"`
+	Order int    `bson:"order" json:"order"`
 }
 
 type Device struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	IP       string `json:"ip"`
-	Location string `json:"location"`
+	ID       string `bson:"id" json:"id"`
+	Name     string `bson:"name" json:"name"`
+	IP       string `bson:"ip" json:"ip"`
+	Location string `bson:"location" json:"location"`
 }

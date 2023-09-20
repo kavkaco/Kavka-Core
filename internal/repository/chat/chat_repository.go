@@ -6,7 +6,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,7 +36,7 @@ func (repo *chatRepository) Create(newChat *chat.Chat) (*chat.Chat, error) {
 }
 
 func (repo *chatRepository) Destroy(chatID primitive.ObjectID) error {
-	filter := bson.M{"_id": chatID}
+	filter := bson.M{"id": chatID}
 
 	_, err := repo.chatsCollection.DeleteOne(context.TODO(), filter)
 	if err != nil {
@@ -79,7 +78,7 @@ func (repo *chatRepository) findBy(filter any) (*chat.Chat, error) {
 }
 
 func (repo *chatRepository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
-	filter := bson.D{{Key: "_id", Value: staticID}}
+	filter := bson.D{{Key: "id", Value: staticID}}
 	return repo.findBy(filter)
 }
 
@@ -87,7 +86,7 @@ func (repo *chatRepository) FindChatOrSidesByStaticID(staticID *primitive.Object
 	filter := bson.M{
 		"$or": []interface{}{
 			bson.M{"chat_detail.sides": bson.M{"$in": []*primitive.ObjectID{staticID}}},
-			bson.M{"_id": staticID},
+			bson.M{"id": staticID},
 		},
 	}
 

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/router"
 	"github.com/kavkaco/Kavka-Core/app/socket"
 	"github.com/kavkaco/Kavka-Core/config"
@@ -11,10 +13,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
-
-	"github.com/gin-contrib/cors"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {

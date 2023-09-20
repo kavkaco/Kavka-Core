@@ -9,7 +9,7 @@ const (
 )
 
 type Setting struct {
-	ShowLastSeen      bool                  `json:"show_last_seen"`
-	TwoFA             bool                  `json:"two_fa"`
-	DeleteAccountTime DeleteAccountTimeType `json:"delete_account_time"`
+	ShowLastSeen      bool                  `bson:"show_last_seen" json:"showLastSeen"`
+	TwoFA             bool                  `bson:"two_fa" json:"twoFa"`
+	DeleteAccountTime DeleteAccountTimeType `bson:"delete_account_time" json:"deleteAccountTime"`
 }

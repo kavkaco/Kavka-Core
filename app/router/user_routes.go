@@ -1,10 +1,9 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/controller"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
-
-	"github.com/gin-gonic/gin"
 )
 
 type UserRouter struct {

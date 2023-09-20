@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/utils/random"
-
-	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -34,9 +33,7 @@ func makeExpiration(tokenType string) time.Duration {
 }
 
 func (session *Session) saveToken(token string, tokenType string) error {
-	payload := struct {
-		TokenType string `json:"token_type"`
-	}{
+	payload := sessionTokenData{
 		TokenType: tokenType,
 	}
 

@@ -22,3 +22,7 @@ redis:
   port: 6379
   db: 0
 sms:
+minio:
+  endpoint: 127.0.0.1:9000
+  access_key: uD3h2W3CONpYe8Tb4nbp
+  secret_key: fKF98iAk1eDSpdtdJWcJHgivjpF4Su4HCdgkpYvQ

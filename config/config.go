@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ type (
 		Mongo Mongo `yaml:"mongo"`
 		Redis Redis `yaml:"redis"`
 		SMS   `yaml:"sms"`
-		MinIOCredentials
+		MinIO MinIOCredentials `yaml:"minio"`
 	}
 	App struct {
 		Name   string `yaml:"name"`
@@ -61,9 +60,9 @@ type (
 		DBName   string `yaml:"db_name"`
 	}
 	MinIOCredentials struct {
-		Endpoint  string `json:"endpoint"   yaml:"endpoint"`
-		AccessKey string `json:"access_key" yaml:"access_key"`
-		SecretKey string `json:"secret_key" yaml:"secret_key"`
+		Endpoint  string `yaml:"endpoint"`
+		AccessKey string `yaml:"access_key"`
+		SecretKey string `yaml:"secret_key"`
 	}
 	// TODO - Add sms-service's configs.
 	SMS struct{}
@@ -111,22 +110,6 @@ func Read() *IConfig {
 	}
 
 	cfg.App.Auth.SECRET = strings.TrimSpace(string(secretData))
-
-	// Load MinIO credentials
-	filename := "minio-credentials.json"
-	credFile, credErr := os.ReadFile(ConfigsDirPath() + "/" + filename)
-	if credErr != nil {
-		panic(credErr)
-	}
-
-	var cred MinIOCredentials
-
-	jsonErr := json.Unmarshal(credFile, &cred)
-	if jsonErr != nil {
-		panic(jsonErr)
-	}
-
-	cfg.MinIOCredentials = cred
 
 	return cfg
 }

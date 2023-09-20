@@ -6,7 +6,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,7 +25,7 @@ func NewMessageRepository(db *mongo.Database) message.MessageRepository {
 }
 
 func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
-	filter := bson.M{"_id": chatID}
+	filter := bson.M{"id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
@@ -42,7 +41,7 @@ func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Me
 
 // REVIEW - fieldsToUpdate.
 func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate []bson.M) error {
-	filter := bson.M{"_id": chatID, "messages._id": messageID}
+	filter := bson.M{"id": chatID, "messages.id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
@@ -58,8 +57,8 @@ func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primi
 }
 
 func (repo *messageRepository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
-	filter := bson.M{"_id": chatID}
-	update := bson.M{"$pull": bson.M{"messages": bson.M{"_id": messageID}}}
+	filter := bson.M{"id": chatID}
+	update := bson.M{"$pull": bson.M{"messages": bson.M{"id": messageID}}}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {

@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	dto "github.com/kavkaco/Kavka-Core/app/dto"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
-
-	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {

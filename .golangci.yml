@@ -1,50 +1,40 @@
 linters:
-  enable-all: true
-  disable:
-    - scopelint # deprecated
-    - maligned # deprecated
-    - nosnakecase # deprecated
-    - interfacer # deprecated
-    - deadcode # deprecated
-    - ifshort # deprecated
-    - golint # deprecated
-    - structcheck # deprecated
-    - varcheck # deprecated
-    - exhaustivestruct # deprecated
-    - varnamelen
-    - wrapcheck
-    - paralleltest
-    - interfacebloat
-    - depguard
-    - gochecknoglobals
-    - gomnd
-    - cyclop
-    - nestif
-    - gochecknoinits
-    - dupl
-    - goconst
-    - forcetypeassert # Consider to enable it
-    - gosimple # Consider to enable it
-    - ineffassign # Consider to enable it
-    - stylecheck # Consider to enable it
-    - revive # Consider to enable it
-    - gocognit # Consider to enable it
-    - funlen # Consider to enable it
-    - forbidigo # Consider to enable it
-    - gci  # Consider to enable it (add it to make fmt)
-    - godox # Consider to enable it (only show warning)
-    - gocritic # Consider to enable it
-    - wsl # Consider to enable it
-    - testpackage # Consider to enable it (??)
-    - containedctx # Consider to enable it
-    - contextcheck # Consider to enable it
-    - exhaustive # Consider to enable it
-    - exhaustruct # Consider to enable it
-    - goerr113 # Consider to enable it
-    - wastedassign # Consider to enable it
-    - nonamedreturns # Consider to enable it
-    - nlreturn # Consider to enable it
-    - ireturn  # Consider to enable it (??)
+  disable-all: true
+  enable:
+    - errcheck # Checking for unchecked errors in Go code. These unchecked errors can be critical bugs in some cases.
+    - gosimple # Linter for Go source code that specializes in simplifying code.
+    - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string.
+    - ineffassign # Detects when assignments to existing variables are not used.
+    - unused # Checks Go code for unused constants, variables, functions and types.
+    - bodyclose # Checks whether HTTP response body is closed successfully.
+    - dogsled # Checks assignments with too many blank identifiers (e.g. x, , , _, := f()).
+    - errchkjson # Checks types passed to the json encoding functions.
+    - dupl # Tool for code clone detection.
+    - errname # Checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error.
+    - exhaustive # Check exhaustiveness of enum switch statements.
+    - gci # Gci controls Go package import order and makes it always deterministic.
+    - gocheckcompilerdirectives # Checks that go compiler directive comments (//go:) are valid.
+    - gocognit # Computes and checks the cognitive complexity of functions.
+    - goconst # Finds repeated strings that could be replaced by a constant.
+    - gocyclo # Computes and checks the cyclomatic complexity of functions.
+    - godot # Check if comments end in a period.
+    - gofmt # Gofmt checks whether code was gofmt-ed. By default this tool runs with -s option to check for code simplification.
+    - gofumpt # Gofumpt checks whether code was gofumpt-ed.
+    - gosec # Inspects source code for security problems.
+    - importas # Enforces consistent import aliases.
+    - loggercheck # Checks key value pairs for common logger libraries (kitlog,klog,logr,zap).
+    - maintidx # Maintidx measures the maintainability index of each function.
+    - misspell # Finds commonly misspelled English words in comments.
+    - musttag # Enforce field tags in (un)marshaled structs.
+    - nestif # Reports deeply nested if statements.
+    - noctx	# Noctx finds sending http request without context.Context.
+    - prealloc # Finds slice declarations that could potentially be pre-allocated.
+    - predeclared # Find code that shadows one of Go's predeclared identifiers.
+    - reassign # Checks that package variables are not reassigned.
+    - unconvert # Remove unnecessary type conversions.
+    - whitespace # Tool for detection of leading and trailing whitespace.
+    - tagliatelle
+    # - goerr113 # Go linter to check the errors handling expressions.
 
 linters-settings:
   gosimple:
@@ -55,9 +45,6 @@ linters-settings:
     disable: fieldalignment
     shadow:
         strict: true
-
-  godox:
-    severity: warning
 
   predeclared:
     # Comma-separated list of predeclared identifiers to not report on.
@@ -72,16 +59,7 @@ linters-settings:
     case:
       use-field-name: false
       rules:
-        json: snake
+        bson: snake
         yaml: snake
+        json: camel
 
-issues:
-  exclude-rules:
-    # disable funlen for all _test.go files
-    - path: _test.go
-      linters:
-        - funlen
-
-    - linters:
-        - govet
-      text: "shadow: declaration of \"err\" shadows"

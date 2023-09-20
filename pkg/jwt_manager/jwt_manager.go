@@ -4,9 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kavkaco/Kavka-Core/config"
-
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/kavkaco/Kavka-Core/config"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
