@@ -10,7 +10,7 @@ import (
 	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
-	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
+	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
 
 	"github.com/gin-contrib/cors"
 
@@ -46,10 +46,10 @@ func main() {
 
 	// ----- Init Services -----
 	session := session.NewSession(redisClient, configs.App.Auth)
-	smsOtp := sms_otp.NewSMSOtpService(&configs.SMS, TEMPLATES_PATH)
+	smsService := sms_service.NewSmsService(&configs.SMS, TEMPLATES_PATH)
 
 	userRepo := userRepository.NewUserRepository(mongoDB)
-	userService := service.NewUserService(userRepo, session, smsOtp)
+	userService := service.NewUserService(userRepo, session, smsService)
 	router.NewUserRouter(app.Group("/users"), userService)
 
 	chatRepo := chatRepository.NewChatRepository(mongoDB)
