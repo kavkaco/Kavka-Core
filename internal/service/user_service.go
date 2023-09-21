@@ -7,16 +7,16 @@ import (
 	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
-	"github.com/kavkaco/Kavka-Core/utils/sms_otp"
+	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
 )
 
 type userService struct {
 	userRepo user.UserRepository
 	session  *session.Session
-	SmsOtp   *sms_otp.SMSOtp
+	SmsOtp   *sms_service.SmsService
 }
 
-func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_otp.SMSOtp) user.UserService {
+func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.UserService {
 	return &userService{userRepo, session, smsOtp}
 }
 

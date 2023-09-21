@@ -1,4 +1,4 @@
-package sms_otp
+package sms_service
 
 import (
 	"os"
@@ -18,14 +18,14 @@ func TestSendSms(t *testing.T) {
 
 	receivers := []string{"+989368392346"}
 
-	smsOTP := NewSMSOtpService(&configs.SMS, templatesPath)
+	smsService := NewSmsService(&configs.SMS, templatesPath)
 
-	template, templateErr := smsOTP.Template("code_sent", struct{ Code int }{
+	template, templateErr := smsService.Template("code_sent", struct{ Code int }{
 		Code: 123456,
 	})
 	assert.NoError(t, templateErr)
 
-	err := smsOTP.SendSMS(template, receivers)
+	err := smsService.SendSMS(template, receivers)
 	assert.NoError(t, err)
 
 	t.Log(template)
