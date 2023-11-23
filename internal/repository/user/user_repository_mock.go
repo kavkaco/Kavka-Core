@@ -30,15 +30,15 @@ func (repo *MockUserRepository) Where(filter bson.M) ([]*user.User, error) {
 		filterValue = v
 	}
 
-	var foundUsers []*user.User
+	var result []*user.User
 
 	if len(repo.users) == 0 {
-		return foundUsers, nil
+		return result, nil
 	}
 
-	for _, user := range repo.users {
+	for _, row := range repo.users {
 		// Check filter for user
-		fields := structs.Fields(user)
+		fields := structs.Fields(row)
 
 		for _, field := range fields {
 			tagValue := field.Tag("bson")
@@ -48,18 +48,18 @@ func (repo *MockUserRepository) Where(filter bson.M) ([]*user.User, error) {
 				switch filterValue := filterValue.(type) {
 				case primitive.ObjectID:
 					if fieldValue.(primitive.ObjectID).Hex() == filterValue.Hex() {
-						foundUsers = append(foundUsers, user)
+						result = append(result, row)
 					}
 				case any:
 					if fieldValue == filterValue {
-						foundUsers = append(foundUsers, user)
+						result = append(result, row)
 					}
 				}
 			}
 		}
 	}
 
-	return foundUsers, nil
+	return result, nil
 }
 
 func (repo *MockUserRepository) findBy(filter bson.M) (*user.User, error) {
