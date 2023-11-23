@@ -19,7 +19,7 @@ type Chat struct {
 	ChatID     primitive.ObjectID `bson:"id"          json:"chatId"`
 	ChatType   string             `bson:"chat_type"   json:"chatType"`
 	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
-	Messages   []*message.Message `bson:"messages"    json:"messages"`
+	Messages   []message.Message  `bson:"messages"    json:"messages"`
 }
 
 // Chat Detail
@@ -88,7 +88,7 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.ChatType = chatType
 	m.ChatDetail = chatDetail
 	m.ChatID = primitive.NewObjectID()
-	m.Messages = []*message.Message{}
+	m.Messages = []message.Message{}
 
 	return m
 }
