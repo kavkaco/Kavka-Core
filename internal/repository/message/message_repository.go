@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +12,7 @@ import (
 
 var (
 	ErrChatNotFound = errors.New("chat not found")
+	ErrMsgNotFound  = errors.New("message not found")
 	ErrNoAccess     = errors.New("no access")
 )
 
@@ -20,7 +20,7 @@ type messageRepository struct {
 	chatsCollection *mongo.Collection
 }
 
-func NewMessageRepository(db *mongo.Database) message.MessageRepository {
+func NewMessageRepository(db *mongo.Database) message.Repository {
 	return &messageRepository{db.Collection(database.ChatsCollection)}
 }
 
@@ -39,8 +39,7 @@ func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Me
 	return msg, nil
 }
 
-// REVIEW - fieldsToUpdate.
-func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate []bson.M) error {
+func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error {
 	filter := bson.M{"id": chatID, "messages.id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 

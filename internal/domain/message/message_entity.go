@@ -16,8 +16,8 @@ type Message struct {
 	MessageID primitive.ObjectID `bson:"message_id" json:"messageId"`
 	SenderID  primitive.ObjectID `bson:"sender_id"  json:"senderId"`
 	CreatedAt time.Time          `bson:"created_at" json:"createdAt"`
-	Edited    bool
-	Seen      bool
+	Edited    bool               `bson:"edited" json:"edited"`
+	Seen      bool               `bson:"seen" json:"seen"`
 
 	// MessageType
 	Type    string
@@ -50,13 +50,13 @@ func NewMessage(senderID primitive.ObjectID, messageType string, content interfa
 
 // Interfaces
 
-type MessageRepository interface {
+type Repository interface {
 	Insert(chatID primitive.ObjectID, msg *Message) (*Message, error)
-	Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate []bson.M) error
+	Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error
 	Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error
 }
 
-type MessageService interface {
+type Service interface {
 	InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*Message, error)
 	DeleteMessage(chatID primitive.ObjectID, messageID primitive.ObjectID) error
 }

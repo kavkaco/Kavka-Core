@@ -69,9 +69,9 @@ func (repo *MockUserRepository) findBy(filter bson.M) (*user.User, error) {
 	}
 
 	if len(users) > 0 {
-		user := users[len(users)-1]
+		result := users[len(users)-1]
 
-		return user, nil
+		return result, nil
 	}
 
 	return nil, ErrUserNotFound
@@ -90,8 +90,4 @@ func (repo *MockUserRepository) FindByUsername(username string) (*user.User, err
 func (repo *MockUserRepository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.M{"phone": phone}
 	return repo.findBy(filter)
-}
-
-func (repo *MockUserRepository) FindOrCreateGuestUser(phone string) (*user.User, error) {
-	return nil, nil
 }
