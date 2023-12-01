@@ -92,3 +92,12 @@ func (repo *repository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (
 
 	return repo.findBy(filter)
 }
+
+func (repo *repository) FindBySides(sides [2]primitive.ObjectID) (*chat.Chat, error) {
+	filter := bson.M{
+		"chat_detail.sides":     sides,
+		"chat_detail.chat_type": bson.M{"$ne": "direct"},
+	}
+
+	return repo.findBy(filter)
+}
