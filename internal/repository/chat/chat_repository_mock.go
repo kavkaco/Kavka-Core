@@ -2,12 +2,13 @@ package repository
 
 import (
 	"errors"
+	"reflect"
+
 	"github.com/fatih/structs"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"reflect"
 )
 
 type MockRepository struct {
@@ -110,6 +111,21 @@ func (repo *MockRepository) FindChatOrSidesByStaticID(staticID primitive.ObjectI
 		}
 	} else {
 		return resultByID, nil
+	}
+
+	return nil, ErrChatNotFound
+}
+
+func (repo *MockRepository) FindBySides(sides [2]primitive.ObjectID) (*chat.Chat, error) {
+	for _, c := range repo.chats {
+		if c.ChatType == chat.TypeDirect {
+			chatDetail, _ := utils.TypeConverter[chat.DirectChatDetail](c.ChatDetail)
+			chatSides := chatDetail.Sides
+
+			if chatSides[0].Hex() == sides[0].Hex() && chatSides[1].Hex() == sides[1].Hex() {
+				return &c, nil
+			}
+		}
 	}
 
 	return nil, ErrChatNotFound
