@@ -10,11 +10,11 @@ import (
 )
 
 var (
-	RF_EXPIRE_DAY = 60 * 24 * time.Hour // 60 days
-	AT_EXPIRE_DAY = 24 * time.Hour      // 1 days
+	RfExpireDay = 60 * 24 * time.Hour // 60 days
+	AtExpireDay = 24 * time.Hour      // 1 day
 )
 
-var JWT_ALGORITHM = jwt.SigningMethodHS512
+var JwtAlgorithm = jwt.SigningMethodHS512
 
 // define errors.
 var (
@@ -40,7 +40,7 @@ const (
 	AccessToken  string = "access"
 )
 
-const DEFAULT_OTP_EXPIRE = 120 * time.Second
+const DefaultOtpExpire = 120 * time.Second
 
 func NewJwtManager(configs config.Auth, otpExpire time.Duration) *JwtManager {
 	return &JwtManager{
@@ -53,7 +53,7 @@ func (m *JwtManager) Generate(tokenType string, staticID primitive.ObjectID) (st
 	createdAt := time.Now()
 	claims := &JwtClaims{StaticID: staticID, TokenType: tokenType, CreatedAt: createdAt}
 
-	token := jwt.NewWithClaims(JWT_ALGORITHM, claims)
+	token := jwt.NewWithClaims(JwtAlgorithm, claims)
 	return token.SignedString([]byte(m.secretKey))
 }
 

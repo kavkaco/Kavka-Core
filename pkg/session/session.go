@@ -13,7 +13,7 @@ import (
 )
 
 func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
-	jwtManager := jwt_manager.NewJwtManager(authConfigs, jwt_manager.DEFAULT_OTP_EXPIRE)
+	jwtManager := jwt_manager.NewJwtManager(authConfigs, jwt_manager.DefaultOtpExpire)
 	return &Session{redisClient, authConfigs, jwtManager}
 }
 
@@ -22,11 +22,11 @@ func makeExpiration(tokenType string) time.Duration {
 	var expiration time.Duration
 
 	if tokenType == jwt_manager.RefreshToken {
-		expiration = jwt_manager.RF_EXPIRE_DAY
+		expiration = jwt_manager.RfExpireDay
 	}
 
 	if tokenType == jwt_manager.AccessToken {
-		expiration = jwt_manager.AT_EXPIRE_DAY
+		expiration = jwt_manager.AtExpireDay
 	}
 
 	return expiration
@@ -81,7 +81,7 @@ func (session *Session) Login(phone string) (int, error) {
 		return 0, err
 	}
 
-	err = session.redisClient.Set(context.Background(), phone, payload, jwt_manager.DEFAULT_OTP_EXPIRE).Err()
+	err = session.redisClient.Set(context.Background(), phone, payload, jwt_manager.DefaultOtpExpire).Err()
 	if err != nil {
 		return 0, err
 	}

@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-
+	"fmt"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
@@ -22,20 +22,26 @@ func NewUserService(userRepo user.UserRepository, session *session.Session, smsO
 
 // Login function gets user's phone and find it or created it in the database,
 // then generates an otp code and stores it in redis store and returns `otp code` as int and an `error`.
-func (s *userService) Login(phone string) (int, error) {
+func (s *userService) Login(phone string) error {
 	newUser := user.NewUser(phone)
 
-	_, err := s.userRepo.Create(newUser)
-	if err != nil {
-		return 0, err
+	_, findErr := s.userRepo.FindByPhone(phone)
+	if errors.Is(findErr, repository.ErrUserNotFound) {
+		// User does not exist then it should be created!
+		_, err := s.userRepo.Create(newUser)
+		if err != nil {
+			return err
+		}
 	}
 
 	otp, loginErr := s.session.Login(phone)
 	if loginErr != nil {
-		return 0, loginErr
+		return loginErr
 	}
 
-	return otp, nil
+	s.SmsOtp.SendSMS(fmt.Sprintf("OTP Code: %d", otp), []string{phone})
+
+	return nil
 }
 
 // VerifyOTP function gets phone and otp code and checks if the otp code was correct for

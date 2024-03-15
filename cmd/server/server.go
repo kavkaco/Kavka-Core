@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// Define paths
-	TEMPLATES_PATH := config.ProjectRootPath + "/app/views/mail/"
+	TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
 
 	// Load Configs
 	configs := config.Read()
@@ -41,7 +41,7 @@ func main() {
 
 	// ----- Init Services -----
 	session := session.NewSession(redisClient, configs.App.Auth)
-	smsService := sms_service.NewSmsService(&configs.SMS, TEMPLATES_PATH)
+	smsService := sms_service.NewSmsService(&configs.SMS, TemplatesPath)
 
 	userRepo := userRepository.NewUserRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsService)
