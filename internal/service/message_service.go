@@ -11,11 +11,11 @@ import (
 )
 
 type messageService struct {
-	msgRepo  message.MessageRepository
-	chatRepo chat.ChatRepository
+	msgRepo  message.Repository
+	chatRepo chat.Repository
 }
 
-func NewMessageService(msgRepo message.MessageRepository, chatRepo chat.ChatRepository) message.MessageService {
+func NewMessageService(msgRepo message.Repository, chatRepo chat.Repository) message.Service {
 	return &messageService{msgRepo, chatRepo}
 }
 
@@ -34,7 +34,7 @@ func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, _ pri
 	// 	isAdmin := slices.Contains(admins, &staticID)
 	// 	return isAdmin, nil
 	// } else
-	if foundChat.ChatType == chat.ChatTypeGroup {
+	if foundChat.ChatType == chat.TypeGroup {
 		log.Println(reflect.TypeOf(foundChat.ChatDetail).Name())
 		// members := foundChat.ChatDetail.(*chat.GroupChatDetail).Members
 		// isMember := slices.Contains(members, &staticID)

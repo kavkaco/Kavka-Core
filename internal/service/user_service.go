@@ -21,11 +21,11 @@ func NewUserService(userRepo user.UserRepository, session *session.Session, smsO
 }
 
 // Login function gets user's phone and find it or created it in the database,
-// then generates a otp code and stores it in redis store and returns `otp code` as int and an `error`.
+// then generates an otp code and stores it in redis store and returns `otp code` as int and an `error`.
 func (s *userService) Login(phone string) (int, error) {
-	user := user.NewUser(phone)
+	newUser := user.NewUser(phone)
 
-	_, err := s.userRepo.Create(user)
+	_, err := s.userRepo.Create(newUser)
 	if err != nil {
 		return 0, err
 	}
@@ -39,14 +39,14 @@ func (s *userService) Login(phone string) (int, error) {
 }
 
 // VerifyOTP function gets phone and otp code and checks if the otp code was correct for
-// mentioned phone, its gonna return an instance of *session.LoginTokens and an error.
+// mentioned phone, it's going to return an instance of *session.LoginTokens and an error.
 func (s *userService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
-	user, err := s.userRepo.FindByPhone(phone)
+	foundUser, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
 		return nil, repository.ErrUserNotFound
 	}
 
-	tokens, ok := s.session.VerifyOTP(phone, otp, user.StaticID)
+	tokens, ok := s.session.VerifyOTP(phone, otp, foundUser.StaticID)
 	if !ok {
 		return nil, repository.ErrInvalidOtpCode
 	}
@@ -67,13 +67,13 @@ func (s *userService) RefreshToken(refreshToken string, accessToken string) (str
 		return "", errors.New("invalid access token")
 	}
 
-	user, findErr := s.userRepo.FindByID(payload.StaticID)
+	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
 	if findErr != nil {
 		return "", findErr
 	}
 
 	// Generate & Refresh current access token
-	newAccessToken, ok := s.session.NewAccessToken(user.StaticID)
+	newAccessToken, ok := s.session.NewAccessToken(foundUser.StaticID)
 	if !ok {
 		return "", errors.New("refreshing token failed")
 	}
@@ -87,17 +87,17 @@ func (s *userService) RefreshToken(refreshToken string, accessToken string) (str
 	return newAccessToken, nil
 }
 
-// `Authenticate` function is used to authenticate a user and returns a `*user.User` and an error.
+// Authenticate function is used to authenticate a user and returns a `*user.User` and an error.
 func (s *userService) Authenticate(accessToken string) (*user.User, error) {
 	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
 	if decodeErr != nil {
 		return nil, errors.New("invalid access token")
 	}
 
-	user, findErr := s.userRepo.FindByID(payload.StaticID)
+	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
 	if findErr != nil {
 		return nil, jwt_manager.ErrInvalidToken
 	}
 
-	return user, nil
+	return foundUser, nil
 }
