@@ -23,7 +23,7 @@ type errorResponse struct {
 var validate = validator.New()
 
 func Validate[Dto interface{}](ctx *gin.Context) *Dto {
-	validationErrors := []errorResponse{}
+	var validationErrors []errorResponse
 
 	body := new(Dto)
 
