@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var jwtManager = NewJwtManager(config.Auth{SECRET: "sample_secret"}, DEFAULT_OTP_EXPIRE)
+var jwtManager = NewJwtManager(config.Auth{SECRET: "sample_secret"}, DefaultOtpExpire)
 
 var StaticID = primitive.NewObjectID()
 

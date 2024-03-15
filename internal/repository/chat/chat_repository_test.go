@@ -1,6 +1,11 @@
 package repository
 
 import (
+	"testing"
+
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/utils"
+	"github.com/stretchr/testify/assert"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -97,7 +102,7 @@ func (s *MyTestSuite) TestB_FindByID() {
 	}
 }
 
-func (s *MyTestSuite) TestE_FindChatOrSidesByStaticID() {
+func (s *MyTestSuite) TestC_FindChatOrSidesByStaticID() {
 	cases := []struct {
 		name     string
 		success  bool
@@ -112,7 +117,8 @@ func (s *MyTestSuite) TestE_FindChatOrSidesByStaticID() {
 			name:     "Find the direct chat by staticID",
 			staticID: s.sampleDirectChat.ChatID,
 			success:  true,
-		}, {
+		},
+    {
 			name:     "Find the channel chat by staticID",
 			staticID: s.sampleChannelChat.ChatID,
 			success:  true,
@@ -122,6 +128,38 @@ func (s *MyTestSuite) TestE_FindChatOrSidesByStaticID() {
 	for _, tt := range cases {
 		s.T().Run(tt.name, func(t *testing.T) {
 			user, err := s.chatRepo.FindChatOrSidesByStaticID(tt.staticID)
+
+			if tt.success {
+				assert.NoError(s.T(), err)
+				assert.NotEmpty(s.T(), user)
+			} else {
+				assert.Empty(s.T(), user)
+			}
+		})
+	}
+}
+
+func (s *MyTestSuite) TestD_FindBySides() {
+	cases := []struct {
+		name    string
+		success bool
+		sides   [2]primitive.ObjectID
+	}{
+		{
+			name:    "Must find the created chat using by the sides",
+			sides:   s.sampleDirectChatSides,
+			success: true,
+		},
+		{
+			name:    "Should not find anything",
+			sides:   [2]primitive.ObjectID{primitive.NilObjectID, primitive.NilObjectID},
+			success: false,
+		},
+	}
+
+	for _, tt := range cases {
+		s.T().Run(tt.name, func(t *testing.T) {
+			user, err := s.chatRepo.FindBySides(tt.sides)
 
 			if tt.success {
 				assert.NoError(s.T(), err)

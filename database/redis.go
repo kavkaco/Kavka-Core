@@ -26,6 +26,6 @@ func GetRedisDBInstance(redisConfigs config.Redis) *redis.Client {
 
 		redisInstance = client
 	}
-
 	return redisInstance
+
 }

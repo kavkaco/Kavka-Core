@@ -1,6 +1,7 @@
 package bearer
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ func extractTokenFromHeader(authHeader string) string {
 
 func AccessToken(ctx *gin.Context) (string, bool) {
 	bearerHeader := ctx.GetHeader("Authorization")
+
+	fmt.Println(bearerHeader)
 
 	if len(bearerHeader) == 0 {
 		err := presenters.ResponseBadRequest(ctx)

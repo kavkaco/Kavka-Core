@@ -10,7 +10,7 @@ type ChatDto struct {
 }
 
 func ChatAsJSON(_ string, obj *chat.Chat) interface{} {
-	if obj.ChatType == chat.ChatTypeDirect {
+	if obj.ChatType == chat.TypeDirect {
 		obj.ChatDetail = nil
 	}
 

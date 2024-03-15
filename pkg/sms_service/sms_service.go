@@ -22,14 +22,14 @@ func NewSmsService(configs *config.SMS, templatesPath string) *SmsService {
 }
 
 func (s *SmsService) SendSMS(msg string, receivers []string) error {
-	if config.ENV == "devel" {
-		fmt.Println("------ SMS Sent ------")
-		fmt.Printf("msg: \n%s\n", strings.TrimSpace(msg))
-		fmt.Println("--------------")
-		fmt.Printf("receivers count: %d\n", len(receivers))
-		fmt.Println("SMS Sent!")
-		return nil
-	}
+	//if config.CurrentEnv == "devel" {
+	fmt.Println("------ SMS Sent ------")
+	fmt.Printf("%s\n", strings.TrimSpace(msg))
+	fmt.Println("--------------")
+	fmt.Printf("receivers count: %d\n", len(receivers))
+	fmt.Println("SMS Sent!")
+	return nil
+	//}
 
 	// TODO - Implement SMS sender for production
 

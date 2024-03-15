@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,14 +23,11 @@ func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
 	body := dto.Validate[dto.UserLoginDto](ctx)
 	phone := body.Phone
 
-	otp, err := ctrl.userService.Login(phone)
+	err := ctrl.userService.Login(phone)
 	if err != nil {
 		presenters.ResponseError(ctx, err)
 		return
 	}
-
-	// FIXME - Gonna be removed after implementing SMS service.
-	fmt.Printf("OTP Code: %d\n", otp)
 
 	ctx.JSON(http.StatusOK, presenters.SimpleMessageDto{
 		Code:    200,

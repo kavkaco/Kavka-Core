@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// define errors.
 var (
 	ErrEmptyPassword = errors.New("empty password")
 )
@@ -60,7 +59,7 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	Login(phone string) (int, error)
+	Login(phone string) error
 	VerifyOTP(phone string, otp int) (*session.LoginTokens, error)
 	RefreshToken(refreshToken string, accessToken string) (string, error)
 	Authenticate(accessToken string) (*User, error)
