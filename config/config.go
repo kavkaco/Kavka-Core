@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	ENV_ITEMS = []string{"devel", "prod"}
-	ENV       string
+	EnvItems   = []string{"devel", "prod"}
+	CurrentEnv string
 )
 
 type (
@@ -83,9 +83,9 @@ func Read() *IConfig {
 	// Load ENV
 	env := os.Getenv("ENV")
 	if len(strings.TrimSpace(env)) == 0 {
-		ENV = ENV_ITEMS[0]
-	} else if slices.Contains(ENV_ITEMS, env) {
-		ENV = env
+		env = EnvItems[0]
+	} else if slices.Contains(EnvItems, env) {
+		CurrentEnv = env
 	} else {
 		panic(errors.New("Invalid ENV key: " + env))
 	}
