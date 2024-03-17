@@ -1,25 +1,41 @@
 package repository
 
 import (
+	"context"
 	"testing"
 
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const Phone = "user-phone"
 
 type MyTestSuite struct {
 	suite.Suite
+	db         *mongo.Database
 	userRepo   user.UserRepository
 	sampleUser user.User
 }
 
 func (s *MyTestSuite) SetupSuite() {
-	s.userRepo = NewMockUserRepository()
+	// Connecting to test database!
+	cfg := config.Read()
+	cfg.Mongo.DBName = "test"
+	db, connErr := database.GetMongoDBInstance(cfg.Mongo)
+	assert.NoError(s.T(), connErr)
+	s.db = db
+
+	// Drop test db
+	err := s.db.Drop(context.TODO())
+	assert.NoError(s.T(), err)
+
+	s.userRepo = NewUserRepository(db)
 }
 
 func (s *MyTestSuite) TestA_Create() {

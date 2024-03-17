@@ -3,7 +3,6 @@ package socket
 import (
 	"log"
 
-	"github.com/kavkaco/Kavka-Core/app/presenters"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -32,12 +31,13 @@ func CreateDirect(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	chat, err := args.socketService.chatService.CreateDirect(args.staticID, staticID.(primitive.ObjectID))
+	_, err := args.socketService.chatService.CreateDirect(args.staticID, staticID.(primitive.ObjectID))
 	if err != nil {
 		return false
 	}
 
-	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	// FIXME
+	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
 	return err == nil
 }
@@ -50,13 +50,14 @@ func GetChat(event string, args MessageHandlerArgs) bool {
 		return false
 	}
 
-	chat, err := args.socketService.chatService.GetChat(staticID.(primitive.ObjectID))
+	_, err := args.socketService.chatService.GetChat(staticID.(primitive.ObjectID))
 	if err != nil {
 		log.Println("find chat error in socket:", err)
 		return false
 	}
 
-	err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	// FIXME
+	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
 	return err == nil
 }
@@ -67,14 +68,15 @@ func CreateGroup(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, createErr := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
+		_, createErr := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
 		if createErr != nil {
 			return false
 		}
 
-		err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		// FIXME
+		// err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		return err == nil
+		return true
 	}
 
 	return false
@@ -86,14 +88,16 @@ func CreateChannel(event string, args MessageHandlerArgs) bool {
 	description := args.message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		chat, createErr := args.socketService.chatService.CreateChannel(args.staticID, title.(string), username.(string), description.(string))
+		_, createErr := args.socketService.chatService.CreateChannel(args.staticID, title.(string), username.(string), description.(string))
 		if createErr != nil {
 			return false
 		}
 
-		err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+		// FIXME
+		// err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		return err == nil
+		// return err == nil
+		return true
 	}
 
 	return false

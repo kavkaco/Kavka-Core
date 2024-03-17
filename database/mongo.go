@@ -43,6 +43,12 @@ func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
 			return nil, err
 		}
 
+		// Send a ping to confirm a successful connection
+		var result bson.M
+		if err := client.Database("test").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
+			return nil, err
+		}
+
 		mongoInstance = client.Database(mongoConfigs.DBName)
 
 		collectionsConfigurations(mongoInstance)

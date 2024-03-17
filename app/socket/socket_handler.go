@@ -21,7 +21,7 @@ var (
 )
 
 type Service struct {
-	userService user.UserService
+	userService user.Service
 	chatService chat.Service
 	msgService  message.Service
 }
@@ -40,7 +40,7 @@ type MessageHandlerArgs struct {
 
 var upgrader = websocket.Upgrader{}
 
-func NewSocketService(app *gin.Engine, userService user.UserService, chatService chat.Service, messageService message.Service) *Service {
+func NewSocketService(app *gin.Engine, userService user.Service, chatService chat.Service, messageService message.Service) *Service {
 	socketService := &Service{userService, chatService, messageService}
 
 	app.GET("/ws", socketService.handleWebsocket)

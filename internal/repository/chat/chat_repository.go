@@ -25,18 +25,16 @@ func NewRepository(db *mongo.Database) chat.Repository {
 }
 
 func (repo *repository) Create(newChat chat.Chat) (*chat.Chat, error) {
-	result, err := repo.chatsCollection.InsertOne(context.Background(), newChat)
+	_, err := repo.chatsCollection.InsertOne(context.Background(), newChat)
 	if err != nil {
 		return nil, err
 	}
-
-	newChat.ChatID = result.InsertedID.(primitive.ObjectID)
 
 	return &newChat, nil
 }
 
 func (repo *repository) Destroy(chatID primitive.ObjectID) error {
-	filter := bson.M{"id": chatID}
+	filter := bson.M{"chat_id": chatID}
 
 	_, err := repo.chatsCollection.DeleteOne(context.TODO(), filter)
 	if err != nil {
@@ -77,8 +75,23 @@ func (repo *repository) findBy(filter bson.M) (*chat.Chat, error) {
 	return nil, ErrChatNotFound
 }
 
+func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
+	filter := bson.M{
+		"chat_detail.members": bson.M{
+			"$in": bson.A{userStaticID},
+		},
+	}
+
+	chats, err := repo.Where(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return chats, nil
+}
+
 func (repo *repository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
-	filter := bson.M{"id": staticID}
+	filter := bson.M{"chat_id": staticID}
 	return repo.findBy(filter)
 }
 
@@ -86,7 +99,7 @@ func (repo *repository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (
 	filter := bson.M{
 		"$or": []interface{}{
 			bson.M{"chat_detail.sides": bson.M{"$in": []primitive.ObjectID{staticID}}},
-			bson.M{"id": staticID},
+			bson.M{"chat_id": staticID},
 		},
 	}
 
