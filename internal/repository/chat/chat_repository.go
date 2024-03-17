@@ -77,6 +77,21 @@ func (repo *repository) findBy(filter bson.M) (*chat.Chat, error) {
 	return nil, ErrChatNotFound
 }
 
+func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
+	filter := bson.M{
+		"chat_detail.members": bson.M{
+			"$in": bson.A{userStaticID},
+		},
+	}
+
+	chats, err := repo.Where(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return chats, nil
+}
+
 func (repo *repository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{"id": staticID}
 	return repo.findBy(filter)

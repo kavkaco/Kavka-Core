@@ -25,6 +25,10 @@ func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
 	return foundChat, nil
 }
 
+func (s *chatService) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
+	return s.chatRepo.GetUserChats(userStaticID)
+}
+
 func (s *chatService) CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {
 	sides := [2]primitive.ObjectID{
 		userStaticID,

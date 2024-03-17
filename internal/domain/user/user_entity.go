@@ -58,7 +58,7 @@ type UserRepository interface {
 	FindByPhone(phone string) (*User, error)
 }
 
-type UserService interface {
+type Service interface {
 	Login(phone string) error
 	VerifyOTP(phone string, otp int) (*session.LoginTokens, error)
 	RefreshToken(refreshToken string, accessToken string) (string, error)
