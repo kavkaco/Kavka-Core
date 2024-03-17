@@ -13,10 +13,9 @@ const (
 	TypeDirect  = "direct"
 )
 
-type StaticID = primitive.ObjectID
-
+// type StaticID = primitive.ObjectID
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"id"          json:"chatId"`
+	ChatID     primitive.ObjectID `bson:"chat_id"          json:"chatId"`
 	ChatType   string             `bson:"chat_type"   json:"chatType"`
 	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
 	Messages   []*message.Message `bson:"messages"    json:"messages"`
@@ -111,11 +110,4 @@ type Service interface {
 	CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*Chat, error)
 	CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
 	CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
-}
-
-type Service interface {
-	GetChat(staticID primitive.ObjectID) (Chat, error)
-	CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (Chat, error)
-	CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (Chat, error)
-	CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (Chat, error)
 }
