@@ -3,6 +3,7 @@ package service
 import (
 	"log"
 	"reflect"
+	"slices"
 
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
@@ -20,21 +21,20 @@ func NewMessageService(msgRepo message.Repository, chatRepo chat.Repository) mes
 }
 
 // This function is used to check that user can send message or not.
-func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, _ primitive.ObjectID) (bool, error) {
+func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
 	foundChat, chatErr := s.chatRepo.FindByID(chatID)
 	if chatErr != nil {
 		return false, chatErr
 	}
 
-	// if foundChat.ChatType == chat.ChatTypeDirect {
-	// 	hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
-	// 	return hasSide, nil
-	// } else if foundChat.ChatType == chat.ChatTypeChannel {
-	// 	admins := foundChat.ChatDetail.(*chat.ChannelChatDetail).Admins
-	// 	isAdmin := slices.Contains(admins, &staticID)
-	// 	return isAdmin, nil
-	// } else
-	if foundChat.ChatType == chat.TypeGroup {
+	if foundChat.ChatType == chat.TypeDirect {
+		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
+		return hasSide, nil
+	} else if foundChat.ChatType == chat.TypeChannel {
+		admins := foundChat.ChatDetail.(*chat.ChannelChatDetail).Admins
+		isAdmin := slices.Contains(admins, staticID)
+		return isAdmin, nil
+	} else if foundChat.ChatType == chat.TypeGroup {
 		log.Println(reflect.TypeOf(foundChat.ChatDetail).Name())
 		// members := foundChat.ChatDetail.(*chat.GroupChatDetail).Members
 		// isMember := slices.Contains(members, &staticID)

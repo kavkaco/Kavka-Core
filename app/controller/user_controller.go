@@ -1,22 +1,25 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	dto "github.com/kavkaco/Kavka-Core/app/dto"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
+	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
 )
 
 type UserController struct {
-	userService user.UserService
+	userService user.Service
+	chatService chat.Service
 }
 
-func NewUserController(userService user.UserService) *UserController {
-	return &UserController{userService}
+func NewUserController(userService user.Service, chatService chat.Service) *UserController {
+	return &UserController{userService, chatService}
 }
 
 func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
@@ -82,12 +85,23 @@ func (ctrl *UserController) HandleAuthenticate(ctx *gin.Context) {
 	accessToken, bearerOk := bearer.AccessToken(ctx)
 
 	if bearerOk {
+		// get the user info
 		userInfo, err := ctrl.userService.Authenticate(accessToken)
 		if err != nil {
-			presenters.ResponseError(ctx, err)
+			presenters.AccessDenied(ctx)
 			return
 		}
 
-		presenters.ResponseUserInfo(ctx, userInfo)
+		// gathering user chats
+		userChats, err := ctrl.chatService.GetUserChats(userInfo.StaticID)
+		if err != nil {
+			presenters.ResponseInternalServerError(ctx)
+			return
+		}
+
+		fmt.Println(userChats)
+
+		// FIXME - fix the presenters
+		// presenters.ResponseUserInfo(ctx, userInfo, userChats)
 	}
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
@@ -16,7 +17,7 @@ type userService struct {
 	SmsOtp   *sms_service.SmsService
 }
 
-func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.UserService {
+func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.Service {
 	return &userService{userRepo, session, smsOtp}
 }
 
