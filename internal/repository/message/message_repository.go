@@ -26,7 +26,7 @@ func NewMessageRepository(db *mongo.Database) message.Repository {
 }
 
 func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
-	filter := bson.M{"id": chatID}
+	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
@@ -41,7 +41,7 @@ func (repo *messageRepository) Insert(chatID primitive.ObjectID, msg *message.Me
 }
 
 func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error {
-	filter := bson.M{"id": chatID, "messages.id": messageID}
+	filter := bson.M{"chat_id": chatID, "messages.message_id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
@@ -57,8 +57,8 @@ func (repo *messageRepository) Update(chatID primitive.ObjectID, messageID primi
 }
 
 func (repo *messageRepository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
-	filter := bson.M{"id": chatID}
-	update := bson.M{"$pull": bson.M{"messages": bson.M{"id": messageID}}}
+	filter := bson.M{"chat_id": chatID}
+	update := bson.M{"$pull": bson.M{"messages": bson.M{"message_id": messageID}}}
 
 	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {

@@ -1,27 +1,44 @@
 package repository
 
 import (
+	"context"
 	"testing"
 
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const SampleChatUsername = "sample_chat"
 
 type MyTestSuite struct {
 	suite.Suite
+	db                    *mongo.Database
 	chatRepo              chat.Repository
-	sampleChannelChat     chat.Chat
-	sampleDirectChat      chat.Chat
+	sampleChannelChatID   primitive.ObjectID
+	sampleDirectChatID    primitive.ObjectID
 	sampleDirectChatSides [2]primitive.ObjectID
 	creatorID             primitive.ObjectID
 }
 
 func (s *MyTestSuite) SetupSuite() {
+	// Connecting to test database!
+	cfg := config.Read()
+	cfg.Mongo.DBName = "test"
+	db, connErr := database.GetMongoDBInstance(cfg.Mongo)
+	assert.NoError(s.T(), connErr)
+	s.db = db
+
+	// Drop test db
+	err := s.db.Drop(context.TODO())
+	assert.NoError(s.T(), err)
+
+	// Set a new object-id to sample creator
 	s.creatorID = primitive.NewObjectID()
 
 	// Create the clients who going to chat with each other in direct-chat.
@@ -29,7 +46,7 @@ func (s *MyTestSuite) SetupSuite() {
 	user2StaticID := primitive.NewObjectID()
 	s.sampleDirectChatSides = [2]primitive.ObjectID{user1StaticID, user2StaticID}
 
-	s.chatRepo = NewMockRepository()
+	s.chatRepo = NewRepository(db)
 }
 
 func (s *MyTestSuite) TestA_Create() {
@@ -50,7 +67,9 @@ func (s *MyTestSuite) TestA_Create() {
 	assert.True(s.T(), newChannelChat.IsMember(s.creatorID))
 	assert.True(s.T(), newChannelChat.IsAdmin(s.creatorID))
 
-	s.sampleChannelChat = *newChannelChat
+	s.sampleChannelChatID = newChannelChat.ChatID
+
+	s.T().Log(newChannelChat.ChatID)
 
 	// Create a direct chat
 	newDirectChat := chat.NewChat(chat.TypeDirect, &chat.DirectChatDetail{Sides: s.sampleDirectChatSides})
@@ -62,7 +81,7 @@ func (s *MyTestSuite) TestA_Create() {
 
 	assert.NoError(s.T(), err)
 
-	s.sampleDirectChat = *newDirectChat
+	s.sampleDirectChatID = newDirectChat.ChatID
 }
 
 func (s *MyTestSuite) TestB_FindByID() {
@@ -78,7 +97,7 @@ func (s *MyTestSuite) TestB_FindByID() {
 		},
 		{
 			name:     "Should be found",
-			staticID: s.sampleChannelChat.ChatID,
+			staticID: s.sampleChannelChatID,
 			success:  true,
 		},
 	}
@@ -110,12 +129,12 @@ func (s *MyTestSuite) TestC_FindChatOrSidesByStaticID() {
 		},
 		{
 			name:     "Find the direct chat by staticID",
-			staticID: s.sampleDirectChat.ChatID,
+			staticID: s.sampleDirectChatID,
 			success:  true,
 		},
 		{
 			name:     "Find the channel chat by staticID",
-			staticID: s.sampleChannelChat.ChatID,
+			staticID: s.sampleChannelChatID,
 			success:  true,
 		},
 	}
