@@ -15,9 +15,9 @@ const (
 
 // type StaticID = primitive.ObjectID
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"chat_id"          json:"chatId"`
-	ChatType   string             `bson:"chat_type"   json:"chatType"`
-	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
+	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chat_id"`
+	ChatType   string             `bson:"chat_type"   json:"chat_type"`
+	ChatDetail interface{}        `bson:"chat_detail" json:"chat_detail"`
 	Messages   []*message.Message `bson:"messages"    json:"messages"`
 }
 

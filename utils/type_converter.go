@@ -1,16 +1,18 @@
 package utils
 
-import "encoding/json"
+import (
+	"go.mongodb.org/mongo-driver/bson"
+)
 
 func TypeConverter[R any](data any) (*R, error) {
 	var result R
 
-	b, err := json.Marshal(&data)
+	b, err := bson.Marshal(&data)
 	if err != nil {
 		return nil, err
 	}
 
-	err = json.Unmarshal(b, &result)
+	err = bson.Unmarshal(b, &result)
 	if err != nil {
 		return nil, err
 	}

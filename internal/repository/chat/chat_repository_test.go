@@ -57,6 +57,7 @@ func (s *MyTestSuite) TestA_Create() {
 		Description: "This is a new channel created from unit-test.",
 		Members:     []primitive.ObjectID{s.creatorID},
 		Admins:      []primitive.ObjectID{s.creatorID},
+		Owner:       s.creatorID,
 	})
 
 	newChannelChat, err := s.chatRepo.Create(*newChannelChat)
@@ -64,12 +65,11 @@ func (s *MyTestSuite) TestA_Create() {
 
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), channelChatDetail.Username, SampleChatUsername)
+	assert.Equal(s.T(), channelChatDetail.Owner, s.creatorID)
 	assert.True(s.T(), newChannelChat.IsMember(s.creatorID))
 	assert.True(s.T(), newChannelChat.IsAdmin(s.creatorID))
 
 	s.sampleChannelChatID = newChannelChat.ChatID
-
-	s.T().Log(newChannelChat.ChatID)
 
 	// Create a direct chat
 	newDirectChat := chat.NewChat(chat.TypeDirect, &chat.DirectChatDetail{Sides: s.sampleDirectChatSides})

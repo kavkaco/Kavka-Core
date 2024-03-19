@@ -54,6 +54,7 @@ func (s *chatService) CreateGroup(userStaticID primitive.ObjectID, title string,
 		Members:     []primitive.ObjectID{userStaticID},
 		Admins:      []primitive.ObjectID{userStaticID},
 		Description: description,
+		Owner:       userStaticID,
 	})
 
 	return s.chatRepo.Create(*newChat)
@@ -66,6 +67,7 @@ func (s *chatService) CreateChannel(userStaticID primitive.ObjectID, title strin
 		Members:     []primitive.ObjectID{userStaticID},
 		Admins:      []primitive.ObjectID{userStaticID},
 		Description: description,
+		Owner:       userStaticID,
 	})
 
 	return s.chatRepo.Create(*newChat)
