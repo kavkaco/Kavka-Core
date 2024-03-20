@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/kavkaco/Kavka-Core/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,19 +25,12 @@ func NewMongoDBConnectionString(host string, port int, username string, password
 	return fmt.Sprintf("mongodb://%s:%s@%s:%d", username, password, host, port) //nolint
 }
 
-func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
+func GetMongoDBInstance(uri, dbName string) (*mongo.Database, error) {
 	if mongoInstance == nil {
 		mongoLock.Lock()
 		defer mongoLock.Unlock()
 
-		connectionString := NewMongoDBConnectionString(
-			mongoConfigs.Host,
-			mongoConfigs.Port,
-			mongoConfigs.Username,
-			mongoConfigs.Password,
-		)
-
-		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionString))
+		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +41,7 @@ func GetMongoDBInstance(mongoConfigs config.Mongo) (*mongo.Database, error) {
 			return nil, err
 		}
 
-		mongoInstance = client.Database(mongoConfigs.DBName)
+		mongoInstance = client.Database(dbName)
 
 		collectionsConfigurations(mongoInstance)
 	}

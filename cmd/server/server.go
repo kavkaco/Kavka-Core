@@ -23,7 +23,15 @@ func main() {
 	configs := config.Read()
 
 	// Init MongoDB
-	mongoDB, mongoErr := database.GetMongoDBInstance(configs.Mongo)
+	mongoDB, mongoErr := database.GetMongoDBInstance(
+		database.NewMongoDBConnectionString(
+			configs.Mongo.Host,
+			configs.Mongo.Port,
+			configs.Mongo.Username,
+			configs.Mongo.Password,
+		),
+		configs.Mongo.DBName,
+	)
 	if mongoErr != nil {
 		panic(mongoErr)
 	}

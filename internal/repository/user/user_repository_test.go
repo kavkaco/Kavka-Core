@@ -1,10 +1,9 @@
 package repository
 
 import (
-	"context"
 	"testing"
 
-	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/benweissmann/memongo"
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/stretchr/testify/assert"
@@ -24,16 +23,16 @@ type MyTestSuite struct {
 }
 
 func (s *MyTestSuite) SetupSuite() {
-	// Connecting to test database!
-	cfg := config.Read()
-	cfg.Mongo.DBName = "test"
-	db, connErr := database.GetMongoDBInstance(cfg.Mongo)
-	assert.NoError(s.T(), connErr)
-	s.db = db
-
-	// Drop test db
-	err := s.db.Drop(context.TODO())
+	// Initilizing in-memory mongodb server
+	mongoServer, err := memongo.Start("4.0.5")
+	defer mongoServer.Stop()
 	assert.NoError(s.T(), err)
+
+	// Connecting to database
+	db, err := database.GetMongoDBInstance(mongoServer.URI(), "test")
+	assert.NoError(s.T(), err)
+
+	s.db = db
 
 	s.userRepo = NewUserRepository(db)
 }
