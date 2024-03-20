@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -99,9 +98,9 @@ func (ctrl *UserController) HandleAuthenticate(ctx *gin.Context) {
 			return
 		}
 
-		fmt.Println(userChats)
-
-		// FIXME - fix the presenters
-		// presenters.ResponseUserInfo(ctx, userInfo, userChats)
+		err = presenters.ResponseUserInfo(ctx, userInfo, userChats)
+		if err != nil {
+			presenters.ResponseInternalServerError(ctx)
+		}
 	}
 }

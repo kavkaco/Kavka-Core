@@ -34,11 +34,27 @@ func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
 	ctx.Header("authorization", fmt.Sprintf("Bearer %s", tokens.AccessToken))
 }
 
-func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Chat) {
+func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Chat) error {
+	// Marshal all of the chats into json using by ChatAsJson function
+	var marshaledChatsJson []chat.Chat
+
+	for _, v := range userChats {
+		chatJson, err := ChatAsJSON(v)
+		if err != nil {
+			return err
+		}
+
+		marshaledChatsJson = append(marshaledChatsJson, chatJson.(chat.Chat))
+	}
+
+	// Response JSON
+
 	ctx.JSON(http.StatusOK, UserInfoDto{
 		Message:   "Success",
 		Code:      200,
 		UserInfo:  userInfo,
-		UserChats: userChats,
+		UserChats: marshaledChatsJson,
 	})
+
+	return nil
 }
