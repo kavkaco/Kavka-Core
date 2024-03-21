@@ -25,7 +25,7 @@ type HttpGroupChatDetail struct {
 }
 
 type HttpDirectChatDetail struct {
-	StaticID primitive.ObjectID `json:"id"`
+	UserID   primitive.ObjectID `json:"user_id"`
 	Name     string             `json:"name"`
 	LastName string             `json:"lastName"`
 }
@@ -65,16 +65,10 @@ func ChatAsJSON(obj chat.Chat, userStaticID primitive.ObjectID) (interface{}, er
 			return nil, errors.New("invalid length of fetched users")
 		}
 
-		var target user.User
-
-		if fetchedUsers[0].StaticID.Hex() == userStaticID.Hex() {
-			target = fetchedUsers[1]
-		} else {
-			target = fetchedUsers[0]
-		}
+		target := chat.DetectTarget(fetchedUsers, userStaticID)
 
 		httpChatDetail = HttpDirectChatDetail{
-			StaticID: target.StaticID,
+			UserID:   target.StaticID,
 			Name:     target.Name,
 			LastName: target.LastName,
 		}

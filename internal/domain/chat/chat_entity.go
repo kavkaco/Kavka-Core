@@ -2,6 +2,7 @@ package chat
 
 import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,7 +45,7 @@ type GroupChatDetail struct {
 }
 
 type DirectChatDetail struct {
-	// ID of the users that chats with each other
+	// Chat partners
 	Sides [2]primitive.ObjectID `json:"sides"`
 }
 
@@ -79,6 +80,17 @@ func (d *DirectChatDetail) HasSide(staticID primitive.ObjectID) bool {
 		}
 	}
 	return has
+}
+
+// DetectTarget determines the appropriate chat partner for the user identified by userStaticID,
+// considering a list of potential users and assuming only two participants are involved.
+// It returns a pointer to the target user's struct.
+func DetectTarget(users []user.User, userStaticID primitive.ObjectID) *user.User {
+	if users[0].StaticID.Hex() == userStaticID.Hex() {
+		return &users[1]
+	} else {
+		return &users[0]
+	}
 }
 
 func NewChat(chatType string, chatDetail interface{}) *Chat {
