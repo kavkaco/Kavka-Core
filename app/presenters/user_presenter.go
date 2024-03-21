@@ -39,7 +39,7 @@ func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Ch
 	var marshaledChatsJson []chat.Chat
 
 	for _, v := range userChats {
-		chatJson, err := ChatAsJSON(v)
+		chatJson, err := ChatAsJSON(v, userInfo.StaticID)
 		if err != nil {
 			return err
 		}

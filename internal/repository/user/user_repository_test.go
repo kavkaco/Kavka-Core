@@ -68,12 +68,12 @@ func (s *MyTestSuite) TestC_Find() {
 		length int
 	}{
 		{
-			name:   "empty",
+			name:   "Should not find anything",
 			filter: bson.M{"name": "sample"},
 			length: 0,
 		},
 		{
-			name:   "find_one",
+			name:   "Should find the user",
 			filter: bson.M{"name": s.sampleUser.Name},
 			length: 1,
 		},
@@ -96,12 +96,12 @@ func (s *MyTestSuite) TestD_FindByID() {
 		exist    bool
 	}{
 		{
-			name:     "empty",
+			name:     "Should not find anything",
 			StaticID: primitive.NewObjectID(),
 			exist:    false,
 		},
 		{
-			name:     "find_one",
+			name:     "Should find the user",
 			StaticID: s.sampleUser.StaticID,
 			exist:    true,
 		},
@@ -121,19 +121,51 @@ func (s *MyTestSuite) TestD_FindByID() {
 	}
 }
 
-func (s *MyTestSuite) TestE_FindByPhone() {
+func (s *MyTestSuite) TestE_FindByID() {
+	cases := []struct {
+		name      string
+		StaticIDs []primitive.ObjectID
+		exist     bool
+	}{
+		{
+			name:      "Should not find anything",
+			StaticIDs: []primitive.ObjectID{primitive.NewObjectID()},
+			exist:     false,
+		},
+		{
+			name:      "Should find the user",
+			StaticIDs: []primitive.ObjectID{s.sampleUser.StaticID},
+			exist:     true,
+		},
+	}
+
+	for _, tt := range cases {
+		s.T().Run(tt.name, func(t *testing.T) {
+			user, err := s.userRepo.FindMany(tt.StaticIDs)
+
+			if tt.exist {
+				assert.NoError(s.T(), err)
+				assert.NotEmpty(s.T(), user)
+			} else {
+				assert.Empty(s.T(), user)
+			}
+		})
+	}
+}
+
+func (s *MyTestSuite) TestF_FindByPhone() {
 	cases := []struct {
 		name  string
 		Phone string
 		exist bool
 	}{
 		{
-			name:  "empty",
+			name:  "Should not find anything",
 			Phone: "sample",
 			exist: false,
 		},
 		{
-			name:  "found_just_one",
+			name:  "Should find the user",
 			Phone: s.sampleUser.Phone,
 			exist: true,
 		},
