@@ -57,7 +57,7 @@ func (s *MyTestSuite) TestA_Create() {
 		Description: "This is a new channel created from unit-test.",
 		Members:     []primitive.ObjectID{s.creatorID},
 		Admins:      []primitive.ObjectID{s.creatorID},
-		Owner:       s.creatorID,
+		Owner:       &s.creatorID,
 	})
 
 	newChannelChat, err := s.chatRepo.Create(*newChannelChat)

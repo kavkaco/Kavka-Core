@@ -25,22 +25,22 @@ type Chat struct {
 
 type ChannelChatDetail struct {
 	Title        string               `bson:"title" json:"title"`
-	Members      []primitive.ObjectID `bson:"members" json:"members"`
-	Admins       []primitive.ObjectID `bson:"admins" json:"admins"`
-	Owner        primitive.ObjectID   `bson:"owner"         json:"owner"`
-	RemovedUsers []primitive.ObjectID `bson:"removed_users" json:"removedUsers"`
-	Username     string               `bson:"username" json:"username"`
-	Description  string               `bson:"description" json:"description"`
+	Members      []primitive.ObjectID `bson:"members,omitempty" json:"members"`
+	Admins       []primitive.ObjectID `bson:"admins,omitempty" json:"admins"`
+	Owner        *primitive.ObjectID  `bson:"owner,omitempty"         json:"owner"`
+	RemovedUsers []primitive.ObjectID `bson:"removed_users,omitempty" json:"removedUsers"`
+	Username     string               `bson:"username,omitempty" json:"username"`
+	Description  string               `bson:"description,omitempty" json:"description"`
 }
 
 type GroupChatDetail struct {
-	Title        string               `json:"title"`
-	Members      []primitive.ObjectID `json:"members"`
-	Admins       []primitive.ObjectID `json:"admins"`
-	Owner        primitive.ObjectID   `bson:"owner"         json:"owner"`
-	RemovedUsers []primitive.ObjectID `bson:"removed_users" json:"removedUsers"`
-	Username     string               `json:"username"`
-	Description  string               `json:"description"`
+	Title        string               `bson:"title" json:"title"`
+	Members      []primitive.ObjectID `bson:"members,omitempty" json:"members"`
+	Admins       []primitive.ObjectID `bson:"admins,omitempty" json:"admins"`
+	Owner        *primitive.ObjectID  `bson:"owner,omitempty"         json:"owner"`
+	RemovedUsers []primitive.ObjectID `bson:"removed_users,omitempty" json:"removedUsers"`
+	Username     string               `bson:"username,omitempty" json:"username"`
+	Description  string               `bson:"description,omitempty" json:"description"`
 }
 
 type DirectChatDetail struct {
