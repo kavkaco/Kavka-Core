@@ -36,7 +36,22 @@ func (repo *userRepository) Create(user *user.User) (*user.User, error) {
 	return user, nil
 }
 
-func (repo *userRepository) Where(filter bson.M) ([]*user.User, error) {
+func (repo *userRepository) FindOne(filter bson.M) (*user.User, error) {
+	var model *user.User
+	result := repo.usersCollection.FindOne(context.TODO(), filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.Decode(&model)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
+
+func (repo *userRepository) FindMany(filter bson.M) ([]*user.User, error) {
 	cursor, err := repo.usersCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -52,32 +67,17 @@ func (repo *userRepository) Where(filter bson.M) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *userRepository) findBy(filter bson.M) (*user.User, error) {
-	result, err := repo.Where(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(result) > 0 {
-		user := result[len(result)-1]
-
-		return user, nil
-	}
-
-	return nil, ErrUserNotFound
-}
-
 func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.M{"id": staticID}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
 func (repo *userRepository) FindByUsername(username string) (*user.User, error) {
 	filter := bson.M{"username": username}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
 func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.M{"phone": phone}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }

@@ -52,7 +52,8 @@ func (u User) IsBanned() bool {
 
 type UserRepository interface {
 	Create(user *User) (*User, error)
-	Where(filter bson.M) ([]*User, error)
+	FindOne(filter bson.M) (*User, error)
+	FindMany(filter bson.M) ([]*User, error)
 	FindByID(staticID primitive.ObjectID) (*User, error)
 	FindByUsername(username string) (*User, error)
 	FindByPhone(phone string) (*User, error)

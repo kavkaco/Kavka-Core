@@ -3,155 +3,49 @@ package repository
 import (
 	"testing"
 
-	"github.com/benweissmann/memongo"
-	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
-const Phone = "user-phone"
+func TestUserRepository(t *testing.T) {
+	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+	defer mt.Close()
 
-type MyTestSuite struct {
-	suite.Suite
-	db         *mongo.Database
-	userRepo   user.UserRepository
-	sampleUser user.User
-}
+	mt.Run("test create", func(mt *mtest.T) {
+		mt.AddMockResponses(mtest.CreateSuccessResponse())
+		userRepo := NewUserRepository(mt.DB)
 
-func (s *MyTestSuite) SetupSuite() {
-	// Initilizing in-memory mongodb server
-	mongoServer, err := memongo.Start("4.0.5")
-	defer mongoServer.Stop()
-	assert.NoError(s.T(), err)
+		model := user.NewUser("1234")
+		model.Name = "John"
+		model.LastName = "Doe"
+		savedModel, err := userRepo.Create(model)
 
-	// Connecting to database
-	db, err := database.GetMongoDBInstance(mongoServer.URI(), "test")
-	assert.NoError(s.T(), err)
+		assert.NoError(t, err)
+		assert.Equal(t, savedModel.Name, model.Name)
+	})
 
-	s.db = db
+	mt.Run("test find by username", func(mt *mtest.T) {
+		userRepo := NewUserRepository(mt.DB)
 
-	s.userRepo = NewUserRepository(db)
-}
+		expectedDoc := bson.D{
+			{Key: "id", Value: primitive.NewObjectID()},
+			{Key: "name", Value: "John"},
+			{Key: "last_name", Value: "Doe"},
+			{Key: "phone", Value: "1234"},
+			{Key: "username", Value: "john_doe"},
+		}
 
-func (s *MyTestSuite) TestA_Create() {
-	user := user.NewUser(Phone)
-	user.Name = "John"
-	user.LastName = "Doe"
+		mt.AddMockResponses(mtest.CreateCursorResponse(1, "myDB.users", mtest.FirstBatch, expectedDoc))
 
-	user, err := s.userRepo.Create(user)
+		model, err := userRepo.FindByUsername("john_doe")
+		assert.NoError(t, err)
 
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), user.Name, user.Name)
-	assert.Equal(s.T(), user.LastName, user.LastName)
-	assert.Equal(s.T(), user.Phone, Phone)
-	assert.NotEmpty(s.T(), user.StaticID)
-
-	s.sampleUser = *user
-}
-
-func (s *MyTestSuite) TestB_Where() {
-	users, err := s.userRepo.Where(bson.M{"phone": Phone})
-
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), len(users), 1)
-}
-
-func (s *MyTestSuite) TestC_Find() {
-	cases := []struct {
-		name   string
-		filter bson.M
-		length int
-	}{
-		{
-			name:   "empty",
-			filter: bson.M{"name": "sample"},
-			length: 0,
-		},
-		{
-			name:   "find_one",
-			filter: bson.M{"name": s.sampleUser.Name},
-			length: 1,
-		},
-	}
-
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			users, err := s.userRepo.Where(tt.filter)
-
-			assert.NoError(s.T(), err)
-			assert.Len(s.T(), users, tt.length)
-		})
-	}
-}
-
-func (s *MyTestSuite) TestD_FindByID() {
-	cases := []struct {
-		name     string
-		StaticID primitive.ObjectID
-		exist    bool
-	}{
-		{
-			name:     "empty",
-			StaticID: primitive.NewObjectID(),
-			exist:    false,
-		},
-		{
-			name:     "find_one",
-			StaticID: s.sampleUser.StaticID,
-			exist:    true,
-		},
-	}
-
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			user, err := s.userRepo.FindByID(tt.StaticID)
-
-			if tt.exist {
-				assert.NoError(s.T(), err)
-				assert.NotEmpty(s.T(), user)
-			} else {
-				assert.Empty(s.T(), user)
-			}
-		})
-	}
-}
-
-func (s *MyTestSuite) TestE_FindByPhone() {
-	cases := []struct {
-		name  string
-		Phone string
-		exist bool
-	}{
-		{
-			name:  "empty",
-			Phone: "sample",
-			exist: false,
-		},
-		{
-			name:  "found_just_one",
-			Phone: s.sampleUser.Phone,
-			exist: true,
-		},
-	}
-
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			user, err := s.userRepo.FindByPhone(tt.Phone)
-
-			if tt.exist {
-				assert.NoError(s.T(), err)
-				assert.NotEmpty(s.T(), user)
-			} else {
-				assert.Empty(s.T(), user)
-			}
-		})
-	}
-}
-
-func TestMySuite(t *testing.T) {
-	suite.Run(t, new(MyTestSuite))
+		assert.Equal(t, model.StaticID, expectedDoc.Map()["id"])
+		assert.Equal(t, model.Name, expectedDoc.Map()["name"])
+		assert.Equal(t, model.LastName, expectedDoc.Map()["last_name"])
+		assert.Equal(t, model.Phone, expectedDoc.Map()["phone"])
+	})
 }
