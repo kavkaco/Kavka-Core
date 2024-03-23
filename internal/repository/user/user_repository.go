@@ -17,15 +17,15 @@ var (
 	ErrInvalidOtpCode    = errors.New("invalid otp Code")
 )
 
-type userRepository struct {
+type repository struct {
 	usersCollection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) user.UserRepository {
-	return &userRepository{db.Collection(database.UsersCollection)}
+func NewRepository(db *mongo.Database) user.UserRepository {
+	return &repository{db.Collection(database.UsersCollection)}
 }
 
-func (repo *userRepository) Create(user *user.User) (*user.User, error) {
+func (repo *repository) Create(user *user.User) (*user.User, error) {
 	_, err := repo.usersCollection.InsertOne(context.TODO(), user)
 	if database.IsDuplicateKeyError(err) {
 		return nil, ErrPhoneAlreadyTaken
@@ -36,7 +36,22 @@ func (repo *userRepository) Create(user *user.User) (*user.User, error) {
 	return user, nil
 }
 
-func (repo *userRepository) Where(filter bson.M) ([]*user.User, error) {
+func (repo *repository) FindOne(filter bson.M) (*user.User, error) {
+	var model *user.User
+	result := repo.usersCollection.FindOne(context.TODO(), filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.Decode(&model)
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}
+
+func (repo *repository) FindMany(filter bson.M) ([]*user.User, error) {
 	cursor, err := repo.usersCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -52,22 +67,6 @@ func (repo *userRepository) Where(filter bson.M) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *userRepository) findBy(filter bson.M) (*user.User, error) {
-	result, err := repo.Where(filter)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(result) > 0 {
-		user := result[len(result)-1]
-
-		return user, nil
-
-	}
-
-	return nil, ErrUserNotFound
-}
-
 func (repo *userRepository) FindMany(staticIDs []primitive.ObjectID) ([]*user.User, error) {
 	filter := bson.M{"id": bson.M{"$in": staticIDs}}
 
@@ -81,15 +80,15 @@ func (repo *userRepository) FindMany(staticIDs []primitive.ObjectID) ([]*user.Us
 
 func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.M{"id": staticID}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
-func (repo *userRepository) FindByUsername(username string) (*user.User, error) {
+func (repo *repository) FindByUsername(username string) (*user.User, error) {
 	filter := bson.M{"username": username}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
-func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
+func (repo *repository) FindByPhone(phone string) (*user.User, error) {
 	filter := bson.M{"phone": phone}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }

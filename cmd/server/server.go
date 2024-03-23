@@ -23,7 +23,15 @@ func main() {
 	configs := config.Read()
 
 	// Init MongoDB
-	mongoDB, mongoErr := database.GetMongoDBInstance(configs.Mongo)
+	mongoDB, mongoErr := database.GetMongoDBInstance(
+		database.NewMongoDBConnectionString(
+			configs.Mongo.Host,
+			configs.Mongo.Port,
+			configs.Mongo.Username,
+			configs.Mongo.Password,
+		),
+		configs.Mongo.DBName,
+	)
 	if mongoErr != nil {
 		panic(mongoErr)
 	}
@@ -46,13 +54,13 @@ func main() {
 	session := session.NewSession(redisClient, configs.App.Auth)
 	smsService := sms_service.NewSmsService(&configs.SMS, TemplatesPath)
 
-	userRepo := userRepository.NewUserRepository(mongoDB)
+	userRepo := userRepository.NewRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsService)
 
 	chatRepo := chatRepository.NewRepository(mongoDB)
 	chatService := service.NewChatService(chatRepo, userRepo)
 
-	messageRepo := messageRepository.NewMessageRepository(mongoDB)
+	messageRepo := messageRepository.NewRepository(mongoDB)
 	messageRepository := service.NewMessageService(messageRepo, chatRepo)
 
 	// Init routes

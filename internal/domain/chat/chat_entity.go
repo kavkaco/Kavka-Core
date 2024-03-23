@@ -108,7 +108,8 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 
 type Repository interface {
 	Create(newChat Chat) (*Chat, error)
-	Where(filter bson.M) ([]Chat, error)
+	FindMany(filter bson.M) ([]Chat, error)
+	FindOne(filter bson.M) (*Chat, error)
 	Destroy(chatID primitive.ObjectID) error
 	GetUserChats(userStaticID primitive.ObjectID) ([]Chat, error)
 	FindByID(staticID primitive.ObjectID) (*Chat, error)
