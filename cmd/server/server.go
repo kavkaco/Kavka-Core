@@ -60,7 +60,7 @@ func main() {
 	chatRepo := chatRepository.NewRepository(mongoDB)
 	chatService := service.NewChatService(chatRepo, userRepo)
 
-	messageRepo := messageRepository.NewMessageRepository(mongoDB)
+	messageRepo := messageRepository.NewRepository(mongoDB)
 	messageRepository := service.NewMessageService(messageRepo, chatRepo)
 
 	// Init routes
