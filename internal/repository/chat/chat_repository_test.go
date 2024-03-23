@@ -1,190 +1,154 @@
 package repository
 
 import (
-	"context"
 	"testing"
 
-	"github.com/kavkaco/Kavka-Core/config"
-	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
-const SampleChatUsername = "sample_chat"
+func TestChatRepository(t *testing.T) {
+	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+	defer mt.Close()
 
-type MyTestSuite struct {
-	suite.Suite
-	db                    *mongo.Database
-	chatRepo              chat.Repository
-	sampleChannelChatID   primitive.ObjectID
-	sampleDirectChatID    primitive.ObjectID
-	sampleDirectChatSides [2]primitive.ObjectID
-	creatorID             primitive.ObjectID
-}
+	mt.Run("test create channel", func(mt *mtest.T) {
+		mt.AddMockResponses(mtest.CreateSuccessResponse())
+		chatRepo := NewRepository(mt.DB)
 
-func (s *MyTestSuite) SetupSuite() {
-	// Connecting to test database!
-	cfg := config.Read()
-	cfg.Mongo.DBName = "test"
-	db, connErr := database.GetMongoDBInstance(cfg.Mongo)
-	assert.NoError(s.T(), connErr)
-	s.db = db
+		ownerStaticID := primitive.NewObjectID()
+		model := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
+			Title:       "MyChannel",
+			Username:    "my_channel",
+			Description: "Example description",
+			Members:     []primitive.ObjectID{ownerStaticID},
+			Admins:      []primitive.ObjectID{ownerStaticID},
+			Owner:       ownerStaticID,
+		})
 
-	// Drop test db
-	err := s.db.Drop(context.TODO())
-	assert.NoError(s.T(), err)
+		savedModel, err := chatRepo.Create(*model)
+		assert.NoError(t, err)
 
-	// Set a new object-id to sample creator
-	s.creatorID = primitive.NewObjectID()
+		chatDetail, err := utils.TypeConverter[chat.ChannelChatDetail](savedModel.ChatDetail)
+		assert.NoError(t, err)
 
-	// Create the clients who going to chat with each other in direct-chat.
-	user1StaticID := primitive.NewObjectID()
-	user2StaticID := primitive.NewObjectID()
-	s.sampleDirectChatSides = [2]primitive.ObjectID{user1StaticID, user2StaticID}
-
-	s.chatRepo = NewRepository(db)
-}
-
-func (s *MyTestSuite) TestA_Create() {
-	// Create a channel chat
-	newChannelChat := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
-		Title:       "New Channel",
-		Username:    SampleChatUsername,
-		Description: "This is a new channel created from unit-test.",
-		Members:     []primitive.ObjectID{s.creatorID},
-		Admins:      []primitive.ObjectID{s.creatorID},
-		Owner:       s.creatorID,
+		assert.Equal(t, chatDetail.Title, "MyChannel")
+		assert.Equal(t, chatDetail.Username, "my_channel")
+		assert.Equal(t, chatDetail.Owner, ownerStaticID)
+		assert.True(t, savedModel.IsMember(ownerStaticID))
+		assert.True(t, savedModel.IsAdmin(ownerStaticID))
 	})
 
-	newChannelChat, err := s.chatRepo.Create(*newChannelChat)
-	channelChatDetail, _ := utils.TypeConverter[chat.ChannelChatDetail](newChannelChat.ChatDetail)
+	mt.Run("test create direct", func(mt *mtest.T) {
+		mt.AddMockResponses(mtest.CreateSuccessResponse())
+		chatRepo := NewRepository(mt.DB)
 
-	assert.NoError(s.T(), err)
-	assert.Equal(s.T(), channelChatDetail.Username, SampleChatUsername)
-	assert.Equal(s.T(), channelChatDetail.Owner, s.creatorID)
-	assert.True(s.T(), newChannelChat.IsMember(s.creatorID))
-	assert.True(s.T(), newChannelChat.IsAdmin(s.creatorID))
-
-	s.sampleChannelChatID = newChannelChat.ChatID
-
-	// Create a direct chat
-	newDirectChat := chat.NewChat(chat.TypeDirect, &chat.DirectChatDetail{Sides: s.sampleDirectChatSides})
-
-	newDirectChat, err = s.chatRepo.Create(*newDirectChat)
-
-	chatDetail, _ := utils.TypeConverter[chat.DirectChatDetail](newDirectChat.ChatDetail)
-	assert.Equal(s.T(), chatDetail.Sides, s.sampleDirectChatSides)
-
-	assert.NoError(s.T(), err)
-
-	s.sampleDirectChatID = newDirectChat.ChatID
-}
-
-func (s *MyTestSuite) TestB_FindByID() {
-	cases := []struct {
-		name     string
-		staticID primitive.ObjectID
-		success  bool
-	}{
-		{
-			name:     "Should rise chat not found error",
-			staticID: primitive.NilObjectID,
-			success:  false,
-		},
-		{
-			name:     "Should be found",
-			staticID: s.sampleChannelChatID,
-			success:  true,
-		},
-	}
-
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			foundChat, err := s.chatRepo.FindByID(tt.staticID)
-
-			if tt.success {
-				assert.NoError(s.T(), err)
-				assert.NotEqual(s.T(), foundChat, nil)
-			} else {
-				assert.Error(s.T(), err)
-			}
+		user1StaticID := primitive.NewObjectID()
+		user2StaticID := primitive.NewObjectID()
+		model := chat.NewChat(chat.TypeChannel, &chat.DirectChatDetail{
+			Sides: [2]primitive.ObjectID{user1StaticID, user2StaticID},
 		})
-	}
-}
 
-func (s *MyTestSuite) TestC_FindChatOrSidesByStaticID() {
-	cases := []struct {
-		name     string
-		success  bool
-		staticID primitive.ObjectID
-	}{
-		{
-			name:     "Find the direct chat by side",
-			staticID: s.sampleDirectChatSides[0],
-			success:  true,
-		},
-		{
-			name:     "Find the direct chat by staticID",
-			staticID: s.sampleDirectChatID,
-			success:  true,
-		},
-		{
-			name:     "Find the channel chat by staticID",
-			staticID: s.sampleChannelChatID,
-			success:  true,
-		},
-	}
+		savedModel, err := chatRepo.Create(*model)
+		assert.NoError(t, err)
 
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			user, err := s.chatRepo.FindChatOrSidesByStaticID(tt.staticID)
+		chatDetail, err := utils.TypeConverter[chat.DirectChatDetail](savedModel.ChatDetail)
+		assert.NoError(t, err)
 
-			if tt.success {
-				assert.NoError(s.T(), err)
-				assert.NotEmpty(s.T(), user)
-			} else {
-				assert.Empty(s.T(), user)
-			}
-		})
-	}
-}
+		assert.True(t, chatDetail.HasSide(user1StaticID))
+		assert.True(t, chatDetail.HasSide(user2StaticID))
+	})
 
-func (s *MyTestSuite) TestD_FindBySides() {
-	cases := []struct {
-		name    string
-		success bool
-		sides   [2]primitive.ObjectID
-	}{
-		{
-			name:    "Must find the created chat using by the sides",
-			sides:   s.sampleDirectChatSides,
-			success: true,
-		},
-		{
-			name:    "Should not find anything",
-			sides:   [2]primitive.ObjectID{primitive.NilObjectID, primitive.NilObjectID},
-			success: false,
-		},
-	}
+	mt.Run("test find by id", func(mt *mtest.T) {
+		chatRepo := NewRepository(mt.DB)
 
-	for _, tt := range cases {
-		s.T().Run(tt.name, func(t *testing.T) {
-			user, err := s.chatRepo.FindBySides(tt.sides)
+		chatID := primitive.NewObjectID()
+		ownerStaticID := primitive.NewObjectID()
+		expectedDoc := bson.D{
+			{Key: "chat_id", Value: chatID},
+			{Key: "chat_type", Value: "channel"},
+			{
+				Key: "chat_detail",
+				Value: &chat.ChannelChatDetail{
+					Title:       "MyChannel",
+					Username:    "my_channel",
+					Description: "Example description",
+					Members:     []primitive.ObjectID{ownerStaticID},
+					Admins:      []primitive.ObjectID{ownerStaticID},
+					Owner:       ownerStaticID,
+				},
+			},
+		}
 
-			if tt.success {
-				assert.NoError(s.T(), err)
-				assert.NotEmpty(s.T(), user)
-			} else {
-				assert.Empty(s.T(), user)
-			}
-		})
-	}
-}
+		mt.AddMockResponses(mtest.CreateCursorResponse(1, "myDB.chats", mtest.FirstBatch, expectedDoc))
 
-func TestMySuite(t *testing.T) {
-	suite.Run(t, new(MyTestSuite))
+		model, err := chatRepo.FindByID(chatID)
+		assert.NoError(t, err)
+
+		assert.Equal(t, model.ChatType, expectedDoc.Map()["chat_type"])
+	})
+
+	mt.Run("test find chat or sides by static id", func(mt *mtest.T) {
+		chatRepo := NewRepository(mt.DB)
+
+		chatID := primitive.NewObjectID()
+		user1StaticID := primitive.NewObjectID()
+		user2StaticID := primitive.NewObjectID()
+		expectedDoc := bson.D{
+			{Key: "chat_id", Value: chatID},
+			{Key: "chat_type", Value: "direct"},
+			{
+				Key: "chat_detail",
+				Value: &chat.DirectChatDetail{
+					Sides: [2]primitive.ObjectID{user1StaticID, user2StaticID},
+				},
+			},
+		}
+
+		mt.AddMockResponses(mtest.CreateCursorResponse(1, "myDB.chats", mtest.FirstBatch, expectedDoc))
+
+		// Find by one of the sides
+		model, err := chatRepo.FindChatOrSidesByStaticID(user1StaticID)
+		assert.NoError(t, err)
+
+		chatDetail, err := utils.TypeConverter[chat.DirectChatDetail](model.ChatDetail)
+		assert.NoError(t, err)
+
+		assert.True(t, chatDetail.HasSide(user1StaticID))
+		assert.True(t, chatDetail.HasSide(user2StaticID))
+		assert.Equal(t, model.ChatType, expectedDoc.Map()["chat_type"])
+	})
+
+	mt.Run("test find by sides", func(mt *mtest.T) {
+		chatRepo := NewRepository(mt.DB)
+
+		chatID := primitive.NewObjectID()
+		user1StaticID := primitive.NewObjectID()
+		user2StaticID := primitive.NewObjectID()
+		expectedDoc := bson.D{
+			{Key: "chat_id", Value: chatID},
+			{Key: "chat_type", Value: "direct"},
+			{
+				Key: "chat_detail",
+				Value: &chat.DirectChatDetail{
+					Sides: [2]primitive.ObjectID{user1StaticID, user2StaticID},
+				},
+			},
+		}
+
+		mt.AddMockResponses(mtest.CreateCursorResponse(1, "myDB.chats", mtest.FirstBatch, expectedDoc))
+
+		model, err := chatRepo.FindBySides([2]primitive.ObjectID{user1StaticID, user2StaticID})
+		assert.NoError(t, err)
+
+		chatDetail, err := utils.TypeConverter[chat.DirectChatDetail](model.ChatDetail)
+		assert.NoError(t, err)
+
+		assert.True(t, chatDetail.HasSide(user1StaticID))
+		assert.True(t, chatDetail.HasSide(user2StaticID))
+		assert.Equal(t, model.ChatType, expectedDoc.Map()["chat_type"])
+	})
 }

@@ -44,7 +44,7 @@ func (repo *repository) Destroy(chatID primitive.ObjectID) error {
 	return nil
 }
 
-func (repo *repository) Where(filter bson.M) ([]chat.Chat, error) {
+func (repo *repository) FindMany(filter bson.M) ([]chat.Chat, error) {
 	cursor, err := repo.chatsCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -60,21 +60,22 @@ func (repo *repository) Where(filter bson.M) ([]chat.Chat, error) {
 	return chats, nil
 }
 
-func (repo *repository) findBy(filter bson.M) (*chat.Chat, error) {
-	result, err := repo.Where(filter)
+func (repo *repository) FindOne(filter bson.M) (*chat.Chat, error) {
+	var model *chat.Chat
+	result := repo.chatsCollection.FindOne(context.TODO(), filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	err := result.Decode(&model)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(result) > 0 {
-		user := result[len(result)-1]
-
-		return &user, nil
-	}
-
-	return nil, ErrChatNotFound
+	return model, nil
 }
 
+// REVIEW - this method is not completed yet.
 func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
 	filter := bson.M{
 		"chat_detail.members": bson.M{
@@ -82,9 +83,9 @@ func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Ch
 		},
 	}
 
-	chats, err := repo.Where(filter)
+	chats, err := repo.FindMany(filter)
 	if err != nil {
-		return nil, err
+		return []chat.Chat{}, err
 	}
 
 	return chats, nil
@@ -92,7 +93,7 @@ func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Ch
 
 func (repo *repository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
 	filter := bson.M{"chat_id": staticID}
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
 func (repo *repository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*chat.Chat, error) {
@@ -103,7 +104,7 @@ func (repo *repository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (
 		},
 	}
 
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }
 
 func (repo *repository) FindBySides(sides [2]primitive.ObjectID) (*chat.Chat, error) {
@@ -112,5 +113,5 @@ func (repo *repository) FindBySides(sides [2]primitive.ObjectID) (*chat.Chat, er
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},
 	}
 
-	return repo.findBy(filter)
+	return repo.FindOne(filter)
 }

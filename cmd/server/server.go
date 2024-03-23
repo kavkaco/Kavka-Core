@@ -54,7 +54,7 @@ func main() {
 	session := session.NewSession(redisClient, configs.App.Auth)
 	smsService := sms_service.NewSmsService(&configs.SMS, TemplatesPath)
 
-	userRepo := userRepository.NewUserRepository(mongoDB)
+	userRepo := userRepository.NewRepository(mongoDB)
 	userService := service.NewUserService(userRepo, session, smsService)
 
 	chatRepo := chatRepository.NewRepository(mongoDB)

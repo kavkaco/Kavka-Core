@@ -16,7 +16,7 @@ func TestUserRepository(t *testing.T) {
 
 	mt.Run("test create", func(mt *mtest.T) {
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
-		userRepo := NewUserRepository(mt.DB)
+		userRepo := NewRepository(mt.DB)
 
 		model := user.NewUser("1234")
 		model.Name = "John"
@@ -28,7 +28,7 @@ func TestUserRepository(t *testing.T) {
 	})
 
 	mt.Run("test find by username", func(mt *mtest.T) {
-		userRepo := NewUserRepository(mt.DB)
+		userRepo := NewRepository(mt.DB)
 
 		expectedDoc := bson.D{
 			{Key: "id", Value: primitive.NewObjectID()},
