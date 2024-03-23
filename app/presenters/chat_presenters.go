@@ -1,8 +1,13 @@
 package presenters
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ChatDto struct {
@@ -10,27 +15,86 @@ type ChatDto struct {
 	Chat  *chat.Chat `json:"chat"`
 }
 
-func ChatAsJSON(obj chat.Chat) (interface{}, error) {
-	if obj.ChatType == chat.TypeDirect {
-		obj.ChatDetail = nil
-	} else {
-		// Determine the specific ChatDetail type based on chatType
-		var chatDetail interface{}
-		var convertErr error
+type HttpChannelChatDetail struct {
+	Title    string `json:"title"`
+	Username string `json:"username"`
+}
+type HttpGroupChatDetail struct {
+	Title    string `json:"title"`
+	Username string `json:"username"`
+}
 
-		switch obj.ChatType {
-		case chat.TypeChannel:
-			chatDetail, convertErr = utils.TypeConverter[chat.ChannelChatDetail](obj.ChatDetail)
-		case chat.TypeGroup:
-			chatDetail, convertErr = utils.TypeConverter[chat.GroupChatDetail](obj.ChatDetail)
+type HttpDirectChatDetail struct {
+	UserID   primitive.ObjectID `json:"user_id"`
+	Name     string             `json:"name"`
+	LastName string             `json:"lastName"`
+}
+
+func UnmarshalFetchedUsers(fetchedUsers primitive.A) ([]user.User, error) {
+	var users []user.User
+	for _, v := range fetchedUsers {
+		currentUser, err := utils.TypeConverter[user.User](v)
+		if err != nil {
+			return nil, err
 		}
 
-		if convertErr != nil {
-			return nil, convertErr
-		}
-
-		obj.ChatDetail = chatDetail
+		users = append(users, *currentUser)
 	}
+
+	return users, nil
+}
+
+func ChatAsJSON(obj chat.Chat, userStaticID primitive.ObjectID) (interface{}, error) {
+	// Determine the specific ChatDetail type based on chatType
+	var httpChatDetail interface{}
+
+	switch obj.ChatType {
+	case chat.TypeDirect:
+		chatDetailLocal, err := utils.TypeConverter[map[string]interface{}](obj.ChatDetail)
+		fmt.Println(err)
+		if err != nil {
+			return nil, err
+		}
+
+		fetchedUsers, err := UnmarshalFetchedUsers((*chatDetailLocal)["fetchedUsers"].(primitive.A))
+		if err != nil {
+			return nil, err
+		}
+
+		if len(fetchedUsers) != 2 {
+			return nil, errors.New("invalid length of fetched users")
+		}
+
+		target := chat.DetectTarget(fetchedUsers, userStaticID)
+
+		httpChatDetail = HttpDirectChatDetail{
+			UserID:   target.StaticID,
+			Name:     target.Name,
+			LastName: target.LastName,
+		}
+	case chat.TypeChannel:
+		chatDetailLocal, err := utils.TypeConverter[chat.ChannelChatDetail](obj.ChatDetail)
+		if err != nil {
+			return nil, err
+		}
+
+		httpChatDetail = HttpChannelChatDetail{
+			Title:    chatDetailLocal.Title,
+			Username: chatDetailLocal.Username,
+		}
+	case chat.TypeGroup:
+		chatDetailLocal, err := utils.TypeConverter[chat.GroupChatDetail](obj.ChatDetail)
+		if err != nil {
+			return nil, err
+		}
+
+		httpChatDetail = HttpGroupChatDetail{
+			Title:    chatDetailLocal.Title,
+			Username: chatDetailLocal.Username,
+		}
+	}
+
+	obj.ChatDetail = httpChatDetail
 
 	return obj, nil
 }

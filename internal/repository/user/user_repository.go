@@ -67,7 +67,18 @@ func (repo *repository) FindMany(filter bson.M) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *repository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
+func (repo *userRepository) FindMany(staticIDs []primitive.ObjectID) ([]*user.User, error) {
+	filter := bson.M{"id": bson.M{"$in": staticIDs}}
+
+	result, err := repo.Where(filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.M{"id": staticID}
 	return repo.FindOne(filter)
 }

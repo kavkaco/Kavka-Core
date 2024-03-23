@@ -77,18 +77,69 @@ func (repo *repository) FindOne(filter bson.M) (*chat.Chat, error) {
 
 // REVIEW - this method is not completed yet.
 func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
-	filter := bson.M{
-		"chat_detail.members": bson.M{
-			"$in": bson.A{userStaticID},
-		},
+	ctx := context.TODO()
+
+	memberMatchStage := bson.M{"chat_detail.members": bson.M{"$in": bson.A{userStaticID}}}
+	sidesMatchStage := bson.D{{
+		Key: "$match",
+		Value: bson.D{{
+			Key: "chat_detail.sides",
+			Value: bson.D{{
+				Key:   "$in",
+				Value: bson.A{userStaticID},
+			}},
+		}},
+	}}
+
+	// Define the pipeline for direct chats (with aggregation for sides)
+	directPipeline := mongo.Pipeline{
+		sidesMatchStage,
+		{{
+			Key: "$lookup",
+			Value: bson.M{
+				"from":         "users",
+				"localField":   "chat_detail.sides",
+				"foreignField": "id",
+				"as":           "chat_detail.fetchedUsers",
+			},
+		}},
+		{{
+			Key: "$project",
+			Value: bson.M{
+				"chat_id":     1,
+				"chat_type":   1,
+				"chat_detail": 1,
+			},
+		}},
 	}
 
 	chats, err := repo.FindMany(filter)
 	if err != nil {
 		return []chat.Chat{}, err
 	}
+	defer normalCursor.Close(ctx)
 
-	return chats, nil
+	// Aggregate for direct chats
+	directCursor, err := repo.chatsCollection.Aggregate(ctx, directPipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer directCursor.Close(ctx)
+
+	// Decode and merge results
+	var allChats []chat.Chat
+	if err := normalCursor.All(ctx, &allChats); err != nil {
+		return nil, err
+	}
+
+	var directChats []chat.Chat
+	if err := directCursor.All(ctx, &directChats); err != nil {
+		return nil, err
+	}
+
+	allChats = append(allChats, directChats...)
+
+	return allChats, nil
 }
 
 func (repo *repository) FindByID(staticID primitive.ObjectID) (*chat.Chat, error) {
