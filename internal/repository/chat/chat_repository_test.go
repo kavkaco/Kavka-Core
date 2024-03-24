@@ -58,6 +58,29 @@ func TestChatRepository(t *testing.T) {
 		chatDetail, err := utils.TypeConverter[chat.DirectChatDetail](savedModel.ChatDetail)
 		assert.NoError(t, err)
 
+		assert.Equal(t, chatDetail.Title, "MyChannel")
+		assert.Equal(t, chatDetail.Username, "my_channel")
+		assert.Equal(t, chatDetail.Owner, ownerStaticID)
+		assert.True(t, savedModel.IsMember(ownerStaticID))
+		assert.True(t, savedModel.IsAdmin(ownerStaticID))
+  })
+
+	mt.Run("test create direct", func(mt *mtest.T) {
+		mt.AddMockResponses(mtest.CreateSuccessResponse())
+		chatRepo := NewRepository(mt.DB)
+
+		user1StaticID := primitive.NewObjectID()
+		user2StaticID := primitive.NewObjectID()
+		model := chat.NewChat(chat.TypeChannel, &chat.DirectChatDetail{
+			Sides: [2]primitive.ObjectID{user1StaticID, user2StaticID},
+		})
+
+		savedModel, err := chatRepo.Create(*model)
+		assert.NoError(t, err)
+
+		chatDetail, err := utils.TypeConverter[chat.DirectChatDetail](savedModel.ChatDetail)
+		assert.NoError(t, err)
+
 		assert.True(t, chatDetail.HasSide(user1StaticID))
 		assert.True(t, chatDetail.HasSide(user2StaticID))
 	})
