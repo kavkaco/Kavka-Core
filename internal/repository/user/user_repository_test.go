@@ -30,6 +30,17 @@ func TestUserRepository(t *testing.T) {
 	mt.Run("test find by username", func(mt *mtest.T) {
 		userRepo := NewRepository(mt.DB)
 
+		model := user.NewUser("1234")
+		model.Name = "John"
+		model.LastName = "Doe"
+		savedModel, err := userRepo.Create(model)
+
+		assert.NoError(t, err)
+		assert.Equal(t, savedModel.Name, model.Name)
+	})
+
+	mt.Run("test find by username", func(mt *mtest.T) {
+		userRepo := NewRepository(mt.DB)
 
 		expectedDoc := bson.D{
 			{Key: "id", Value: primitive.NewObjectID()},
@@ -43,8 +54,8 @@ func TestUserRepository(t *testing.T) {
 
 		model, err := userRepo.FindByUsername("john_doe")
 		assert.NoError(t, err)
-    
-    assert.Equal(t, model.StaticID, expectedDoc.Map()["id"])
+
+		assert.Equal(t, model.StaticID, expectedDoc.Map()["id"])
 		assert.Equal(t, model.Name, expectedDoc.Map()["name"])
 		assert.Equal(t, model.LastName, expectedDoc.Map()["last_name"])
 		assert.Equal(t, model.Phone, expectedDoc.Map()["phone"])
