@@ -1,107 +1,119 @@
 package repository
 
 import (
+	"context"
 	"testing"
 
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-	"github.com/kavkaco/Kavka-Core/utils"
-
+	repository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func TestMessageRepository(t *testing.T) {
-	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-	defer mt.Close()
-	mt.Run("test insert text message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+type MyTestSuite struct {
+	suite.Suite
+	db              *mongo.Database
+	messageRepo     message.Repository
+	chatRepo        chat.Repository
+	senderStaticID  primitive.ObjectID
+	channelChatID   primitive.ObjectID
+	sampleMessageID primitive.ObjectID
+}
 
-		expectedResult := []bson.E{
-			{Key: "NModified", Value: 1},
-			{Key: "N", Value: 1},
-		}
-		mt.AddMockResponses(mtest.CreateSuccessResponse(expectedResult...))
+func (s *MyTestSuite) SetupSuite() {
+	// Connecting to test database!
+	cfg := config.Read()
+	cfg.Mongo.DBName = "test"
+	db, connErr := database.GetMongoDBInstance(cfg.Mongo)
+	assert.NoError(s.T(), connErr)
+	s.db = db
 
-		ownerStaticID := primitive.NewObjectID()
-		chatModel := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
-			Title:       "MyChannel",
-			Username:    "my_channel",
-			Description: "Example description",
-			Members:     []primitive.ObjectID{ownerStaticID},
-			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
-		})
+	// Drop test db
+	err := s.db.Drop(context.TODO())
+	assert.NoError(s.T(), err)
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
-		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
+	s.messageRepo = NewMessageRepository(db)
+	s.chatRepo = repository.NewRepository(db)
 
-		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
-		assert.NoError(t, err)
+	s.senderStaticID = primitive.NewObjectID()
 
-		textMessageContentModel, err := utils.TypeConverter[message.TextMessage](savedMessageModel.Content)
-		assert.NoError(t, err)
-
-		assert.Equal(t, textMessageModel.Message, textMessageContentModel.Message)
+	newChannelChat := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
+		Title:       "New Channel",
+		Username:    "sample_channel",
+		Description: "This is a new channel created from unit-test.",
+		Members:     []primitive.ObjectID{s.senderStaticID},
+		Admins:      []primitive.ObjectID{s.senderStaticID},
 	})
 
-	mt.Run("test delete message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+	newChannelChat, createErr := s.chatRepo.Create(*newChannelChat)
+	assert.NoError(s.T(), createErr)
 
-		ownerStaticID := primitive.NewObjectID()
-		chatModel := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
-			Title:       "MyChannel",
-			Username:    "my_channel",
-			Description: "Example description",
-			Members:     []primitive.ObjectID{ownerStaticID},
-			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
-		})
+	s.channelChatID = newChannelChat.ChatID
+}
 
-		mt.AddMockResponses(mtest.CreateSuccessResponse())
+func (s *MyTestSuite) TestA_InsertTextMessage() {
+	chatID := s.channelChatID
+	messageContent := "Hello World"
+	newMessage := message.NewMessage(s.senderStaticID, message.TypeTextMessage, message.TextMessage{Message: messageContent})
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
-		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
+	createdMessage, err := s.messageRepo.Insert(chatID, newMessage)
+	assert.NoError(s.T(), err)
 
-		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
-		assert.NoError(t, err)
+	// Reading the memory for the recently updated store.
+	foundChat, findErr := s.chatRepo.FindByID(chatID)
+	assert.NoError(s.T(), findErr)
+	chatMessages := foundChat.Messages
 
-		expectedResult := []bson.E{{Key: "NModified", Value: 1}, {Key: "N", Value: 1}}
-		mt.AddMockResponses(mtest.CreateSuccessResponse(expectedResult...))
+	assert.Equal(s.T(), len(chatMessages), 1)
 
-		err = messageRepo.Delete(chatModel.ChatID, savedMessageModel.MessageID)
-		assert.NoError(t, err)
-	})
-	mt.Run("test update message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+	// Get the created message from the store.
+	assert.Equal(s.T(), createdMessage.Type, message.TypeTextMessage)
+	assert.Equal(s.T(), createdMessage.Content.(message.TextMessage).Message, messageContent)
+	assert.NotEmpty(s.T(), createdMessage.MessageID)
 
-		ownerStaticID := primitive.NewObjectID()
-		chatModel := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
-			Title:       "MyChannel",
-			Username:    "my_channel",
-			Description: "Example description",
-			Members:     []primitive.ObjectID{ownerStaticID},
-			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
-		})
+	s.sampleMessageID = createdMessage.MessageID
+}
 
-		mt.AddMockResponses(mtest.CreateSuccessResponse())
+func (s *MyTestSuite) TestB_UpdateMessage() {
+	// Update the fields of a text-message
+	update := bson.M{
+		"messages.$.seen": true,
+	}
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
-		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
+	err := s.messageRepo.Update(s.channelChatID, s.sampleMessageID, update)
 
-		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
-		assert.NoError(t, err)
+	assert.NoError(s.T(), err)
 
-		fieldsToUpdate := bson.M{
-			"message": "Message changed!",
-		}
-		expectedResult := []bson.E{{Key: "NModified", Value: 1}, {Key: "N", Value: 1}}
-		mt.AddMockResponses(mtest.CreateSuccessResponse(expectedResult...))
+	// Reading the memory for the recently updated store.
+	foundChat, findErr := s.chatRepo.FindByID(s.channelChatID)
+	assert.NoError(s.T(), findErr)
+	chatMessages := foundChat.Messages
 
-		err = messageRepo.Update(chatModel.ChatID, savedMessageModel.MessageID, fieldsToUpdate)
-		assert.NoError(t, err)
-	})
+	createdMessage := chatMessages[0]
+
+	assert.Equal(s.T(), createdMessage.Seen, true)
+}
+
+func (s *MyTestSuite) TestC_DeleteMessage() {
+	// Delete a text-message from the first chat of the list.
+	err := s.messageRepo.Delete(s.channelChatID, s.sampleMessageID)
+
+	assert.NoError(s.T(), err)
+
+	// Reading the memory for the recently updated store.
+	foundChat, findErr := s.chatRepo.FindByID(s.channelChatID)
+	assert.NoError(s.T(), findErr)
+	chatMessages := foundChat.Messages
+
+	assert.Equal(s.T(), len(chatMessages), 0)
+}
+
+func TestMySuite(t *testing.T) {
+	suite.Run(t, new(MyTestSuite))
 }

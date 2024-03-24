@@ -75,7 +75,6 @@ func (repo *repository) FindOne(filter bson.M) (*chat.Chat, error) {
 	return model, nil
 }
 
-// REVIEW - this method is not completed yet.
 func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
 	ctx := context.TODO()
 
@@ -113,7 +112,7 @@ func (repo *repository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Ch
 		}},
 	}
 
-	chats, err := repo.FindMany(filter)
+	normalCursor, err := repo.chatsCollection.Find(context.TODO(), memberMatchStage)
 	if err != nil {
 		return []chat.Chat{}, err
 	}
