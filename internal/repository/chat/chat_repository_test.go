@@ -26,7 +26,7 @@ func TestChatRepository(t *testing.T) {
 			Description: "Example description",
 			Members:     []primitive.ObjectID{ownerStaticID},
 			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
+			Owner:       &ownerStaticID,
 		})
 
 		savedModel, err := chatRepo.Create(*model)
@@ -40,7 +40,7 @@ func TestChatRepository(t *testing.T) {
 		assert.Equal(t, chatDetail.Owner, ownerStaticID)
 		assert.True(t, savedModel.IsMember(ownerStaticID))
 		assert.True(t, savedModel.IsAdmin(ownerStaticID))
-  })
+	})
 
 	mt.Run("test create direct", func(mt *mtest.T) {
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
@@ -78,7 +78,7 @@ func TestChatRepository(t *testing.T) {
 					Description: "Example description",
 					Members:     []primitive.ObjectID{ownerStaticID},
 					Admins:      []primitive.ObjectID{ownerStaticID},
-					Owner:       ownerStaticID,
+					Owner:       &ownerStaticID,
 				},
 			},
 		}

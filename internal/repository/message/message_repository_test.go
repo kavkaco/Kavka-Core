@@ -32,7 +32,7 @@ func TestMessageRepository(t *testing.T) {
 			Description: "Example description",
 			Members:     []primitive.ObjectID{ownerStaticID},
 			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
+			Owner:       &ownerStaticID,
 		})
 
 		textMessageModel := &message.TextMessage{Message: "Hello World!"}
@@ -57,7 +57,7 @@ func TestMessageRepository(t *testing.T) {
 			Description: "Example description",
 			Members:     []primitive.ObjectID{ownerStaticID},
 			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
+			Owner:       &ownerStaticID,
 		})
 
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
@@ -84,7 +84,7 @@ func TestMessageRepository(t *testing.T) {
 			Description: "Example description",
 			Members:     []primitive.ObjectID{ownerStaticID},
 			Admins:      []primitive.ObjectID{ownerStaticID},
-			Owner:       ownerStaticID,
+			Owner:       &ownerStaticID,
 		})
 
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
