@@ -25,7 +25,7 @@ func NewRepository(db *mongo.Database) message.Repository {
 	return &repository{db.Collection(database.ChatsCollection)}
 }
 
-func (repo *repository) Insert(chatID primitive.ObjectID, msg *Repo.Message) (*message.Message, error) {
+func (repo *repository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 

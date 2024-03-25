@@ -10,9 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var (
-	ErrEmptyPassword = errors.New("empty password")
-)
+var ErrEmptyPassword = errors.New("empty password")
 
 type User struct {
 	StaticID  primitive.ObjectID `bson:"id"        json:"id"`

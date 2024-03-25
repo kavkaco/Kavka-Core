@@ -22,7 +22,7 @@ func NewSmsService(configs *config.SMS, templatesPath string) *SmsService {
 }
 
 func (s *SmsService) SendSMS(msg string, receivers []string) error {
-	//if config.CurrentEnv == "devel" {
+	// if config.CurrentEnv == "devel" {
 	fmt.Println("------ SMS Sent ------")
 	fmt.Printf("%s\n", strings.TrimSpace(msg))
 	fmt.Println("--------------")
