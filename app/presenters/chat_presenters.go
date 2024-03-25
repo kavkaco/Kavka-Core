@@ -31,7 +31,8 @@ type HttpDirectChatDetail struct {
 }
 
 func UnmarshalFetchedUsers(fetchedUsers primitive.A) ([]user.User, error) {
-	var users []user.User
+	var users []user.User = []user.User{}
+
 	for _, v := range fetchedUsers {
 		currentUser, err := utils.TypeConverter[user.User](v)
 		if err != nil {
