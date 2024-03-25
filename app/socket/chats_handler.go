@@ -32,9 +32,6 @@ func CreateDirect(event string, args MessageHandlerArgs) bool {
 	}
 
 	_, err := args.socketService.chatService.CreateDirect(args.staticID, staticID.(primitive.ObjectID))
-	if err != nil {
-		return false
-	}
 
 	// FIXME
 	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
@@ -59,7 +56,7 @@ func GetChat(event string, args MessageHandlerArgs) bool {
 	// FIXME
 	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-	return err == nil
+	return true
 }
 
 func CreateGroup(event string, args MessageHandlerArgs) bool {
@@ -69,14 +66,11 @@ func CreateGroup(event string, args MessageHandlerArgs) bool {
 
 	if title != nil && username != nil && description != nil {
 		_, createErr := args.socketService.chatService.CreateGroup(args.staticID, title.(string), username.(string), description.(string))
-		if createErr != nil {
-			return false
-		}
 
 		// FIXME
 		// err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		return true
+		return createErr == nil
 	}
 
 	return false
@@ -89,15 +83,12 @@ func CreateChannel(event string, args MessageHandlerArgs) bool {
 
 	if title != nil && username != nil && description != nil {
 		_, createErr := args.socketService.chatService.CreateChannel(args.staticID, title.(string), username.(string), description.(string))
-		if createErr != nil {
-			return false
-		}
 
 		// FIXME
 		// err := args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-		// return err == nil
-		return true
+		// return true
+		return createErr == nil
 	}
 
 	return false
