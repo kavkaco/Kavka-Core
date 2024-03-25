@@ -40,7 +40,10 @@ func (s *userService) Login(phone string) error {
 		return loginErr
 	}
 
-	s.SmsOtp.SendSMS(fmt.Sprintf("OTP Code: %d", otp), []string{phone})
+	err := s.SmsOtp.SendSMS(fmt.Sprintf("OTP Code: %d", otp), []string{phone})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
