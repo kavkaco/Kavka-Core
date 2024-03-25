@@ -1,4 +1,4 @@
-name: Lint and format check
+name: Linter check
 
 on:
   push:
@@ -25,8 +25,5 @@ jobs:
     - name: Install devtools
       run: make devtools
       
-    - name: Run Formater
-      run: make fmt
-
     - name: Run Linter
       run: make check
