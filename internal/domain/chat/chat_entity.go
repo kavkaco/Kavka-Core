@@ -14,7 +14,6 @@ const (
 	TypeDirect  = "direct"
 )
 
-// type StaticID = primitive.ObjectID
 type Chat struct {
 	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chat_id"`
 	ChatType   string             `bson:"chat_type"   json:"chat_type"`
