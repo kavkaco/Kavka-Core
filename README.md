@@ -10,71 +10,44 @@
   <p align="center">
     Messaging Application
     <br />
-    <a href="https://github.com/kavkaco/Docs"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/kavkaco/Kavka-Core/tree/main/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/kavkaco/Kavka-Backend/issues">Report Bug</a>
   </p>
 </div>
  
-## Introduction
- 
-Kavka is a **feature-rich**, **open-source** chat application developed with **GoLang**, and it is proudly hosted on GitHub. As an open-source project, Kavka welcomes contributors from all over the world to join the community and contribute their skills and expertise to make the application even better.
- 
-At Kavka, we believe in the power of collaboration and continuous learning. Our primary goal is to provide a platform where developers can not only connect and communicate but also enhance their programming skills and strive towards becoming senior programmers. We understand the importance of continuous growth in the ever-evolving field of technology, and Kavka aims to be a catalyst in that journey.
- 
-With a focus on learning, Kavka offers a range of features designed to challenge and expand developers' knowledge. From implementing real-time messaging using `websocket` to ensuring data security and encryption, Kavka provides an environment where developers can experiment with new technologies and stay up-to-date with the latest trends in the industry.
- 
-## Built With
+## 💬 Kavka: Secure and Private Chat Application
+
+Kavka is an open-source chat application designed for **secure** and **private** communication. Developed using GoLang and adhering to the **Clean Architecture** principles, Kavka offers a robust and scalable foundation for building private chat experiences.
+
+### 🦄 Built for Privacy
+
+Kavka is designed with a focus on privacy at its core. Our goal is to provide a platform for small to medium-scale private chat applications that can be deployed on anonymous servers. Kavka utilizes **strong encryption algorithms** to ensure the confidentiality and anonymity of your messages, allowing users to express themselves freely without fear.
+
+### 🔑 Key Features
+
+- **Open-Source**: Kavka's source code is freely available for anyone to inspect, modify, and contribute to.
+
+- **GoLang and Clean Architecture**: The application leverages the power and efficiency of GoLang, while adhering to the Clean Architecture principles for maintainability and scalability.
+
+- **Strong Encryption**: Kavka utilizes strong encryption algorithms to safeguard message confidentiality and anonymity.
+
+- **Anonymous Server Deployment**: The application can be deployed on anonymous servers, further enhancing user privacy.
+
+## 🪜 Built With
 
 [![My Skills](https://skillicons.dev/icons?i=vscode,golang,docker,nginx,git,github,postman,mongodb,redis,vuejs,nuxtjs,ts,aws)](https://skillicons.dev)
+
+## ⚙️ Setup Server Guide
+The server setup guide is explained in detail here.
+
+[docs/setup_server.md](https://github.com/kavkaco/Kavka-Core/blob/main/docs/setup_server.md)
  
-## Getting Started
+## 💎 Contribution!
 
-Let's begin to clone and configure Kavka on a local machine!
- 
-### Prerequisites
+Kavka welcomes contributions from developers around the world. We are committed to fostering a collaborative and inclusive community where everyone can contribute to the project's growth and development.
 
-`go-version` `1.18`   
-`docker-version`: `^24.0`   
-`docker-compose-version`: `^1.29`   
- 
-### Installation
+We invite you to explore Kavka, join our community, and contribute to building a secure and private communication platform for everyone.💜
 
-1. Clone the repo
 
- ```bash
- git clone --depth 1 https://github.com/kavkaco/Kavka-Backend.git
- ```
-
-2. Install dependencies
-
- ```bash
- go mod tidy
- ```
-
-3. Build databases using by docker
-
- ```bash
- sudo docker-compose up -d redis
- sudo docker-compose up -d mongo
- ```
-
-3. Build MinIO service
-
- ```bash
- sudo docker-compose up -d minio
- ```
-
-### Setup
-
-Everything almost done. You can easily run the backend server on your system!
-
-```bash
-sudo chmod +x ./scripts/run_devel.sh
-./scripts/run_devel.sh
-```
-
-## Postman
-
-[https://www.postman.com/crimson-equinox-208211/workspace/kavka](https://www.postman.com/crimson-equinox-208211/workspace/kavka)
