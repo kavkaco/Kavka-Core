@@ -22,8 +22,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install golangci-lint
-      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
+    - name: Install devtools
+      run: make devtools
+      
+    - name: Run Formater
+      run: make fmt
 
-    - name: Format & Lint
+    - name: Run Linter
       run: make check
