@@ -15,9 +15,9 @@ const (
 )
 
 type Chat struct {
-	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chat_id"`
-	ChatType   string             `bson:"chat_type"   json:"chat_type"`
-	ChatDetail interface{}        `bson:"chat_detail" json:"chat_detail"`
+	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chatID"`
+	ChatType   string             `bson:"chat_type"   json:"chatType"`
+	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
 	Messages   []*message.Message `bson:"messages"    json:"messages"`
 }
 
