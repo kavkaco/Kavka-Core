@@ -21,17 +21,13 @@ func NewSmsService(configs *config.SMS, templatesPath string) *SmsService {
 	return &SmsService{configs, templatesPath}
 }
 
+// TODO - Write sms service for production.
 func (s *SmsService) SendSMS(msg string, receivers []string) error {
-	// if config.CurrentEnv == "devel" {
-	fmt.Println("------ SMS Sent ------")
-	fmt.Printf("%s\n", strings.TrimSpace(msg))
-	fmt.Println("--------------")
-	fmt.Printf("receivers count: %d\n", len(receivers))
-	fmt.Println("SMS Sent!")
-	return nil
-	//}
-
-	// TODO - Implement SMS sender for production
+	if config.CurrentEnv == "devel" {
+		fmt.Println("------ SMS Sent ------")
+		fmt.Printf("%s\n", strings.TrimSpace(msg))
+		fmt.Println("-----------------------")
+	}
 
 	return nil
 }
