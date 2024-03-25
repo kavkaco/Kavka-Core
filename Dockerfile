@@ -1,13 +1,9 @@
-FROM golang:latest
+FROM golang:1.22-alpine
 
 WORKDIR /server
 
 COPY . .
 
-RUN go get
+RUN chmod +x ./scripts/run_prod.sh
 
-RUN chmod +x ./scripts/build.sh
-
-RUN ./scripts/build.sh
-
-CMD ["./build/server"]
+CMD ["./scripts/run_prod.sh"]
