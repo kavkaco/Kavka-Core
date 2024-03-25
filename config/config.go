@@ -83,7 +83,7 @@ func Read() *IConfig {
 	// Load ENV
 	env := os.Getenv("ENV")
 	if len(strings.TrimSpace(env)) == 0 {
-		env = EnvItems[0]
+		CurrentEnv = EnvItems[0]
 	} else if slices.Contains(EnvItems, env) {
 		CurrentEnv = env
 	} else {
