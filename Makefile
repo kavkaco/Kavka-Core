@@ -3,7 +3,7 @@ PACKAGES=$(shell go list ./... | grep -v 'tests')
 # Install tools are needed for development (golangci-lint, gofumpt)
 devtools:
 	@echo "Installing devtools"
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.1
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 	go install mvdan.cc/gofumpt@latest
 
 # GoLang Unit-Test
