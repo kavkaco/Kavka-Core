@@ -27,7 +27,3 @@ Your additional work here is greatly appreciated and will help us respond as qui
 ### Expected Behavior
 
 > What were you expecting
-
-### Extra
-
-> any extra information you think is relevant to issue

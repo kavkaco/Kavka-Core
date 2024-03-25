@@ -23,7 +23,3 @@ Your additional work here is greatly appreciated and will help us respond as qui
 ### Alternatives and current work-around
 
 > A clear and concise description of any alternatives you've considered or any work-around that are currently in place.
-
-### Additional context
-
-> Add any other context or screenshots about the feature request here.
