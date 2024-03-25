@@ -36,7 +36,7 @@ func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
 
 func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Chat) error {
 	// Marshal all of the chats into json using by ChatAsJson function
-	var marshaledChatsJson []chat.Chat = []chat.Chat{}
+	marshaledChatsJson := []chat.Chat{}
 
 	for _, v := range userChats {
 		chatJson, err := ChatAsJSON(v, userInfo.StaticID)
