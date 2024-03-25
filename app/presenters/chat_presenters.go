@@ -25,13 +25,14 @@ type HttpGroupChatDetail struct {
 }
 
 type HttpDirectChatDetail struct {
-	UserID   primitive.ObjectID `json:"user_id"`
+	UserID   primitive.ObjectID `json:"userId"`
 	Name     string             `json:"name"`
 	LastName string             `json:"lastName"`
 }
 
 func UnmarshalFetchedUsers(fetchedUsers primitive.A) ([]user.User, error) {
-	var users []user.User
+	users := []user.User{}
+
 	for _, v := range fetchedUsers {
 		currentUser, err := utils.TypeConverter[user.User](v)
 		if err != nil {

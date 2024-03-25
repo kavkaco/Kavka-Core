@@ -10,8 +10,8 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 )
 
-// the data and information that would be send to user after authentication;
-// the messages of chats must not be sent!
+// the data and information that would be send to user after authentication.
+// the messages of chats must not be sent
 
 type UserInfoDto struct {
 	Message   string      `json:"message"`
@@ -36,7 +36,7 @@ func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
 
 func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Chat) error {
 	// Marshal all of the chats into json using by ChatAsJson function
-	var marshaledChatsJson []chat.Chat
+	marshaledChatsJson := []chat.Chat{}
 
 	for _, v := range userChats {
 		chatJson, err := ChatAsJSON(v, userInfo.StaticID)

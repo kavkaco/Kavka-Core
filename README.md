@@ -13,7 +13,12 @@
     <a href="https://github.com/kavkaco/Kavka-Core/tree/main/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/kavkaco/Kavka-Backend/issues">Report Bug</a>
+    <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/go.yml">
+      <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/go.yml/badge.svg"
+    </a>
+    <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/linting.yml">
+      <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/linting.yml/badge.svg"
+    </a>
   </p>
 </div>
  
