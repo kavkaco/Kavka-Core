@@ -25,7 +25,7 @@ type HttpGroupChatDetail struct {
 }
 
 type HttpDirectChatDetail struct {
-	UserID   primitive.ObjectID `json:"user_id"`
+	UserID   primitive.ObjectID `json:"userId"`
 	Name     string             `json:"name"`
 	LastName string             `json:"lastName"`
 }
