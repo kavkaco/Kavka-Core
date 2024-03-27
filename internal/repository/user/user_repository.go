@@ -38,15 +38,16 @@ func (repo *userRepository) Create(user *user.User) (*user.User, error) {
 
 func (repo *userRepository) FindOne(filter bson.M) (*user.User, error) {
 	var model *user.User
+
 	result := repo.usersCollection.FindOne(context.TODO(), filter)
-	if result.Err() != nil {
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return nil, ErrUserNotFound
+	} else if result.Err() != nil {
 		return nil, result.Err()
 	}
 
 	err := result.Decode(&model)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		return nil, ErrUserNotFound
-	} else if err != nil {
+	if err != nil {
 		return nil, err
 	}
 
