@@ -77,7 +77,7 @@ func (repo *chatRepository) FindOne(filter bson.M) (*chat.Chat, error) {
 
 // Using mongodb aggregation pipeline to fetch user-chats.
 // This process is a little special because we do not fetch all of the messages because it's really heavy query!
-// Then, only last 3 messages are going to be fetched by pipeline.
+// Then, only last message are going to be fetched by pipeline.
 func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
 	ctx := context.TODO()
 
@@ -109,7 +109,7 @@ func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]cha
 				"chat_id":     1,
 				"chat_type":   1,
 				"chat_detail": 1,
-				"messages":    bson.M{"$slice": []interface{}{"$messages", -3}},
+				"messages":    bson.M{"$slice": []interface{}{"$messages", -1}},
 			},
 		},
 	}
