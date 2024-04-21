@@ -20,8 +20,8 @@ type Message struct {
 	Seen      bool               `bson:"seen" json:"seen"`
 
 	// MessageType
-	Type    string
-	Content interface{}
+	Type    string      `bson:"type" json:"type"`
+	Content interface{} `bson:"content" json:"content"`
 }
 
 type TextMessage struct {
