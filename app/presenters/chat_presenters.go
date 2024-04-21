@@ -2,18 +2,20 @@ package presenters
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
+	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ChatDto struct {
-	Event string     `json:"event"`
-	Chat  *chat.Chat `json:"chat"`
-}
+// type ChatDto struct {
+// 	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chatId"`
+// 	ChatType   string             `bson:"chat_type"   json:"chatType"`
+// 	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
+// 	Messages   []interface{}      `bson:"messages"    json:"messages"`
+// }
 
 type HttpChannelChatDetail struct {
 	Title    string `json:"title"`
@@ -52,7 +54,6 @@ func ChatAsJSON(obj chat.Chat, userStaticID primitive.ObjectID) (interface{}, er
 	switch obj.ChatType {
 	case chat.TypeDirect:
 		chatDetailLocal, err := utils.TypeConverter[map[string]interface{}](obj.ChatDetail)
-		fmt.Println(err)
 		if err != nil {
 			return nil, err
 		}
@@ -96,6 +97,20 @@ func ChatAsJSON(obj chat.Chat, userStaticID primitive.ObjectID) (interface{}, er
 	}
 
 	obj.ChatDetail = httpChatDetail
+
+	for i, msg := range obj.Messages {
+		messageJson, err := MessageAsJSON(*msg)
+		if err != nil {
+			return nil, err
+		}
+
+		castMessageJson, err := utils.TypeConverter[message.Message](messageJson)
+		if err != nil {
+			return nil, err
+		}
+
+		obj.Messages[i] = castMessageJson
+	}
 
 	return obj, nil
 }
