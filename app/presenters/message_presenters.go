@@ -5,7 +5,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils"
 )
 
-func MessageAsJSON(obj message.Message) (interface{}, error) {
+func MessageAsJSON(obj message.Message) (*message.Message, error) {
 	var messageContent interface{}
 
 	switch obj.Type {
@@ -20,5 +20,5 @@ func MessageAsJSON(obj message.Message) (interface{}, error) {
 
 	obj.Content = messageContent
 
-	return obj, nil
+	return &obj, nil
 }

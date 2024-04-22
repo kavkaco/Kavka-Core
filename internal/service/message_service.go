@@ -82,7 +82,7 @@ func (s *messageService) InsertTextMessage(chatID primitive.ObjectID, staticID p
 
 	if hasAccess {
 		msg := message.NewMessage(staticID, message.TypeTextMessage, &message.TextMessage{
-			Message: messageContent,
+			Data: messageContent,
 		})
 
 		return s.msgRepo.Insert(chatID, msg)

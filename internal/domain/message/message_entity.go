@@ -25,12 +25,12 @@ type Message struct {
 }
 
 type TextMessage struct {
-	Message string
+	Data string `bson:"data" json:"data"`
 }
 
 type ImageMessage struct {
-	ImageURL string
-	Caption  string
+	ImageURL string `bson:"image_url" json:"imageUrl"`
+	Caption  string `bson:"caption" json:"caption"`
 }
 
 func NewMessage(senderID primitive.ObjectID, messageType string, content interface{}) *Message {

@@ -34,7 +34,7 @@ func TestMessageRepository(t *testing.T) {
 			Owner:       &ownerStaticID,
 		})
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
+		textMessageModel := &message.TextMessage{Data: "Hello World!"}
 		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
 
 		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
@@ -43,7 +43,7 @@ func TestMessageRepository(t *testing.T) {
 		textMessageContentModel, err := utils.TypeConverter[message.TextMessage](savedMessageModel.Content)
 		assert.NoError(t, err)
 
-		assert.Equal(t, textMessageModel.Message, textMessageContentModel.Message)
+		assert.Equal(t, textMessageModel.Data, textMessageContentModel.Data)
 	})
 
 	mt.Run("test delete message", func(mt *mtest.T) {
@@ -61,7 +61,7 @@ func TestMessageRepository(t *testing.T) {
 
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
+		textMessageModel := &message.TextMessage{Data: "Hello World!"}
 		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
 
 		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
@@ -88,7 +88,7 @@ func TestMessageRepository(t *testing.T) {
 
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
 
-		textMessageModel := &message.TextMessage{Message: "Hello World!"}
+		textMessageModel := &message.TextMessage{Data: "Hello World!"}
 		messageModel := message.NewMessage(ownerStaticID, message.TypeTextMessage, textMessageModel)
 
 		savedMessageModel, err := messageRepo.Insert(chatModel.ChatID, messageModel)
