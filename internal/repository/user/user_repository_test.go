@@ -8,15 +8,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.uber.org/zap"
 )
 
 func TestUserRepository(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync() // nolint
+
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 	defer mt.Close()
 
 	mt.Run("test create", func(mt *mtest.T) {
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
-		userRepo := NewRepository(mt.DB)
+		userRepo := NewRepository(logger, mt.DB)
 
 		model := user.NewUser("1234")
 		model.Name = "John"
@@ -28,7 +32,7 @@ func TestUserRepository(t *testing.T) {
 	})
 
 	mt.Run("test find by username", func(mt *mtest.T) {
-		userRepo := NewRepository(mt.DB)
+		userRepo := NewRepository(logger, mt.DB)
 
 		expectedDoc := bson.D{
 			{Key: "id", Value: primitive.NewObjectID()},

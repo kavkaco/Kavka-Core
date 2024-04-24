@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 )
 
 var (
@@ -18,11 +19,12 @@ var (
 )
 
 type repository struct {
+	logger          *zap.Logger
 	chatsCollection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) message.Repository {
-	return &repository{db.Collection(database.ChatsCollection)}
+func NewRepository(logger *zap.Logger, db *mongo.Database) message.Repository {
+	return &repository{logger, db.Collection(database.ChatsCollection)}
 }
 
 func (repo *repository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {

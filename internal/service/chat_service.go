@@ -5,15 +5,17 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 )
 
 type chatService struct {
+	logger   *zap.Logger
 	chatRepo chat.Repository
 	userRepo user.UserRepository
 }
 
-func NewChatService(chatRepo chat.Repository, userRepo user.UserRepository) chat.Service {
-	return &chatService{chatRepo, userRepo}
+func NewChatService(logger *zap.Logger, chatRepo chat.Repository, userRepo user.UserRepository) chat.Service {
+	return &chatService{logger, chatRepo, userRepo}
 }
 
 func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {

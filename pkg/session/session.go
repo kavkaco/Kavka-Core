@@ -10,11 +10,12 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 )
 
-func NewSession(redisClient *redis.Client, authConfigs config.Auth) *Session {
+func NewSession(logger *zap.Logger, redisClient *redis.Client, authConfigs config.Auth) *Session {
 	jwtManager := jwt_manager.NewJwtManager(authConfigs, jwt_manager.DefaultOtpExpire)
-	return &Session{redisClient, authConfigs, jwtManager}
+	return &Session{logger, redisClient, authConfigs, jwtManager}
 }
 
 // makeExpiration function returns the expiration time for a given token type.

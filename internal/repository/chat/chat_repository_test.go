@@ -9,15 +9,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.uber.org/zap"
 )
 
 func TestChatRepository(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync() // nolint
+
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 	defer mt.Close()
 
 	mt.Run("test create channel", func(mt *mtest.T) {
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
-		chatRepo := NewRepository(mt.DB)
+		chatRepo := NewRepository(logger, mt.DB)
 
 		ownerStaticID := primitive.NewObjectID()
 		model := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
@@ -44,7 +48,7 @@ func TestChatRepository(t *testing.T) {
 
 	mt.Run("test create direct", func(mt *mtest.T) {
 		mt.AddMockResponses(mtest.CreateSuccessResponse())
-		chatRepo := NewRepository(mt.DB)
+		chatRepo := NewRepository(logger, mt.DB)
 
 		user1StaticID := primitive.NewObjectID()
 		user2StaticID := primitive.NewObjectID()
@@ -63,7 +67,7 @@ func TestChatRepository(t *testing.T) {
 	})
 
 	mt.Run("test find by id", func(mt *mtest.T) {
-		chatRepo := NewRepository(mt.DB)
+		chatRepo := NewRepository(logger, mt.DB)
 
 		chatID := primitive.NewObjectID()
 		ownerStaticID := primitive.NewObjectID()
@@ -92,7 +96,7 @@ func TestChatRepository(t *testing.T) {
 	})
 
 	mt.Run("test find chat or sides by static id", func(mt *mtest.T) {
-		chatRepo := NewRepository(mt.DB)
+		chatRepo := NewRepository(logger, mt.DB)
 
 		chatID := primitive.NewObjectID()
 		user1StaticID := primitive.NewObjectID()
@@ -123,7 +127,7 @@ func TestChatRepository(t *testing.T) {
 	})
 
 	mt.Run("test find by sides", func(mt *mtest.T) {
-		chatRepo := NewRepository(mt.DB)
+		chatRepo := NewRepository(logger, mt.DB)
 
 		chatID := primitive.NewObjectID()
 		user1StaticID := primitive.NewObjectID()
