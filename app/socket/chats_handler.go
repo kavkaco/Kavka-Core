@@ -46,14 +46,11 @@ func GetChat(event string, args MessageHandlerArgs) bool {
 	}
 
 	_, err := args.socketService.chatService.GetChat(staticID.(primitive.ObjectID))
-	if err != nil {
-		return false
-	}
 
 	// FIXME
 	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
 
-	return true
+	return err == nil
 }
 
 func CreateGroup(event string, args MessageHandlerArgs) bool {

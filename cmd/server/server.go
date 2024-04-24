@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/router"
@@ -21,8 +19,6 @@ import (
 func main() {
 	// Init Zap Logger
 	logger := logs.InitZapLogger()
-
-	log.Println(config.CurrentEnv)
 
 	// Define paths
 	TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
