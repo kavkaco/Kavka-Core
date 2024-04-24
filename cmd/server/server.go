@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/router"
@@ -11,20 +13,16 @@ import (
 	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/logs"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
-	"go.uber.org/zap"
 )
 
 func main() {
 	// Init Zap Logger
-	var logger *zap.Logger
-	if config.CurrentEnv == config.EnvItems[0] {
-		logger, _ = zap.NewDevelopment()
-	} else {
-		logger, _ = zap.NewProduction()
-	}
-	defer logger.Sync() // nolint
+	logger := logs.InitZapLogger()
+
+	log.Println(config.CurrentEnv)
 
 	// Define paths
 	TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
