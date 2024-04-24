@@ -7,13 +7,18 @@ import (
 	"runtime"
 	"strings"
 
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 
+type Env int
+
+const (
+	Development Env = iota
+	Production
+)
+
 var (
-	EnvItems          = []string{"devel", "prod"}
-	CurrentEnv string = EnvItems[0]
+	CurrentEnv Env = Development
 )
 
 type (
@@ -81,13 +86,13 @@ func ConfigsDirPath() string {
 
 func Read() *IConfig {
 	// Load ENV
-	env := os.Getenv("ENV")
-	if len(strings.TrimSpace(env)) == 0 {
-		CurrentEnv = EnvItems[0]
-	} else if slices.Contains(EnvItems, env) {
-		CurrentEnv = env
+	env := strings.ToLower(os.Getenv("ENV"))
+	if len(strings.TrimSpace(env)) == 0 || env == "development" {
+		CurrentEnv = Development
+	} else if env == "production" {
+		CurrentEnv = Production
 	} else {
-		panic(errors.New("Invalid ENV key: " + env))
+		panic(errors.New("Invalid ENV: " + env))
 	}
 
 	// Load YAML configs
