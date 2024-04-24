@@ -25,7 +25,7 @@ func NewSmsService(logger *zap.Logger, configs *config.SMS, templatesPath string
 
 // TODO - Write sms service for production.
 func (s *SmsService) SendSMS(msg string, receivers []string) error {
-	if config.CurrentEnv == "devel" {
+	if config.CurrentEnv == config.Development {
 		fmt.Println("------ SMS Sent ------")
 		fmt.Printf("%s\n", strings.TrimSpace(msg))
 		fmt.Println("-----------------------")
