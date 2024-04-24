@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	EnvItems   = []string{"devel", "prod"}
-	CurrentEnv string
+	EnvItems          = []string{"devel", "prod"}
+	CurrentEnv string = EnvItems[0]
 )
 
 type (

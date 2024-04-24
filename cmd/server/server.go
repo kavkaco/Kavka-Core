@@ -11,11 +11,15 @@ import (
 	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/internal/service"
+	"github.com/kavkaco/Kavka-Core/logs"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
 )
 
 func main() {
+	// Init Zap Logger
+	logger := logs.InitZapLogger()
+
 	// Define paths
 	TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
 
@@ -50,24 +54,24 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// ----- Init Services -----
-	session := session.NewSession(redisClient, configs.App.Auth)
-	smsService := sms_service.NewSmsService(&configs.SMS, TemplatesPath)
+	// Initializing various services and repositories used in the application
+	session := session.NewSession(logger, redisClient, configs.App.Auth)
+	smsService := sms_service.NewSmsService(logger, &configs.SMS, TemplatesPath)
 
-	userRepo := userRepository.NewRepository(mongoDB)
-	userService := service.NewUserService(userRepo, session, smsService)
+	userRepo := userRepository.NewRepository(logger, mongoDB)
+	userService := service.NewUserService(logger, userRepo, session, smsService)
 
-	chatRepo := chatRepository.NewRepository(mongoDB)
-	chatService := service.NewChatService(chatRepo, userRepo)
+	chatRepo := chatRepository.NewRepository(logger, mongoDB)
+	chatService := service.NewChatService(logger, chatRepo, userRepo)
 
-	messageRepo := messageRepository.NewRepository(mongoDB)
-	messageRepository := service.NewMessageService(messageRepo, chatRepo)
+	messageRepo := messageRepository.NewRepository(logger, mongoDB)
+	messageService := service.NewMessageService(logger, messageRepo, chatRepo)
 
 	// Init routes
-	router.NewUserRouter(app.Group("/users"), userService, chatService)
+	router.NewUserRouter(logger, app.Group("/users"), userService, chatService)
 
 	// Init Socket Server
-	socket.NewSocketService(app, userService, chatService, messageRepository)
+	socket.NewSocketService(logger, app, userService, chatService, messageService)
 
 	// Everything almost done!
 	err := app.Run(configs.App.HTTP.Address)

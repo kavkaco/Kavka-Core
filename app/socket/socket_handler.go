@@ -1,8 +1,6 @@
 package socket
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
@@ -10,6 +8,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 )
 
 var (
@@ -21,6 +20,7 @@ var (
 )
 
 type Service struct {
+	logger      *zap.Logger
 	userService user.Service
 	chatService chat.Service
 	msgService  message.Service
@@ -40,8 +40,8 @@ type MessageHandlerArgs struct {
 
 var upgrader = websocket.Upgrader{}
 
-func NewSocketService(app *gin.Engine, userService user.Service, chatService chat.Service, messageService message.Service) *Service {
-	socketService := &Service{userService, chatService, messageService}
+func NewSocketService(logger *zap.Logger, app *gin.Engine, userService user.Service, chatService chat.Service, messageService message.Service) *Service {
+	socketService := &Service{logger, userService, chatService, messageService}
 
 	app.GET("/ws", socketService.handleWebsocket)
 
@@ -77,7 +77,7 @@ func (s *Service) handleWebsocket(ctx *gin.Context) {
 		var msgData *Message
 
 		if err := conn.ReadJSON(&msgData); err != nil {
-			log.Println("Unmarshal json error in socket:", err)
+			s.logger.Error("Unmarshal json error in socket: " + err.Error())
 			break
 		}
 

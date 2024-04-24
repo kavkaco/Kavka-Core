@@ -10,15 +10,17 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
+	"go.uber.org/zap"
 )
 
 type UserController struct {
+	logger      *zap.Logger
 	userService user.Service
 	chatService chat.Service
 }
 
-func NewUserController(userService user.Service, chatService chat.Service) *UserController {
-	return &UserController{userService, chatService}
+func NewUserController(logger *zap.Logger, userService user.Service, chatService chat.Service) *UserController {
+	return &UserController{logger, userService, chatService}
 }
 
 func (ctrl *UserController) HandleLogin(ctx *gin.Context) {
@@ -55,8 +57,6 @@ func (ctrl *UserController) HandleVerifyOTP(ctx *gin.Context) {
 }
 
 func (ctrl *UserController) HandleRefreshToken(ctx *gin.Context) {
-	refreshToken := ctx.GetHeader("refresh") //nolint
-
 	refreshToken, bearerRfOk := bearer.RefreshToken(ctx)
 
 	if bearerRfOk {

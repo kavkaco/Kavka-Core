@@ -9,16 +9,18 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
+	"go.uber.org/zap"
 )
 
 type userService struct {
+	logger   *zap.Logger
 	userRepo user.UserRepository
 	session  *session.Session
 	SmsOtp   *sms_service.SmsService
 }
 
-func NewUserService(userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.Service {
-	return &userService{userRepo, session, smsOtp}
+func NewUserService(logger *zap.Logger, userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.Service {
+	return &userService{logger, userRepo, session, smsOtp}
 }
 
 // Login function gets user's phone and find it or created it in the database,

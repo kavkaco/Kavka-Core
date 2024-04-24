@@ -5,3 +5,5 @@ configs/configs.yml
 ./test.go
 vendor/
 minio_data/*
+
+logs/logs*.json

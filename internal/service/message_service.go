@@ -1,23 +1,23 @@
 package service
 
 import (
-	"log"
-	"reflect"
 	"slices"
 
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.uber.org/zap"
 )
 
 type messageService struct {
+	logger   *zap.Logger
 	msgRepo  message.Repository
 	chatRepo chat.Repository
 }
 
-func NewMessageService(msgRepo message.Repository, chatRepo chat.Repository) message.Service {
-	return &messageService{msgRepo, chatRepo}
+func NewMessageService(logger *zap.Logger, msgRepo message.Repository, chatRepo chat.Repository) message.Service {
+	return &messageService{logger, msgRepo, chatRepo}
 }
 
 // This function is used to check that user can send message or not.
@@ -35,7 +35,7 @@ func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, stati
 		isAdmin := slices.Contains(admins, staticID)
 		return isAdmin, nil
 	} else if foundChat.ChatType == chat.TypeGroup {
-		log.Println(reflect.TypeOf(foundChat.ChatDetail).Name())
+		// log.Println(reflect.TypeOf(foundChat.ChatDetail).Name())
 		// members := foundChat.ChatDetail.(*chat.GroupChatDetail).Members
 		// isMember := slices.Contains(members, &staticID)
 		// return isMember, nil

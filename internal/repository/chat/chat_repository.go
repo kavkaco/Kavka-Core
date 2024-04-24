@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 )
 
 var (
@@ -17,11 +18,12 @@ var (
 )
 
 type chatRepository struct {
+	logger          *zap.Logger
 	chatsCollection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) chat.Repository {
-	return &chatRepository{db.Collection(database.ChatsCollection)}
+func NewRepository(logger *zap.Logger, db *mongo.Database) chat.Repository {
+	return &chatRepository{logger, db.Collection(database.ChatsCollection)}
 }
 
 func (repo *chatRepository) Create(newChat chat.Chat) (*chat.Chat, error) {
@@ -99,7 +101,8 @@ func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]cha
 				"pipeline": []interface{}{
 					bson.M{
 						"$match": bson.M{
-							"$expr": bson.M{"$eq": []interface{}{"$chat_type", "direct"}}},
+							"$expr": bson.M{"$eq": []interface{}{"$chat_type", "direct"}},
+						},
 					},
 				},
 			},

@@ -10,13 +10,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
+	"go.uber.org/zap"
 )
 
 func TestMessageRepository(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	defer logger.Sync() // nolint
+
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 	defer mt.Close()
 	mt.Run("test insert text message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+		messageRepo := NewRepository(logger, mt.DB)
 
 		expectedResult := []bson.E{
 			{Key: "NModified", Value: 1},
@@ -47,7 +51,7 @@ func TestMessageRepository(t *testing.T) {
 	})
 
 	mt.Run("test delete message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+		messageRepo := NewRepository(logger, mt.DB)
 
 		ownerStaticID := primitive.NewObjectID()
 		chatModel := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{
@@ -74,7 +78,7 @@ func TestMessageRepository(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	mt.Run("test update message", func(mt *mtest.T) {
-		messageRepo := NewRepository(mt.DB)
+		messageRepo := NewRepository(logger, mt.DB)
 
 		ownerStaticID := primitive.NewObjectID()
 		chatModel := chat.NewChat(chat.TypeChannel, &chat.ChannelChatDetail{

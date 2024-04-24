@@ -8,17 +8,19 @@ import (
 	"text/template"
 
 	"github.com/kavkaco/Kavka-Core/config"
+	"go.uber.org/zap"
 )
 
 const TEMPLATE_FORMAT = "txt"
 
 type SmsService struct {
+	logger        *zap.Logger
 	configs       *config.SMS
 	templatesPath string
 }
 
-func NewSmsService(configs *config.SMS, templatesPath string) *SmsService {
-	return &SmsService{configs, templatesPath}
+func NewSmsService(logger *zap.Logger, configs *config.SMS, templatesPath string) *SmsService {
+	return &SmsService{logger, configs, templatesPath}
 }
 
 // TODO - Write sms service for production.

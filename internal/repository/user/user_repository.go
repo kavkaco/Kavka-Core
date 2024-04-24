@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 )
 
 var (
@@ -18,11 +19,12 @@ var (
 )
 
 type userRepository struct {
+	logger          *zap.Logger
 	usersCollection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) user.UserRepository {
-	return &userRepository{db.Collection(database.UsersCollection)}
+func NewRepository(logger *zap.Logger, db *mongo.Database) user.UserRepository {
+	return &userRepository{logger, db.Collection(database.UsersCollection)}
 }
 
 func (repo *userRepository) Create(user *user.User) (*user.User, error) {
