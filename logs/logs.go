@@ -8,7 +8,7 @@ import (
 func InitZapLogger() *zap.Logger {
 	var loggerConfig zap.Config
 
-	if config.CurrentEnv == config.EnvItems[0] {
+	if config.CurrentEnv == config.Development {
 		loggerConfig = zap.NewProductionConfig()
 		loggerConfig.OutputPaths = []string{config.ProjectRootPath + "/logs/logs.development.json"}
 	} else {

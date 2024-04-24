@@ -17,9 +17,7 @@ const (
 	Production
 )
 
-var (
-	CurrentEnv Env = Development
-)
+var CurrentEnv Env = Development
 
 type (
 	IConfig struct {
