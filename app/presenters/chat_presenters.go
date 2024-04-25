@@ -39,7 +39,7 @@ func UnmarshalFetchedUsers(fetchedUsers primitive.A) ([]user.User, error) {
 	return users, nil
 }
 
-func ChatAsJSON(obj chat.Chat, userStaticID primitive.ObjectID) (interface{}, error) {
+func ChatAsJSON(obj chat.ChatC, userStaticID primitive.ObjectID) (interface{}, error) {
 	// Determine the specific ChatDetail type based on chatType
 	var httpChatDetail interface{}
 

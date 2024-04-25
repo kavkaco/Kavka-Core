@@ -18,6 +18,14 @@ type Chat struct {
 	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chatId"`
 	ChatType   string             `bson:"chat_type"   json:"chatType"`
 	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
+}
+
+// Chat struct that includes messages.
+// ChatC (Complete Chat) created because `Chat` struct does not contain `Messages` field.
+type ChatC struct {
+	ChatID     primitive.ObjectID `bson:"chat_id"     json:"chatId"`
+	ChatType   string             `bson:"chat_type"   json:"chatType"`
+	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
 	Messages   []*message.Message `bson:"messages"    json:"messages"`
 }
 
@@ -98,7 +106,6 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.ChatType = chatType
 	m.ChatDetail = chatDetail
 	m.ChatID = primitive.NewObjectID()
-	m.Messages = []*message.Message{}
 
 	return m
 }
@@ -110,7 +117,7 @@ type Repository interface {
 	FindMany(filter bson.M) ([]Chat, error)
 	FindOne(filter bson.M) (*Chat, error)
 	Destroy(chatID primitive.ObjectID) error
-	GetUserChats(userStaticID primitive.ObjectID) ([]Chat, error)
+	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
 	FindByID(staticID primitive.ObjectID) (*Chat, error)
 	FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*Chat, error)
 	FindBySides(sides [2]primitive.ObjectID) (*Chat, error)
@@ -118,7 +125,7 @@ type Repository interface {
 
 type Service interface {
 	GetChat(staticID primitive.ObjectID) (*Chat, error)
-	GetUserChats(userStaticID primitive.ObjectID) ([]Chat, error)
+	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
 	CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*Chat, error)
 	CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
 	CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)

@@ -14,10 +14,10 @@ import (
 // the messages of chats must not be sent
 
 type UserInfoDto struct {
-	Message   string      `json:"message"`
-	Code      int         `json:"code"`
-	UserInfo  *user.User  `json:"user"`
-	UserChats []chat.Chat `json:"chats"`
+	Message   string       `json:"message"`
+	Code      int          `json:"code"`
+	UserInfo  *user.User   `json:"user"`
+	UserChats []chat.ChatC `json:"chats"`
 }
 
 func AccessDenied(ctx *gin.Context) {
@@ -34,9 +34,9 @@ func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
 	ctx.Header("authorization", fmt.Sprintf("Bearer %s", tokens.AccessToken))
 }
 
-func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Chat) error {
+func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.ChatC) error {
 	// Marshal all of the chats into json using by ChatAsJson function
-	marshaledChatsJson := []chat.Chat{}
+	marshaledChatsJson := []chat.ChatC{}
 
 	for _, v := range userChats {
 		chatJson, err := ChatAsJSON(v, userInfo.StaticID)
@@ -44,7 +44,7 @@ func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.Ch
 			return err
 		}
 
-		marshaledChatsJson = append(marshaledChatsJson, chatJson.(chat.Chat))
+		marshaledChatsJson = append(marshaledChatsJson, chatJson.(chat.ChatC))
 	}
 
 	// Response JSON

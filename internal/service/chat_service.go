@@ -27,7 +27,7 @@ func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
 	return foundChat, nil
 }
 
-func (s *chatService) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
+func (s *chatService) GetUserChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
 	return s.chatRepo.GetUserChats(userStaticID)
 }
 

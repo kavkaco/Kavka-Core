@@ -19,24 +19,24 @@ var (
 )
 
 type repository struct {
-	logger          *zap.Logger
-	chatsCollection *mongo.Collection
+	logger             *zap.Logger
+	messagesCollection *mongo.Collection
 }
 
 func NewRepository(logger *zap.Logger, db *mongo.Database) message.Repository {
-	return &repository{logger, db.Collection(database.ChatsCollection)}
+	return &repository{logger, db.Collection(database.MessagesCollection)}
 }
 
 func (repo *repository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 
-	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		if database.IsRowExistsError(err) {
+	result := repo.messagesCollection.FindOneAndUpdate(context.TODO(), filter, update)
+	if result.Err() != nil {
+		if database.IsRowExistsError(result.Err()) {
 			return nil, ErrChatNotFound
 		}
-		return nil, err
+		return nil, result.Err()
 	}
 
 	return msg, nil
@@ -46,7 +46,7 @@ func (repo *repository) Update(chatID primitive.ObjectID, messageID primitive.Ob
 	filter := bson.M{"chat_id": chatID, "messages.message_id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
-	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
+	_, err := repo.messagesCollection.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		if database.IsRowExistsError(err) {
 			return ErrChatNotFound
@@ -62,8 +62,8 @@ func (repo *repository) Delete(chatID primitive.ObjectID, messageID primitive.Ob
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$pull": bson.M{"messages": bson.M{"message_id": messageID}}}
 
-	_, err := repo.chatsCollection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
+	result, err := repo.messagesCollection.UpdateOne(context.TODO(), filter, update)
+	if err != nil && result.ModifiedCount != 1 {
 		if database.IsRowExistsError(err) {
 			return ErrChatNotFound
 		}
