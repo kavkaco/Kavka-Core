@@ -18,16 +18,25 @@ var (
 )
 
 type chatRepository struct {
-	logger          *zap.Logger
-	chatsCollection *mongo.Collection
+	logger             *zap.Logger
+	chatsCollection    *mongo.Collection
+	messagesCollection *mongo.Collection
 }
 
 func NewRepository(logger *zap.Logger, db *mongo.Database) chat.Repository {
-	return &chatRepository{logger, db.Collection(database.ChatsCollection)}
+	return &chatRepository{logger, db.Collection(database.ChatsCollection), db.Collection(database.MessagesCollection)}
 }
 
 func (repo *chatRepository) Create(newChat chat.Chat) (*chat.Chat, error) {
 	_, err := repo.chatsCollection.InsertOne(context.Background(), newChat)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = repo.messagesCollection.InsertOne(context.Background(), bson.M{
+		"chat_id":  newChat.ChatID,
+		"messages": bson.A{},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -39,6 +48,11 @@ func (repo *chatRepository) Destroy(chatID primitive.ObjectID) error {
 	filter := bson.M{"chat_id": chatID}
 
 	_, err := repo.chatsCollection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+
+	_, err = repo.messagesCollection.DeleteOne(context.TODO(), filter)
 	if err != nil {
 		return err
 	}
@@ -80,7 +94,7 @@ func (repo *chatRepository) FindOne(filter bson.M) (*chat.Chat, error) {
 // Using mongodb aggregation pipeline to fetch user-chats.
 // This process is a little special because we do not fetch all of the messages because it's really heavy query!
 // Then, only last message are going to be fetched by pipeline.
-func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.Chat, error) {
+func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
 	ctx := context.TODO()
 
 	pipeline := []bson.M{
@@ -108,22 +122,33 @@ func (repo *chatRepository) GetUserChats(userStaticID primitive.ObjectID) ([]cha
 			},
 		},
 		{
+			"$lookup": bson.M{
+				"from":         "messages",
+				"localField":   "chat_id",
+				"foreignField": "chat_id",
+				"as":           "chatMessages",
+			},
+		},
+		{
+			"$unwind": "$chatMessages",
+		},
+		{
 			"$project": bson.M{
 				"chat_id":     1,
 				"chat_type":   1,
 				"chat_detail": 1,
-				"messages":    bson.M{"$slice": []interface{}{"$messages", -1}},
+				"messages":    bson.M{"$slice": []interface{}{"$chatMessages.messages", -1}},
 			},
 		},
 	}
 
 	cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
 	if err != nil {
-		return []chat.Chat{}, err
+		return []chat.ChatC{}, err
 	}
 	defer cursor.Close(ctx)
 
-	var chatsList []chat.Chat
+	var chatsList []chat.ChatC
 	if err := cursor.All(ctx, &chatsList); err != nil {
 		return nil, err
 	}
