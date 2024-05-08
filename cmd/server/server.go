@@ -4,7 +4,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/router"
-	"github.com/kavkaco/Kavka-Core/app/socket"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
@@ -14,6 +13,8 @@ import (
 	"github.com/kavkaco/Kavka-Core/logs"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
+	"github.com/kavkaco/Kavka-Core/socket/adapters"
+	"github.com/kavkaco/Kavka-Core/socket/handlers"
 )
 
 func main() {
@@ -70,11 +71,25 @@ func main() {
 	// Init routes
 	router.NewUserRouter(logger, app.Group("/users"), userService, chatService)
 
-	// Init Socket Server
-	socket.NewSocketService(logger, app, userService, chatService, messageService)
+	// Init websocket server
+	websocketAdapter := adapters.NewWebsocketAdapter(logger, &userService)
+
+	err := websocketAdapter.OpenConnection(app, func(conn interface{}) {
+		err := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlers.HandlerServices{
+			UserService: userService,
+			ChatService: chatService,
+			MsgService:  messageService,
+		})
+		if err != nil {
+			panic(err)
+		}
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	// Everything almost done!
-	err := app.Run(configs.App.HTTP.Address)
+	err = app.Run(configs.App.HTTP.Address)
 	if err != nil {
 		panic(err)
 	}
