@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/kavkaco/Kavka-Core/app/middleware"
 	"github.com/kavkaco/Kavka-Core/app/router"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
@@ -72,24 +73,18 @@ func main() {
 	router.NewUserRouter(logger, app.Group("/users"), userService, chatService)
 
 	// Init websocket server
-	websocketAdapter := adapters.NewWebsocketAdapter(logger, &userService)
+	websocketAdapter := adapters.NewWebsocketAdapter(logger)
 
-	err := websocketAdapter.OpenConnection(app, func(conn interface{}) {
-		err := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlers.HandlerServices{
-			UserService: userService,
-			ChatService: chatService,
-			MsgService:  messageService,
-		})
-		if err != nil {
-			panic(err)
-		}
-	})
-	if err != nil {
-		panic(err)
+	handlerServices := handlers.HandlerServices{
+		UserService: userService,
+		ChatService: chatService,
+		MsgService:  messageService,
 	}
 
+	app.GET("/ws", middleware.AuthenticatedMiddleware(userService), adapters.WebsocketRoute(logger, websocketAdapter, handlerServices))
+
 	// Everything almost done!
-	err = app.Run(configs.App.HTTP.Address)
+	err := app.Run(configs.App.HTTP.Address)
 	if err != nil {
 		panic(err)
 	}

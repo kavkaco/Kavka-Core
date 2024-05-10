@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
 	"github.com/kavkaco/Kavka-Core/socket"
-	"github.com/kavkaco/Kavka-Core/utils/bearer"
+	"github.com/kavkaco/Kavka-Core/socket/handlers"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
@@ -18,8 +18,7 @@ var ErrCastConnInterface = errors.New("unable to cast connection interface")
 var clients []*websocket.Conn
 
 type socketAdapter struct {
-	logger      *zap.Logger
-	userService user.Service
+	logger *zap.Logger
 }
 
 var upgrader = websocket.Upgrader{
@@ -28,40 +27,52 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true }, // Allow connections from any origin (not recommended for production)
 }
 
-func NewWebsocketAdapter(logger *zap.Logger, userService *user.Service) socket.SocketAdapter {
-	return &socketAdapter{logger, *userService}
+func WebsocketRoute(logger *zap.Logger, websocketAdapter socket.SocketAdapter, handlerServices handlers.HandlerServices) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		// Get UserStaticID form AuthenticatedMiddleware and cast to primitive.ObjectId!
+		if userStaticIDAny, ok := ctx.Get("user_static_id"); ok {
+			if userStaticIDStr, ok := userStaticIDAny.(string); ok {
+				userStaticID, err := primitive.ObjectIDFromHex(userStaticIDStr)
+				if err != nil {
+					logger.Error("Unable to cast string to ObjectId")
+					ctx.Next()
+				}
+
+				// Call handle from WebsocketAdapter and pass the conn to the handler
+				websocketAdapter.Handle(ctx, func(conn interface{}) {
+					err := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlerServices, userStaticID)
+					if err != nil {
+						logger.Error("Unable to create SocketHandler instance: " + err.Error())
+					}
+				})
+			} else {
+				logger.Error("Unable to cast userStaticID as any to string")
+				ctx.Next()
+			}
+		} else {
+			logger.Error("Unable to read user_static_id from gin.Context")
+			ctx.Next()
+		}
+	}
 }
 
-func (s *socketAdapter) OpenConnection(app *gin.Engine, handleConn func(conn interface{})) error {
-	app.GET("/ws", func(ctx *gin.Context) {
-		// Authenticate
-		accessToken, bearerOk := bearer.AccessToken(ctx)
+func NewWebsocketAdapter(logger *zap.Logger) socket.SocketAdapter {
+	return &socketAdapter{logger}
+}
 
-		if bearerOk {
-			_, err := s.userService.Authenticate(accessToken)
-			if err != nil {
-				ctx.Next()
-				return
-			}
-		}
+func (s *socketAdapter) Handle(ctx *gin.Context, handleConn func(conn interface{})) error {
+	// Upgrade
+	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	if err != nil {
+		ctx.Next()
+		return err
+	}
 
-		// Upgrade
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-		if err != nil {
-			ctx.Next()
-			return
-		}
+	clients = append(clients, conn)
 
-		clients = append(clients, conn)
-
-		handleConn(conn)
-	})
+	handleConn(conn)
 
 	return nil
-}
-
-func (s *socketAdapter) CloseConnection() error {
-	panic("Websocket adapter does not support CloseConnection method!")
 }
 
 func (s *socketAdapter) WriteMessage(conn interface{}, msg interface{}) error {
@@ -72,9 +83,9 @@ func (s *socketAdapter) WriteMessage(conn interface{}, msg interface{}) error {
 	return ErrCastConnInterface
 }
 
-func (s *socketAdapter) HandleMessages(conn interface{}, handleMessage func(msg socket.SocketMessage)) error {
+func (s *socketAdapter) HandleMessages(conn interface{}, handleMessage func(msg socket.IncomingSocketMessage)) error {
 	for {
-		var msgData *socket.SocketMessage
+		var msgData *socket.IncomingSocketMessage
 		if wsc, ok := conn.(*websocket.Conn); ok {
 			if err := wsc.ReadJSON(&msgData); err != nil {
 				s.logger.Error("Unmarshal json error in websocket: " + err.Error())

@@ -13,6 +13,11 @@ import (
 
 var ErrInvalidHandlerEvent = errors.New("invalid handler event")
 
+var HandlersList = []func(args HandlerArgs) (ok bool, err error){
+	NewChatsHandler,
+	NewMessagesHandler,
+}
+
 type HandlerServices struct {
 	UserService user.Service
 	ChatService chat.Service
@@ -23,30 +28,29 @@ type HandlerArgs struct {
 	Logger       *zap.Logger
 	Adapter      socket.SocketAdapter
 	UserStaticID primitive.ObjectID
-	Message      socket.SocketMessage
+	Message      socket.IncomingSocketMessage
 	Services     *HandlerServices
+	Conn         interface{}
 }
 
-func NewSocketHandler(logger *zap.Logger, adapter socket.SocketAdapter, conn interface{}, services *HandlerServices) error {
-	err := adapter.HandleMessages(conn, func(msg socket.SocketMessage) {
+func NewSocketHandler(logger *zap.Logger, adapter socket.SocketAdapter, conn interface{}, services *HandlerServices, userStaticID primitive.ObjectID) error {
+	err := adapter.HandleMessages(conn, func(msg socket.IncomingSocketMessage) {
 		// Define HandlerArgs
 		handlerArgs := HandlerArgs{
+			Conn:         conn,
 			Logger:       logger,
 			Adapter:      adapter,
 			Message:      msg,
 			Services:     services,
-			UserStaticID: primitive.NilObjectID,
+			UserStaticID: userStaticID,
 		}
 
-		// Add Handlers
-		_, err := NewChatsHandler(handlerArgs)
-		if err != nil {
-			logger.Error("Unhandled event on (chats handler): " + err.Error())
-		}
-
-		_, err = NewChatsHandler(handlerArgs)
-		if err != nil {
-			logger.Error("Unhandled event on (chats handler): " + err.Error())
+		// Add Handlers Of HandlersList
+		for _, handler := range HandlersList {
+			_, err := handler(handlerArgs)
+			if err != nil {
+				logger.Error("Unhandled event on handlers: " + err.Error())
+			}
 		}
 	})
 	if err != nil {

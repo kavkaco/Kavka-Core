@@ -18,10 +18,10 @@ func NewChatService(logger *zap.Logger, chatRepo chat.Repository, userRepo user.
 	return &chatService{logger, chatRepo, userRepo}
 }
 
-func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.Chat, error) {
-	foundChat, foundChatErr := s.chatRepo.FindChatOrSidesByStaticID(staticID)
-	if foundChatErr != nil {
-		return nil, foundChatErr
+func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.ChatC, error) {
+	foundChat, err := s.chatRepo.FindChatOrSidesByStaticID(staticID)
+	if err != nil {
+		return nil, err
 	}
 
 	return foundChat, nil
@@ -37,6 +37,7 @@ func (s *chatService) CreateDirect(userStaticID primitive.ObjectID, targetStatic
 		targetStaticID,
 	}
 
+	// Check to do not be duplicated!
 	dup, _ := s.chatRepo.FindBySides(sides)
 	if dup != nil {
 		return nil, chatRepository.ErrChatAlreadyExists

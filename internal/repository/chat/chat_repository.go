@@ -161,15 +161,71 @@ func (repo *chatRepository) FindByID(staticID primitive.ObjectID) (*chat.Chat, e
 	return repo.FindOne(filter)
 }
 
-func (repo *chatRepository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*chat.Chat, error) {
-	filter := bson.M{
-		"$or": []interface{}{
-			bson.M{"chat_detail.sides": bson.M{"$in": []primitive.ObjectID{staticID}}},
-			bson.M{"chat_id": staticID},
+func (repo *chatRepository) FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*chat.ChatC, error) {
+	ctx := context.TODO()
+
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"$or": []interface{}{
+					bson.M{"chat_id": staticID},
+					bson.M{"chat_detail.sides": bson.M{"$in": []interface{}{staticID}}},
+					bson.M{"chat_detail.members": bson.M{"$in": []interface{}{staticID}}},
+				},
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "users",
+				"localField":   "chat_detail.sides",
+				"foreignField": "id",
+				"as":           "chat_detail.fetchedUsers",
+				"pipeline": []interface{}{
+					bson.M{
+						"$match": bson.M{
+							"$expr": bson.M{"$eq": []interface{}{"$chat_type", "direct"}},
+						},
+					},
+				},
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "messages",
+				"localField":   "chat_id",
+				"foreignField": "chat_id",
+				"as":           "chatMessages",
+			},
+		},
+		{
+			"$unwind": "$chatMessages",
+		},
+		{
+			"$project": bson.M{
+				"chat_id":     1,
+				"chat_type":   1,
+				"chat_detail": 1,
+				"messages":    bson.M{"$slice": []interface{}{"$chatMessages.messages", -1}},
+			},
 		},
 	}
 
-	return repo.FindOne(filter)
+	cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var foundChats []chat.ChatC
+	if err := cursor.All(ctx, &foundChats); err != nil {
+		return nil, err
+	}
+
+	if len(foundChats) == 0 {
+		return nil, ErrChatNotFound
+	}
+
+	return &foundChats[0], nil
 }
 
 func (repo *chatRepository) FindBySides(sides [2]primitive.ObjectID) (*chat.Chat, error) {

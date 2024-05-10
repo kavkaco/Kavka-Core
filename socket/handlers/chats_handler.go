@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"github.com/kavkaco/Kavka-Core/app/presenters"
+	"github.com/kavkaco/Kavka-Core/socket"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -48,13 +50,24 @@ func GetChat(event string, args HandlerArgs) (bool, error) {
 		return false, err
 	}
 
-	_, err = args.Services.ChatService.GetChat(staticID.(primitive.ObjectID))
+	foundChat, err := args.Services.ChatService.GetChat(staticID.(primitive.ObjectID))
 	if err != nil {
 		return false, err
 	}
 
-	// FIXME
-	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	chatJson, err := presenters.ChatAsJSON(*foundChat, args.UserStaticID)
+	if err != nil {
+		return false, err
+	}
+
+	err = args.Adapter.WriteMessage(args.Conn, socket.OutgoingSocketMessage{
+		Status: 200,
+		Event:  "chat_found",
+		Data:   chatJson,
+	})
+	if err != nil {
+		return false, err
+	}
 
 	return true, nil
 }

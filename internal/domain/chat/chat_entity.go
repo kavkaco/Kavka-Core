@@ -119,12 +119,12 @@ type Repository interface {
 	Destroy(chatID primitive.ObjectID) error
 	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
 	FindByID(staticID primitive.ObjectID) (*Chat, error)
-	FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*Chat, error)
+	FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*ChatC, error)
 	FindBySides(sides [2]primitive.ObjectID) (*Chat, error)
 }
 
 type Service interface {
-	GetChat(staticID primitive.ObjectID) (*Chat, error)
+	GetChat(staticID primitive.ObjectID) (*ChatC, error)
 	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
 	CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*Chat, error)
 	CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
