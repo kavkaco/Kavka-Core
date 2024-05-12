@@ -44,13 +44,13 @@ func GetMongoDBInstance(uri, dbName string) (*mongo.Database, error) {
 
 		mongoInstance = client.Database(dbName)
 
-		collectionsConfigurations(mongoInstance)
+		configureCollections(mongoInstance)
 	}
 
 	return mongoInstance, nil
 }
 
-func collectionsConfigurations(db *mongo.Database) {
+func configureCollections(db *mongo.Database) {
 	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
 		Keys:    bson.D{{Key: "phone", Value: 1}},
 		Options: options.Index().SetUnique(true),
