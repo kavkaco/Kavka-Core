@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/kavkaco/Kavka-Core/app/presenters"
 	"github.com/kavkaco/Kavka-Core/socket"
 	"github.com/kavkaco/Kavka-Core/socket/handlers"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,23 +32,23 @@ func WebsocketRoute(logger *zap.Logger, websocketAdapter socket.SocketAdapter, h
 	return func(ctx *gin.Context) {
 		// Get UserStaticID form AuthenticatedMiddleware and cast to primitive.ObjectId!
 		if userStaticIDAny, ok := ctx.Get("user_static_id"); ok {
-			if userStaticIDStr, ok := userStaticIDAny.(string); ok {
-				userStaticID, err := primitive.ObjectIDFromHex(userStaticIDStr)
-				if err != nil {
-					logger.Error("Unable to cast string to ObjectId")
-					ctx.Next()
-				}
+			userStaticIDStr, _ := userStaticIDAny.(string)
 
-				// Call handle from WebsocketAdapter and pass the conn to the handler
-				websocketAdapter.Handle(ctx, func(conn interface{}) {
-					err := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlerServices, userStaticID)
-					if err != nil {
-						logger.Error("Unable to create SocketHandler instance: " + err.Error())
-					}
-				})
-			} else {
-				logger.Error("Unable to cast userStaticID as any to string")
+			userStaticID, err := primitive.ObjectIDFromHex(userStaticIDStr)
+			if err != nil {
+				logger.Error("Unable to cast string to ObjectId")
 				ctx.Next()
+			}
+
+			// Call handle from WebsocketAdapter and pass the conn to the handler
+			err = websocketAdapter.Handle(ctx, func(conn interface{}) {
+				handlerErr := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlerServices, userStaticID)
+				if handlerErr != nil {
+					logger.Error("Unable to create SocketHandler instance: " + err.Error())
+				}
+			})
+			if err != nil {
+				presenters.ResponseInternalServerError(ctx)
 			}
 		} else {
 			logger.Error("Unable to read user_static_id from gin.Context")
