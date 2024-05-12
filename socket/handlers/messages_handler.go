@@ -14,7 +14,7 @@ func NewMessagesHandler(args HandlerArgs) (bool, error) {
 		return DeleteMessage(event, args)
 	}
 
-	return false, ErrInvalidHandlerEvent
+	return false, nil
 }
 
 func InsertTextMessage(_ string, args HandlerArgs) (bool, error) {

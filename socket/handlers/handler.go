@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"errors"
-
 	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
 	"github.com/kavkaco/Kavka-Core/internal/domain/message"
 	"github.com/kavkaco/Kavka-Core/internal/domain/user"
@@ -10,8 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
-
-var ErrInvalidHandlerEvent = errors.New("invalid handler event")
 
 var HandlersList = []func(args HandlerArgs) (ok bool, err error){
 	NewChatsHandler,

@@ -20,7 +20,7 @@ func NewChatsHandler(args HandlerArgs) (ok bool, err error) {
 		return CreateChannel(event, args)
 	}
 
-	return false, ErrInvalidHandlerEvent
+	return false, nil
 }
 
 func CreateDirect(event string, args HandlerArgs) (bool, error) {
