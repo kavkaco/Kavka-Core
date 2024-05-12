@@ -81,7 +81,7 @@ func main() {
 		MsgService:  messageService,
 	}
 
-	app.GET("/ws", middleware.AuthenticatedMiddleware(userService), adapters.WebsocketRoute(logger, websocketAdapter, handlerServices))
+	app.GET("/ws", middleware.AuthenticatedMiddleware(userService), router.WebsocketRoute(logger, websocketAdapter, handlerServices))
 
 	// Everything almost done!
 	err := app.Run(configs.App.HTTP.Address)
