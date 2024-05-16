@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 )
 

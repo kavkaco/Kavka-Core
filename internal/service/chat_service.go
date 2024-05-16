@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
@@ -28,7 +28,8 @@ func (s *chatService) GetChat(staticID primitive.ObjectID) (*chat.ChatC, error) 
 }
 
 func (s *chatService) GetUserChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
-	return s.chatRepo.GetUserChats(userStaticID)
+	return []chat.ChatC{}, nil
+	// return s.chatRepo.GetChats(userStaticID)
 }
 
 func (s *chatService) CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
 	"github.com/kavkaco/Kavka-Core/pkg/session"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,6 +23,7 @@ type User struct {
 	Profile   Profile            `bson:"profile" json:"profile"`
 	CreatedAt time.Time          `bson:"created_at" json:"createdAt"`
 	UpdatedAt time.Time          `bson:"updated_at" json:"updatedAt"`
+	Chats     []*chat.Chat       `bson:"chats" json:"chats"`
 }
 
 func NewUser(phone string) *User {
@@ -49,6 +51,7 @@ func (u User) IsBanned() bool {
 // Interfaces
 
 type UserRepository interface {
+	GetChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error)
 	Create(user *User) (*User, error)
 	FindOne(filter bson.M) (*User, error)
 	FindMany(filter bson.M) ([]*User, error)

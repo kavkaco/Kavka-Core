@@ -3,7 +3,7 @@ package repository
 import (
 	"testing"
 
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

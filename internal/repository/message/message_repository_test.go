@@ -3,8 +3,8 @@ package repository
 import (
 	"testing"
 
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/message"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/message"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"

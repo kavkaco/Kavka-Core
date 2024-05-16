@@ -5,7 +5,8 @@ import (
 	"errors"
 
 	"github.com/kavkaco/Kavka-Core/database"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +26,73 @@ type userRepository struct {
 
 func NewRepository(logger *zap.Logger, db *mongo.Database) user.UserRepository {
 	return &userRepository{logger, db.Collection(database.UsersCollection)}
+}
+
+// Using mongodb aggregation pipeline to fetch user-chats.
+// This process is a little special because we do not fetch all of the messages because it's really heavy query!
+// Then, only last message are going to be fetched by pipeline.
+func (repo *userRepository) GetChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
+	// FIXME
+	return []chat.ChatC{}, nil
+	// ctx := context.TODO()
+
+	// pipeline := []bson.M{
+	// 	{
+	// 		"$match": bson.M{
+	// 			"$or": []interface{}{
+	// 				bson.M{"chat_detail.sides": bson.M{"$in": []interface{}{userStaticID}}},
+	// 				bson.M{"chat_detail.members": bson.M{"$in": []interface{}{userStaticID}}},
+	// 			},
+	// 		},
+	// 	},
+	// 	{
+	// 		"$lookup": bson.M{
+	// 			"from":         "users",
+	// 			"localField":   "chat_detail.sides",
+	// 			"foreignField": "id",
+	// 			"as":           "chat_detail.fetchedUsers",
+	// 			"pipeline": []interface{}{
+	// 				bson.M{
+	// 					"$match": bson.M{
+	// 						"$expr": bson.M{"$eq": []interface{}{"$chat_type", "direct"}},
+	// 					},
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// 	{
+	// 		"$lookup": bson.M{
+	// 			"from":         "messages",
+	// 			"localField":   "chat_id",
+	// 			"foreignField": "chat_id",
+	// 			"as":           "chatMessages",
+	// 		},
+	// 	},
+	// 	{
+	// 		"$unwind": "$chatMessages",
+	// 	},
+	// 	{
+	// 		"$project": bson.M{
+	// 			"chat_id":     1,
+	// 			"chat_type":   1,
+	// 			"chat_detail": 1,
+	// 			"messages":    bson.M{"$slice": []interface{}{"$chatMessages.messages", -1}},
+	// 		},
+	// 	},
+	// }
+
+	// cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
+	// if err != nil {
+	// 	return []chat.ChatC{}, err
+	// }
+	// defer cursor.Close(ctx)
+
+	// var chatsList []chat.ChatC
+	// if err := cursor.All(ctx, &chatsList); err != nil {
+	// 	return nil, err
+	// }
+
+	// return chatsList, nil
 }
 
 func (repo *userRepository) Create(user *user.User) (*user.User, error) {

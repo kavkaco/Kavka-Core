@@ -15,6 +15,7 @@ type OutgoingSocketMessage struct {
 	Data   interface{}
 }
 
+// TODO - rename to Communication Layer Adapter
 type SocketAdapter interface {
 	Handle(ctx *gin.Context, handleConn func(conn interface{})) error
 	HandleMessages(conn interface{}, handleMessage func(msg IncomingSocketMessage)) error

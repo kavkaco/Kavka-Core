@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/session"

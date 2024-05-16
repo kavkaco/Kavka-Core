@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/message"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	"github.com/kavkaco/Kavka-Core/socket"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"

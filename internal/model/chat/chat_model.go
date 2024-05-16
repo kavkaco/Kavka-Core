@@ -1,8 +1,7 @@
 package chat
 
 import (
-	"github.com/kavkaco/Kavka-Core/internal/domain/message"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/message"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,6 +26,14 @@ type ChatC struct {
 	ChatType   string             `bson:"chat_type"   json:"chatType"`
 	ChatDetail interface{}        `bson:"chat_detail" json:"chatDetail"`
 	Messages   []*message.Message `bson:"messages"    json:"messages"`
+}
+
+type Member struct {
+	StaticID primitive.ObjectID `bson:"id"        json:"id"`
+	Name     string             `bson:"name" json:"name"`
+	LastName string             `bson:"last_name"  json:"lastName"`
+
+	// We will add a profile photo here later =)
 }
 
 // Chat Detail
@@ -89,14 +96,15 @@ func (d *DirectChatDetail) HasSide(staticID primitive.ObjectID) bool {
 	return has
 }
 
+// FIXME
 // DetectTarget determines the appropriate chat partner for the user identified by userStaticID,
 // considering a list of potential users and assuming only two participants are involved.
 // It returns a pointer to the target user's struct.
-func DetectTarget(users []user.User, userStaticID primitive.ObjectID) *user.User {
-	if users[0].StaticID.Hex() == userStaticID.Hex() {
-		return &users[1]
+func DetectTarget(userIDs [2]primitive.ObjectID, userStaticID primitive.ObjectID) *primitive.ObjectID {
+	if userIDs[0].Hex() == userStaticID.Hex() {
+		return &userIDs[1]
 	} else {
-		return &users[0]
+		return &userIDs[0]
 	}
 }
 
@@ -113,11 +121,11 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 //  Interfaces
 
 type Repository interface {
+	GetChatMembers(chatID primitive.ObjectID) []Member
 	Create(newChat Chat) (*Chat, error)
 	FindMany(filter bson.M) ([]Chat, error)
 	FindOne(filter bson.M) (*Chat, error)
 	Destroy(chatID primitive.ObjectID) error
-	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
 	FindByID(staticID primitive.ObjectID) (*Chat, error)
 	FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*ChatC, error)
 	FindBySides(sides [2]primitive.ObjectID) (*Chat, error)
