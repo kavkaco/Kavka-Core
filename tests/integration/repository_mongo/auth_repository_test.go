@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/kavkaco/Kavka-Core/internal/model/user"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	authRepository "github.com/kavkaco/Kavka-Core/internal/repository/auth"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -14,7 +14,7 @@ import (
 type AuthTestSuite struct {
 	suite.Suite
 	repo   authRepository.AuthRepository
-	UserID user.UserID
+	UserID model.UserID
 }
 
 func (s *AuthTestSuite) SetupTest() {
@@ -85,7 +85,7 @@ func (s *AuthTestSuite) TestChangePassword() {
 	require.True(s.T(), ok)
 }
 
-func TestAuthTestSuite(t *testing.T) {
+func TestAuthSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(AuthTestSuite))
 }

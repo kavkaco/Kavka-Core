@@ -1,4 +1,4 @@
-package message
+package model
 
 import (
 	"time"
@@ -13,7 +13,7 @@ const (
 
 type Message struct {
 	MessageID primitive.ObjectID `bson:"message_id" json:"messageId"`
-	SenderID  primitive.ObjectID `bson:"sender_id"  json:"senderId"`
+	SenderID  UserID             `bson:"sender_id"  json:"senderId"`
 	CreatedAt time.Time          `bson:"created_at" json:"createdAt"`
 	Edited    bool               `bson:"edited" json:"edited"`
 	Seen      bool               `bson:"seen" json:"seen"`
@@ -32,13 +32,13 @@ type ImageMessage struct {
 	Caption  string `bson:"caption" json:"caption"`
 }
 
-func NewMessage(senderID primitive.ObjectID, messageType string, content interface{}) *Message {
+func NewMessage(senderID UserID, messageType string, content interface{}) *Message {
 	m := &Message{}
 
 	m.Type = messageType
 	m.Content = content
 	m.MessageID = primitive.NewObjectID()
-	m.SenderID = senderID
+	// m.SenderID = senderID
 
 	// set timestamps
 	now := time.Now()

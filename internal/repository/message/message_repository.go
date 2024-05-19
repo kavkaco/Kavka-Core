@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/kavkaco/Kavka-Core/database"
-	"github.com/kavkaco/Kavka-Core/internal/model/message"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +19,7 @@ var (
 )
 
 type MessageRepository interface {
-	Insert(ctx context.Context, chatID primitive.ObjectID, msg *message.Message) (*message.Message, error)
+	Insert(ctx context.Context, chatID primitive.ObjectID, msg *model.Message) (*model.Message, error)
 	Update(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error
 	Delete(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error
 }
@@ -33,7 +33,7 @@ func NewRepository(logger *zap.Logger, db *mongo.Database) MessageRepository {
 	return &messageRepository{logger, db.Collection(database.MessagesCollection)}
 }
 
-func (repo *messageRepository) Insert(ctx context.Context, chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
+func (repo *messageRepository) Insert(ctx context.Context, chatID primitive.ObjectID, msg *model.Message) (*model.Message, error) {
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 

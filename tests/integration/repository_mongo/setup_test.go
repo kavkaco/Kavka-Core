@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/ory/dockertest/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,8 +18,10 @@ var DockerContainerEnvVariables = []string{
 	"MONGO_INITDB_ROOT_PASSWORD=test",
 }
 
-var dbClient *mongo.Client
-var db *mongo.Database
+var (
+	dbClient *mongo.Client
+	db       *mongo.Database
+)
 
 func TestMain(m *testing.M) {
 	err := os.Setenv("ENV", "test")
@@ -58,6 +61,8 @@ func TestMain(m *testing.M) {
 	}
 
 	db = dbClient.Database("test")
+
+	database.ConfigureCollections(db)
 
 	code := m.Run()
 

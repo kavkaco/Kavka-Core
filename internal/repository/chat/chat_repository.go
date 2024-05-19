@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/kavkaco/Kavka-Core/database"
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,14 +18,14 @@ var (
 )
 
 type ChatRepository interface {
-	GetChatMembers(chatID primitive.ObjectID) []chat.Member
-	Create(ctx context.Context, newChat chat.Chat) (*chat.Chat, error)
+	GetChatMembers(chatID primitive.ObjectID) []model.Member
+	Create(ctx context.Context, newChat model.Chat) (*model.Chat, error)
 	Destroy(ctx context.Context, chatID primitive.ObjectID) error
-	FindMany(ctx context.Context, filter bson.M) ([]chat.Chat, error)
-	FindOne(ctx context.Context, filter bson.M) (*chat.Chat, error)
-	FindByID(ctx context.Context, staticID primitive.ObjectID) (*chat.Chat, error)
-	FindChatOrSidesByStaticID(ctx context.Context, staticID primitive.ObjectID) (*chat.ChatC, error)
-	FindBySides(ctx context.Context, sides [2]primitive.ObjectID) (*chat.Chat, error)
+	FindMany(ctx context.Context, filter bson.M) ([]model.Chat, error)
+	FindOne(ctx context.Context, filter bson.M) (*model.Chat, error)
+	FindByID(ctx context.Context, staticID primitive.ObjectID) (*model.Chat, error)
+	FindChatOrSidesByStaticID(ctx context.Context, staticID primitive.ObjectID) (*model.ChatC, error)
+	FindBySides(ctx context.Context, sides [2]primitive.ObjectID) (*model.Chat, error)
 	AddToUserChats(ctx context.Context, userStaticID primitive.ObjectID, chatID primitive.ObjectID) (ok bool, err error)
 }
 
@@ -53,28 +53,28 @@ func (repo *chatRepository) AddToUserChats(ctx context.Context, userStaticID pri
 	return true, nil
 }
 
-func (repo *chatRepository) GetChatMembers(chatID primitive.ObjectID) []chat.Member {
+func (repo *chatRepository) GetChatMembers(chatID primitive.ObjectID) []model.Member {
 	// FIXME
-	return []chat.Member{}
+	return []model.Member{}
 }
 
-func (repo *chatRepository) Create(ctx context.Context, newChat chat.Chat) (*chat.Chat, error) {
+func (repo *chatRepository) Create(ctx context.Context, chatModel model.Chat) (*model.Chat, error) {
 	// Insert chat
-	_, err := repo.chatsCollection.InsertOne(ctx, newChat)
+	_, err := repo.chatsCollection.InsertOne(ctx, chatModel)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create messages
 	_, err = repo.messagesCollection.InsertOne(ctx, bson.M{
-		"chat_id":  newChat.ChatID,
+		"chat_id":  chatModel.ChatID,
 		"messages": bson.A{},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return &newChat, nil
+	return &chatModel, nil
 }
 
 func (repo *chatRepository) Destroy(ctx context.Context, chatID primitive.ObjectID) error {
@@ -93,13 +93,13 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID primitive.Object
 	return nil
 }
 
-func (repo *chatRepository) FindMany(ctx context.Context, filter bson.M) ([]chat.Chat, error) {
+func (repo *chatRepository) FindMany(ctx context.Context, filter bson.M) ([]model.Chat, error) {
 	cursor, err := repo.chatsCollection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	var chats []chat.Chat
+	var chats []model.Chat
 
 	decodeErr := cursor.All(ctx, &chats)
 	if decodeErr != nil {
@@ -109,8 +109,8 @@ func (repo *chatRepository) FindMany(ctx context.Context, filter bson.M) ([]chat
 	return chats, nil
 }
 
-func (repo *chatRepository) FindOne(ctx context.Context, filter bson.M) (*chat.Chat, error) {
-	var model *chat.Chat
+func (repo *chatRepository) FindOne(ctx context.Context, filter bson.M) (*model.Chat, error) {
+	var model *model.Chat
 	result := repo.chatsCollection.FindOne(ctx, filter)
 	if result.Err() != nil {
 		return nil, result.Err()
@@ -124,12 +124,12 @@ func (repo *chatRepository) FindOne(ctx context.Context, filter bson.M) (*chat.C
 	return model, nil
 }
 
-func (repo *chatRepository) FindByID(ctx context.Context, staticID primitive.ObjectID) (*chat.Chat, error) {
+func (repo *chatRepository) FindByID(ctx context.Context, staticID primitive.ObjectID) (*model.Chat, error) {
 	filter := bson.M{"chat_id": staticID}
 	return repo.FindOne(ctx, filter)
 }
 
-func (repo *chatRepository) FindChatOrSidesByStaticID(ctx context.Context, staticID primitive.ObjectID) (*chat.ChatC, error) {
+func (repo *chatRepository) FindChatOrSidesByStaticID(ctx context.Context, staticID primitive.ObjectID) (*model.ChatC, error) {
 	pipeline := []bson.M{
 		{
 			"$match": bson.M{
@@ -182,7 +182,7 @@ func (repo *chatRepository) FindChatOrSidesByStaticID(ctx context.Context, stati
 	}
 	defer cursor.Close(ctx)
 
-	var foundChats []chat.ChatC
+	var foundChats []model.ChatC
 	if err := cursor.All(ctx, &foundChats); err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (repo *chatRepository) FindChatOrSidesByStaticID(ctx context.Context, stati
 	return &foundChats[0], nil
 }
 
-func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]primitive.ObjectID) (*chat.Chat, error) {
+func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]primitive.ObjectID) (*model.Chat, error) {
 	filter := bson.M{
 		"chat_detail.sides":     sides,
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},

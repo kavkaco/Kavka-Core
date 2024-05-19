@@ -1,11 +1,15 @@
 package service
 
 import (
+	"errors"
+
 	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
 	auth_manager "github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
 	"go.uber.org/zap"
 )
+
+var ErrInvalidOtpCode = errors.New("invalid otp Code")
 
 type UserService interface {
 	// Login(phone string) error

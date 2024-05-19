@@ -3,6 +3,7 @@ package auth_manager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -127,7 +128,7 @@ func (t *authManager) GetOTP(ctx context.Context, uniqueID string) (_ string, _ 
 }
 
 func (t *authManager) SetOTP(ctx context.Context, uniqueID string, expr time.Duration) (_ string, _ error) {
-	otp := string(rune(random.GenerateOTP()))
+	otp := fmt.Sprintf("%d", random.GenerateOTP())
 
 	_, err := t.redisClient.Set(ctx, uniqueID, otp, expr).Result()
 	if err != nil {
