@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.uber.org/zap"
 )
 
 var (
@@ -19,19 +18,28 @@ var (
 	ErrInvalidOtpCode    = errors.New("invalid otp Code")
 )
 
+type UserRepository interface {
+	GetChats(ctx context.Context, userStaticID primitive.ObjectID) ([]chat.ChatC, error)
+	Create(ctx context.Context, user *user.User) (*user.User, error)
+	FindOne(ctx context.Context, filter bson.M) (*user.User, error)
+	FindMany(ctx context.Context, filter bson.M) ([]*user.User, error)
+	FindByID(ctx context.Context, staticID primitive.ObjectID) (*user.User, error)
+	FindByUsername(ctx context.Context, username string) (*user.User, error)
+	FindByPhone(ctx context.Context, phone string) (*user.User, error)
+}
+
 type userRepository struct {
-	logger          *zap.Logger
 	usersCollection *mongo.Collection
 }
 
-func NewRepository(logger *zap.Logger, db *mongo.Database) user.UserRepository {
-	return &userRepository{logger, db.Collection(database.UsersCollection)}
+func NewRepository(db *mongo.Database) UserRepository {
+	return &userRepository{db.Collection(database.UsersCollection)}
 }
 
 // Using mongodb aggregation pipeline to fetch user-chats.
 // This process is a little special because we do not fetch all of the messages because it's really heavy query!
 // Then, only last message are going to be fetched by pipeline.
-func (repo *userRepository) GetChats(userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
+func (repo *userRepository) GetChats(ctx context.Context, userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
 	// FIXME
 	return []chat.ChatC{}, nil
 	// ctx := context.TODO()
@@ -95,7 +103,7 @@ func (repo *userRepository) GetChats(userStaticID primitive.ObjectID) ([]chat.Ch
 	// return chatsList, nil
 }
 
-func (repo *userRepository) Create(user *user.User) (*user.User, error) {
+func (repo *userRepository) Create(ctx context.Context, user *user.User) (*user.User, error) {
 	_, err := repo.usersCollection.InsertOne(context.TODO(), user)
 	if database.IsDuplicateKeyError(err) {
 		return nil, ErrPhoneAlreadyTaken
@@ -106,7 +114,7 @@ func (repo *userRepository) Create(user *user.User) (*user.User, error) {
 	return user, nil
 }
 
-func (repo *userRepository) FindOne(filter bson.M) (*user.User, error) {
+func (repo *userRepository) FindOne(ctx context.Context, filter bson.M) (*user.User, error) {
 	var model *user.User
 
 	result := repo.usersCollection.FindOne(context.TODO(), filter)
@@ -124,7 +132,7 @@ func (repo *userRepository) FindOne(filter bson.M) (*user.User, error) {
 	return model, nil
 }
 
-func (repo *userRepository) FindMany(filter bson.M) ([]*user.User, error) {
+func (repo *userRepository) FindMany(ctx context.Context, filter bson.M) ([]*user.User, error) {
 	cursor, err := repo.usersCollection.Find(context.TODO(), filter)
 	if err != nil {
 		return nil, err
@@ -132,7 +140,7 @@ func (repo *userRepository) FindMany(filter bson.M) ([]*user.User, error) {
 
 	var users []*user.User
 
-	err = cursor.All(context.Background(), &users)
+	err = cursor.All(ctx, &users)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		return nil, ErrUserNotFound
 	} else if err != nil {
@@ -142,17 +150,17 @@ func (repo *userRepository) FindMany(filter bson.M) ([]*user.User, error) {
 	return users, nil
 }
 
-func (repo *userRepository) FindByID(staticID primitive.ObjectID) (*user.User, error) {
+func (repo *userRepository) FindByID(ctx context.Context, staticID primitive.ObjectID) (*user.User, error) {
 	filter := bson.M{"id": staticID}
-	return repo.FindOne(filter)
+	return repo.FindOne(ctx, filter)
 }
 
-func (repo *userRepository) FindByUsername(username string) (*user.User, error) {
+func (repo *userRepository) FindByUsername(ctx context.Context, username string) (*user.User, error) {
 	filter := bson.M{"username": username}
-	return repo.FindOne(filter)
+	return repo.FindOne(ctx, filter)
 }
 
-func (repo *userRepository) FindByPhone(phone string) (*user.User, error) {
+func (repo *userRepository) FindByPhone(ctx context.Context, phone string) (*user.User, error) {
 	filter := bson.M{"phone": phone}
-	return repo.FindOne(filter)
+	return repo.FindOne(ctx, filter)
 }

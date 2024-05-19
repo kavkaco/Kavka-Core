@@ -3,7 +3,6 @@ package message
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -46,17 +45,4 @@ func NewMessage(senderID primitive.ObjectID, messageType string, content interfa
 	m.CreatedAt = now
 
 	return m
-}
-
-// Interfaces
-
-type Repository interface {
-	Insert(chatID primitive.ObjectID, msg *Message) (*Message, error)
-	Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error
-	Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error
-}
-
-type Service interface {
-	InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*Message, error)
-	DeleteMessage(chatID primitive.ObjectID, messageID primitive.ObjectID) error
 }

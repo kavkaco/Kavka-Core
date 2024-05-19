@@ -15,6 +15,7 @@ type Env int
 const (
 	Development Env = iota
 	Production
+	Test
 )
 
 var CurrentEnv Env = Development
@@ -59,7 +60,6 @@ type (
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		Port     int    `yaml:"port"`
-		DB       int    `yaml:"db"`
 		DBName   string `yaml:"db_name"`
 	}
 	MinIOCredentials struct {
@@ -89,6 +89,8 @@ func Read() *IConfig {
 		CurrentEnv = Development
 	} else if env == "production" {
 		CurrentEnv = Production
+	} else if env == "test" {
+		CurrentEnv = Test
 	} else {
 		panic(errors.New("Invalid ENV: " + env))
 	}

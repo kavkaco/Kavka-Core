@@ -1,115 +1,109 @@
 package service
 
 import (
-	"errors"
-	"fmt"
-
-	"github.com/kavkaco/Kavka-Core/internal/model/user"
-	repository "github.com/kavkaco/Kavka-Core/internal/repository/user"
-	"github.com/kavkaco/Kavka-Core/pkg/jwt_manager"
-	"github.com/kavkaco/Kavka-Core/pkg/session"
+	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
+	auth_manager "github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
 	"go.uber.org/zap"
 )
 
-type userService struct {
-	logger   *zap.Logger
-	userRepo user.UserRepository
-	session  *session.Session
-	SmsOtp   *sms_service.SmsService
+type UserService interface {
+	// Login(phone string) error
+	// VerifyOTP(phone string, otp int) (*session.LoginTokens, error)
+	// RefreshToken(refreshToken string, accessToken string) (string, error)
+	// Authenticate(accessToken string) (*user.User, error)
 }
 
-func NewUserService(logger *zap.Logger, userRepo user.UserRepository, session *session.Session, smsOtp *sms_service.SmsService) user.Service {
-	return &userService{logger, userRepo, session, smsOtp}
+type UserManager struct {
+	logger      *zap.Logger
+	userRepo    userRepository.UserRepository
+	authManager auth_manager.AuthManager
+	SmsOtp      *sms_service.SmsService
 }
 
-// Login function gets user's phone and find it or created it in the database,
-// then generates an otp code and stores it in redis store and returns `otp code` as int and an `error`.
-func (s *userService) Login(phone string) error {
-	newUser := user.NewUser(phone)
-
-	_, findErr := s.userRepo.FindByPhone(phone)
-	if errors.Is(findErr, repository.ErrUserNotFound) {
-		// User does not exist then it should be created!
-		_, err := s.userRepo.Create(newUser)
-		if err != nil {
-			return err
-		}
-	}
-
-	otp, loginErr := s.session.Login(phone)
-	if loginErr != nil {
-		return loginErr
-	}
-
-	err := s.SmsOtp.SendSMS(fmt.Sprintf("OTP Code: %d", otp), []string{phone})
-	if err != nil {
-		return err
-	}
-
-	return nil
+func NewUserService(logger *zap.Logger, userRepo userRepository.UserRepository, authManager auth_manager.AuthManager, smsOtp *sms_service.SmsService) UserService {
+	return &UserManager{logger, userRepo, authManager, smsOtp}
 }
 
-// VerifyOTP function gets phone and otp code and checks if the otp code was correct for
-// mentioned phone, it's going to return an instance of *session.LoginTokens and an error.
-func (s *userService) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
-	foundUser, err := s.userRepo.FindByPhone(phone)
-	if err != nil {
-		return nil, repository.ErrUserNotFound
-	}
+// func (s *UserManager) Login(phone string) error {
+// 	newUser := user.NewUser(phone)
 
-	tokens, ok := s.session.VerifyOTP(phone, otp, foundUser.StaticID)
-	if !ok {
-		return nil, repository.ErrInvalidOtpCode
-	}
+// 	_, findErr := s.userRepo.FindByPhone(phone)
+// 	if errors.Is(findErr, repository.ErrUserNotFound) {
+// 		// User does not exist then it should be created!
+// 		_, err := s.userRepo.Create(newUser)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return &tokens, nil
-}
+// 	otp, loginErr := s.session.Login(phone)
+// 	if loginErr != nil {
+// 		return loginErr
+// 	}
 
-// RefreshToken function is used to refresh `Access Token`, It's returns a new `Access Token` and an error.
-func (s *userService) RefreshToken(refreshToken string, accessToken string) (string, error) {
-	// Decode tokens and detect user phone
-	payload, decodeRfErr := s.session.DecodeToken(refreshToken, jwt_manager.RefreshToken)
-	if decodeRfErr != nil {
-		return "", errors.New("invalid refresh token")
-	}
+// 	err := s.SmsOtp.SendSMS(fmt.Sprintf("OTP Code: %d", otp), []string{phone})
+// 	if err != nil {
+// 		return err
+// 	}
 
-	_, decodeAtErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
-	if decodeAtErr != nil {
-		return "", errors.New("invalid access token")
-	}
+// 	return nil
+// }
 
-	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
-	if findErr != nil {
-		return "", findErr
-	}
+// func (s *UserManager) VerifyOTP(phone string, otp int) (*session.LoginTokens, error) {
+// 	foundUser, err := s.userRepo.FindByPhone(phone)
+// 	if err != nil {
+// 		return nil, repository.ErrUserNotFound
+// 	}
 
-	// Generate & Refresh current access token
-	newAccessToken, ok := s.session.NewAccessToken(foundUser.StaticID)
-	if !ok {
-		return "", errors.New("refreshing token failed")
-	}
+// 	tokens, ok := s.authManager.GetOTP(ctx, phone, otp, foundUser.StaticID)
+// 	if !ok {
+// 		return nil, repository.ErrInvalidOtpCode
+// 	}
 
-	// Destroy old token
-	delErr := s.session.Destroy(accessToken)
-	if delErr != nil {
-		return "", delErr
-	}
+// 	return &tokens, nil
+// }
 
-	return newAccessToken, nil
-}
+// func (s *UserManager) RefreshToken(refreshToken string, accessToken string) (string, error) {
+// 	// Decode tokens and detect user phone
+// 	payload, decodeRfErr := s.token_manager.DecodeToken(refreshToken, jwt_manager.RefreshToken)
+// 	if decodeRfErr != nil {
+// 		return "", errors.New("invalid refresh token")
+// 	}
 
-// Authenticate function is used to authenticate a user and returns a `*user.User` and an error.
-func (s *userService) Authenticate(accessToken string) (*user.User, error) {
-	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
-	if decodeErr != nil {
-		return nil, errors.New("invalid access token")
-	}
+// 	_, decodeAtErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
+// 	if decodeAtErr != nil {
+// 		return "", errors.New("invalid access token")
+// 	}
 
-	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
-	if findErr != nil {
-		return nil, jwt_manager.ErrInvalidToken
-	}
+// 	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
+// 	if findErr != nil {
+// 		return "", findErr
+// 	}
 
-	return foundUser, nil
-}
+// 	newAccessToken, ok := s.session.NewAccessToken(foundUser.StaticID)
+// 	if !ok {
+// 		return "", errors.New("refreshing token failed")
+// 	}
+
+// 	delErr := s.session.Destroy(accessToken)
+// 	if delErr != nil {
+// 		return "", delErr
+// 	}
+
+// 	return newAccessToken, nil
+// }
+
+// func (s *UserManager) Authenticate(accessToken string) (*user.User, error) {
+// 	payload, decodeErr := s.session.DecodeToken(accessToken, jwt_manager.AccessToken)
+// 	if decodeErr != nil {
+// 		return nil, errors.New("invalid access token")
+// 	}
+
+// 	foundUser, findErr := s.userRepo.FindByID(payload.StaticID)
+// 	if findErr != nil {
+// 		return nil, jwt_manager.ErrInvalidToken
+// 	}
+
+// 	return foundUser, nil
+// }

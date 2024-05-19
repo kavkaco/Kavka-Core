@@ -20,6 +20,7 @@ var (
 	UsersCollection    = "users"
 	ChatsCollection    = "chats"
 	MessagesCollection = "messages"
+	AuthCollection     = "user_auth"
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {

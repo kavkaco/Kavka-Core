@@ -18,20 +18,26 @@ var (
 	ErrNoAccess     = errors.New("no access")
 )
 
-type repository struct {
+type MessageRepository interface {
+	Insert(ctx context.Context, chatID primitive.ObjectID, msg *message.Message) (*message.Message, error)
+	Update(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error
+	Delete(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error
+}
+
+type messageRepository struct {
 	logger             *zap.Logger
 	messagesCollection *mongo.Collection
 }
 
-func NewRepository(logger *zap.Logger, db *mongo.Database) message.Repository {
-	return &repository{logger, db.Collection(database.MessagesCollection)}
+func NewRepository(logger *zap.Logger, db *mongo.Database) MessageRepository {
+	return &messageRepository{logger, db.Collection(database.MessagesCollection)}
 }
 
-func (repo *repository) Insert(chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
+func (repo *messageRepository) Insert(ctx context.Context, chatID primitive.ObjectID, msg *message.Message) (*message.Message, error) {
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": msg}}
 
-	result := repo.messagesCollection.FindOneAndUpdate(context.TODO(), filter, update)
+	result := repo.messagesCollection.FindOneAndUpdate(ctx, filter, update)
 	if result.Err() != nil {
 		if database.IsRowExistsError(result.Err()) {
 			return nil, ErrChatNotFound
@@ -42,11 +48,11 @@ func (repo *repository) Insert(chatID primitive.ObjectID, msg *message.Message) 
 	return msg, nil
 }
 
-func (repo *repository) Update(chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error {
+func (repo *messageRepository) Update(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID, fieldsToUpdate bson.M) error {
 	filter := bson.M{"chat_id": chatID, "messages.message_id": messageID}
 	update := bson.M{"$set": fieldsToUpdate}
 
-	_, err := repo.messagesCollection.UpdateOne(context.TODO(), filter, update)
+	_, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		if database.IsRowExistsError(err) {
 			return ErrChatNotFound
@@ -58,11 +64,11 @@ func (repo *repository) Update(chatID primitive.ObjectID, messageID primitive.Ob
 	return nil
 }
 
-func (repo *repository) Delete(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
+func (repo *messageRepository) Delete(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error {
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$pull": bson.M{"messages": bson.M{"message_id": messageID}}}
 
-	result, err := repo.messagesCollection.UpdateOne(context.TODO(), filter, update)
+	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil && result.ModifiedCount != 1 {
 		if database.IsRowExistsError(err) {
 			return ErrChatNotFound

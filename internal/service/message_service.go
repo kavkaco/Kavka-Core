@@ -1,27 +1,35 @@
 package service
 
 import (
+	"context"
+
 	"github.com/kavkaco/Kavka-Core/internal/model/chat"
 	"github.com/kavkaco/Kavka-Core/internal/model/message"
+	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
 	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
-type messageService struct {
-	logger   *zap.Logger
-	msgRepo  message.Repository
-	chatRepo chat.Repository
+type MessageService interface {
+	InsertTextMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error)
+	DeleteMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error
 }
 
-func NewMessageService(logger *zap.Logger, msgRepo message.Repository, chatRepo chat.Repository) message.Service {
-	return &messageService{logger, msgRepo, chatRepo}
+type MessageManager struct {
+	logger   *zap.Logger
+	msgRepo  messageRepository.MessageRepository
+	chatRepo chatRepository.ChatRepository
+}
+
+func NewMessageService(logger *zap.Logger, msgRepo messageRepository.MessageRepository, chatRepo chatRepository.ChatRepository) MessageService {
+	return &MessageManager{logger, msgRepo, chatRepo}
 }
 
 // This function is used to find the chat and check that user has access to send message or not.
-func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(chatID)
+func (s *MessageManager) hasAccessToSendMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
+	foundChat, chatErr := s.chatRepo.FindByID(ctx, chatID)
 	if chatErr != nil {
 		return false, chatErr
 	}
@@ -49,8 +57,8 @@ func (s *messageService) hasAccessToSendMessage(chatID primitive.ObjectID, stati
 }
 
 // This function is used to find the chat and check that user has access to send message or not.
-func (s *messageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(chatID)
+func (s *MessageManager) hasAccessToDeleteMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
+	foundChat, chatErr := s.chatRepo.FindByID(ctx, chatID)
 	if chatErr != nil {
 		return false, chatErr
 	}
@@ -80,8 +88,8 @@ func (s *messageService) hasAccessToDeleteMessage(chatID primitive.ObjectID, sta
 	return false, nil
 }
 
-func (s *messageService) InsertTextMessage(chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error) {
-	hasAccess, hasAccessErr := s.hasAccessToSendMessage(chatID, staticID)
+func (s *MessageManager) InsertTextMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*message.Message, error) {
+	hasAccess, hasAccessErr := s.hasAccessToSendMessage(ctx, chatID, staticID)
 	if hasAccessErr != nil {
 		return nil, hasAccessErr
 	}
@@ -91,12 +99,12 @@ func (s *messageService) InsertTextMessage(chatID primitive.ObjectID, staticID p
 			Data: messageContent,
 		})
 
-		return s.msgRepo.Insert(chatID, msg)
+		return s.msgRepo.Insert(ctx, chatID, msg)
 	}
 
 	return nil, messageRepository.ErrNoAccess
 }
 
-func (s *messageService) DeleteMessage(chatID primitive.ObjectID, messageID primitive.ObjectID) error {
-	return s.msgRepo.Delete(chatID, messageID)
+func (s *MessageManager) DeleteMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error {
+	return s.msgRepo.Delete(ctx, chatID, messageID)
 }

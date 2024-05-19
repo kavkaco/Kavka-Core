@@ -3,7 +3,6 @@ package chat
 import (
 	"github.com/kavkaco/Kavka-Core/internal/model/message"
 	"github.com/kavkaco/Kavka-Core/utils"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -116,25 +115,4 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.ChatID = primitive.NewObjectID()
 
 	return m
-}
-
-//  Interfaces
-
-type Repository interface {
-	GetChatMembers(chatID primitive.ObjectID) []Member
-	Create(newChat Chat) (*Chat, error)
-	FindMany(filter bson.M) ([]Chat, error)
-	FindOne(filter bson.M) (*Chat, error)
-	Destroy(chatID primitive.ObjectID) error
-	FindByID(staticID primitive.ObjectID) (*Chat, error)
-	FindChatOrSidesByStaticID(staticID primitive.ObjectID) (*ChatC, error)
-	FindBySides(sides [2]primitive.ObjectID) (*Chat, error)
-}
-
-type Service interface {
-	GetChat(staticID primitive.ObjectID) (*ChatC, error)
-	GetUserChats(userStaticID primitive.ObjectID) ([]ChatC, error)
-	CreateDirect(userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*Chat, error)
-	CreateGroup(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
-	CreateChannel(userStaticID primitive.ObjectID, title string, username string, description string) (*Chat, error)
 }
