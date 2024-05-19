@@ -6,3 +6,4 @@ configs/configs.yml
 vendor/
 minio_data/*
 logs/logs*.json
+coverage.out*
