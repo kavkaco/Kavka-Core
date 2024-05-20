@@ -96,16 +96,12 @@ func (d *DirectChatDetail) HasSide(userID UserID) bool {
 	return has
 }
 
-// FIXME
-// DetectTarget determines the appropriate chat partner for the user identified by userStaticID,
-// considering a list of potential users and assuming only two participants are involved.
-// It returns a pointer to the target user's struct.
-func DetectTarget(userIDs [2]UserID, userID UserID) *UserID {
-	if userIDs[0] == userID {
+func DetectRecipient(userIDs [2]UserID, currentUserID UserID) *UserID {
+	if userIDs[0] == currentUserID {
 		return &userIDs[1]
-	} else {
-		return &userIDs[0]
 	}
+
+	return &userIDs[0]
 }
 
 func NewChat(chatType string, chatDetail interface{}) *Chat {

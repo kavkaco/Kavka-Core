@@ -1,4 +1,4 @@
-package auth
+package repository
 
 import (
 	"context"
@@ -15,18 +15,18 @@ var ErrAuthNotFound = errors.New("auth not found")
 type AuthRepository interface {
 	Create(ctx context.Context, userID model.UserID, passwordHash string) (*model.Auth, error)
 	GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error)
-	ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) (ok bool, _ error)
+	ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) error
 }
 
 type authRepository struct {
 	authCollection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) AuthRepository {
+func NewAuthRepository(db *mongo.Database) AuthRepository {
 	return &authRepository{db.Collection(database.AuthCollection)}
 }
 
-func (a *authRepository) Create(ctx context.Context, userID string, passwordHash string) (*model.Auth, error) {
+func (a *authRepository) Create(ctx context.Context, userID model.UserID, passwordHash string) (*model.Auth, error) {
 	authModel := model.Auth{
 		UserID:              userID,
 		PasswordHash:        passwordHash,
@@ -42,7 +42,7 @@ func (a *authRepository) Create(ctx context.Context, userID string, passwordHash
 	return &authModel, nil
 }
 
-func (a *authRepository) GetUserAuth(ctx context.Context, userID string) (*model.Auth, error) {
+func (a *authRepository) GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error) {
 	result := a.authCollection.FindOne(ctx, bson.M{"user_id": userID})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
 		return nil, ErrAuthNotFound
@@ -59,11 +59,11 @@ func (a *authRepository) GetUserAuth(ctx context.Context, userID string) (*model
 	return &authModel, nil
 }
 
-func (a *authRepository) ChangePassword(ctx context.Context, userID string, passwordHash string) (ok bool, _ error) {
+func (a *authRepository) ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) error {
 	result := a.authCollection.FindOneAndUpdate(ctx, bson.M{"user_id": userID}, bson.M{"$set": bson.M{"password_hash": passwordHash}})
 	if result.Err() != nil {
-		return false, result.Err()
+		return result.Err()
 	}
 
-	return true, nil
+	return nil
 }

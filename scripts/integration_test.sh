@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-go test -v -cover -coverprofile=./logs/coverage.out ./tests/integration/*
+go test -v ./tests/integration/*

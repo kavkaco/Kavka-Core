@@ -1,4 +1,4 @@
-package repository_mongo
+package repository
 
 import (
 	"context"
@@ -64,16 +64,19 @@ func TestMain(m *testing.M) {
 
 	database.ConfigureCollections(db)
 
+	ipAddr := resource.Container.NetworkSettings.IPAddress
+	fmt.Printf("Docker container network ip address: %s\n\n", ipAddr)
+
 	code := m.Run()
 
 	if err = dbClient.Disconnect(context.Background()); err != nil {
 		panic(err)
 	}
 
-	// Kill the container
-	if err = pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
-	}
+	// Expire the container
+	// if err = pool.Purge(resource); err != nil {
+	// 	log.Fatalf("Could not purge resource: %s", err)
+	// }
 
 	os.Exit(code)
 }

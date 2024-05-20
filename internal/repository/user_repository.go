@@ -19,6 +19,7 @@ var (
 type UserRepository interface {
 	GetChats(ctx context.Context, userID model.UserID) ([]model.ChatID, error)
 	Create(ctx context.Context, user *model.User) (*model.User, error)
+	AddToUserChats(ctx context.Context, userID model.UserID, chatID model.ChatID) error
 	FindOne(ctx context.Context, filter bson.M) (*model.User, error)
 	FindMany(ctx context.Context, filter bson.M) ([]*model.User, error)
 	FindByUserID(ctx context.Context, userID model.UserID) (*model.User, error)
@@ -30,8 +31,22 @@ type userRepository struct {
 	usersCollection *mongo.Collection
 }
 
-func NewRepository(db *mongo.Database) UserRepository {
+func NewUserRepository(db *mongo.Database) UserRepository {
 	return &userRepository{db.Collection(database.UsersCollection)}
+}
+
+func (repo *userRepository) AddToUserChats(ctx context.Context, userID model.UserID, chatID model.ChatID) error {
+	update := bson.M{
+		"$addToSet": bson.M{
+			"chats_list_ids": chatID,
+		},
+	}
+	result := repo.usersCollection.FindOneAndUpdate(ctx, bson.M{"user_id": userID}, update)
+	if result.Err() != nil {
+		return result.Err()
+	}
+
+	return nil
 }
 
 func (repo *userRepository) GetChats(ctx context.Context, userID model.UserID) ([]model.ChatID, error) {

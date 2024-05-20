@@ -1,4 +1,4 @@
-package repository_mongo
+package repository
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	lorem "github.com/bozaro/golorem"
 	"github.com/kavkaco/Kavka-Core/internal/model"
-	userRepo "github.com/kavkaco/Kavka-Core/internal/repository/user"
+	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,14 +14,14 @@ import (
 
 type UserTestSuite struct {
 	suite.Suite
-	repo      userRepo.UserRepository
+	repo      repository.UserRepository
 	lem       *lorem.Lorem
 	savedUser *model.User
 }
 
-func (s *UserTestSuite) SetupTest() {
+func (s *UserTestSuite) SetupSuite() {
 	s.lem = lorem.New()
-	s.repo = userRepo.NewRepository(db)
+	s.repo = repository.NewUserRepository(db)
 }
 
 func (s *UserTestSuite) TestA_Create() {
@@ -75,6 +75,22 @@ func (s *UserTestSuite) TestC_GetChats() {
 	require.Equal(s.T(), len(chatsListIDs), len(s.savedUser.ChatsListIDs))
 }
 
+func (s *UserTestSuite) TestD_AddToUserChats() {
+	ctx := context.TODO()
+
+	// Add channel chat to user's chats
+	var chatID model.ChatID = primitive.NewObjectID()
+	err := s.repo.AddToUserChats(ctx, s.savedUser.UserID, chatID)
+	require.NoError(s.T(), err)
+
+	// Let's find the user and check that chat added to list or not
+	foundUser, err := s.repo.FindByUserID(ctx, s.savedUser.UserID)
+	require.NoError(s.T(), err)
+
+	require.Len(s.T(), foundUser.ChatsListIDs, len(s.savedUser.ChatsListIDs)+1)
+}
+
 func TestUserSuite(t *testing.T) {
+	t.Helper()
 	suite.Run(t, new(UserTestSuite))
 }
