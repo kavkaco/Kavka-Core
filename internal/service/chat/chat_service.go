@@ -1,89 +1,109 @@
-package service
+package chat
 
 import (
 	"context"
 
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
-	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
-	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.uber.org/zap"
 )
 
 type ChatService interface {
-	GetChat(ctx context.Context, chatStaticID primitive.ObjectID) (*chat.ChatC, error)
-	GetUserChats(ctx context.Context, userStaticID primitive.ObjectID) ([]chat.ChatC, error)
-	CreateDirect(ctx context.Context, userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error)
-	CreateGroup(ctx context.Context, userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error)
-	CreateChannel(ctx context.Context, userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error)
+	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
+	GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, error)
+	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error)
+	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error)
+	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error)
 }
 
 type ChatManager struct {
-	logger   *zap.Logger
-	chatRepo chatRepository.ChatRepository
-	userRepo userRepository.UserRepository
+	chatRepo repository.ChatRepository
+	userRepo repository.UserRepository
 }
 
-func NewChatService(logger *zap.Logger, chatRepo chatRepository.ChatRepository, userRepo userRepository.UserRepository) ChatService {
-	return &ChatManager{logger, chatRepo, userRepo}
+func NewChatService(logger *zap.Logger, chatRepo repository.ChatRepository, userRepo repository.UserRepository) ChatService {
+	return &ChatManager{chatRepo, userRepo}
 }
 
-func (s *ChatManager) GetChat(ctx context.Context, chatStaticID primitive.ObjectID) (*chat.ChatC, error) {
-	foundChat, err := s.chatRepo.FindChatOrSidesByStaticID(ctx, chatStaticID)
+// find single chat with chat id
+func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, error) {
+	chat, err := s.chatRepo.FindByID(ctx, chatID)
 	if err != nil {
 		return nil, err
 	}
 
-	return foundChat, nil
+	return chat, nil
 }
 
-// FIXME - not implemented yet
-func (s *ChatManager) GetUserChats(ctx context.Context, userStaticID primitive.ObjectID) ([]chat.ChatC, error) {
-	return []chat.ChatC{}, nil
-	// return s.chatRepo.GetChats(userStaticID)
-}
-
-func (s *ChatManager) CreateDirect(ctx context.Context, userStaticID primitive.ObjectID, targetStaticID primitive.ObjectID) (*chat.Chat, error) {
-	sides := [2]primitive.ObjectID{
-		userStaticID,
-		targetStaticID,
+func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, error) {
+	user, err := s.userRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, ErrUserNotFound
 	}
+
+	userChatsListIDs := user.ChatsListIDs
+
+	userChats, err := s.chatRepo.FindMany(ctx, userChatsListIDs)
+	if err != nil {
+		return nil, ErrGetUserChats
+	}
+
+	return userChats, nil
+}
+
+func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error) {
+	sides := [2]model.UserID{userID, recipientUserID}
 
 	// Check to do not be duplicated!
 	dup, _ := s.chatRepo.FindBySides(ctx, sides)
 	if dup != nil {
-		return nil, chatRepository.ErrChatAlreadyExists
+		return nil, repository.ErrChatAlreadyExists
 	}
 
-	newChat := chat.NewChat(chat.TypeDirect, &chat.DirectChatDetail{
+	chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
 		Sides: sides,
 	})
 
-	return s.chatRepo.Create(ctx, *newChat)
+	saved, err := s.chatRepo.Create(ctx, *chatModel)
+	if err != nil {
+		return nil, ErrCreateChat
+	}
+
+	return saved, nil
 }
 
-func (s *ChatManager) CreateGroup(ctx context.Context, userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
-	newChat := chat.NewChat(chat.TypeGroup, &chat.GroupChatDetail{
+func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error) {
+	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
 		Title:       title,
 		Username:    username,
-		Members:     []primitive.ObjectID{userStaticID},
-		Admins:      []primitive.ObjectID{userStaticID},
+		Members:     []model.UserID{userID},
+		Admins:      []model.UserID{userID},
 		Description: description,
-		Owner:       &userStaticID,
+		Owner:       &userID,
 	})
 
-	return s.chatRepo.Create(ctx, *newChat)
+	saved, err := s.chatRepo.Create(ctx, *chatModel)
+	if err != nil {
+		return nil, ErrCreateChat
+	}
+
+	return saved, nil
 }
 
-func (s *ChatManager) CreateChannel(ctx context.Context, userStaticID primitive.ObjectID, title string, username string, description string) (*chat.Chat, error) {
-	newChat := chat.NewChat(chat.TypeGroup, &chat.GroupChatDetail{
+func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error) {
+	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
 		Title:       title,
 		Username:    username,
-		Members:     []primitive.ObjectID{userStaticID},
-		Admins:      []primitive.ObjectID{userStaticID},
+		Members:     []model.UserID{userID},
+		Admins:      []model.UserID{userID},
 		Description: description,
-		Owner:       &userStaticID,
+		Owner:       &userID,
 	})
 
-	return s.chatRepo.Create(ctx, *newChat)
+	saved, err := s.chatRepo.Create(ctx, *chatModel)
+	if err != nil {
+		return nil, ErrCreateChat
+	}
+
+	return saved, nil
 }

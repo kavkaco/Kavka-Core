@@ -10,10 +10,11 @@ import (
 )
 
 type ChatRepository interface {
+	SearchInChats(ctx context.Context, key string) ([]model.Chat, error)
+	UpdateChatLastMessage(ctx context.Context, chatID model.ChatID, lastMessage model.LastMessage) error
 	Create(ctx context.Context, chatModel model.Chat) (*model.Chat, error)
 	Destroy(ctx context.Context, chatID model.ChatID) error
-	FindMany(ctx context.Context, filter bson.M) ([]model.Chat, error)
-	FindOne(ctx context.Context, filter bson.M) (*model.Chat, error)
+	FindMany(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error)
 	FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
 	FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error)
 	GetChatMembers(chatID model.ChatID) []model.Member
@@ -26,6 +27,27 @@ type chatRepository struct {
 
 func NewChatRepository(db *mongo.Database) ChatRepository {
 	return &chatRepository{db.Collection(database.UsersCollection), db.Collection(database.ChatsCollection)}
+}
+
+func (repo *chatRepository) UpdateChatLastMessage(ctx context.Context, chatID model.ChatID, lastMessage model.LastMessage) error {
+	filter := bson.M{"_id": chatID}
+	update := bson.M{"$set": bson.M{"last_message": lastMessage}}
+
+	result, err := repo.chatsCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
+		return ErrNotModified
+	}
+
+	return nil
+}
+
+// TODO
+func (repo *chatRepository) SearchInChats(ctx context.Context, key string) ([]model.Chat, error) {
+	panic("unimplemented")
 }
 
 // TODO
@@ -60,7 +82,9 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	return nil
 }
 
-func (repo *chatRepository) FindMany(ctx context.Context, filter bson.M) ([]model.Chat, error) {
+func (repo *chatRepository) FindMany(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
+	filter := bson.M{"_id": bson.M{"$in": chatIDs}}
+
 	cursor, err := repo.chatsCollection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
@@ -76,7 +100,7 @@ func (repo *chatRepository) FindMany(ctx context.Context, filter bson.M) ([]mode
 	return chats, nil
 }
 
-func (repo *chatRepository) FindOne(ctx context.Context, filter bson.M) (*model.Chat, error) {
+func (repo *chatRepository) findOne(ctx context.Context, filter bson.M) (*model.Chat, error) {
 	var model *model.Chat
 	result := repo.chatsCollection.FindOne(ctx, filter)
 	if result.Err() != nil {
@@ -93,7 +117,7 @@ func (repo *chatRepository) FindOne(ctx context.Context, filter bson.M) (*model.
 
 func (repo *chatRepository) FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error) {
 	filter := bson.M{"_id": chatID}
-	return repo.FindOne(ctx, filter)
+	return repo.findOne(ctx, filter)
 }
 
 func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error) {
@@ -102,5 +126,5 @@ func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]model.User
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},
 	}
 
-	return repo.FindOne(ctx, filter)
+	return repo.findOne(ctx, filter)
 }

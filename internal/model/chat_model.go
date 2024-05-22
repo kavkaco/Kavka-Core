@@ -14,18 +14,10 @@ const (
 )
 
 type Chat struct {
-	ChatID     ChatID      `bson:"_id" json:"chatId"`
-	ChatType   string      `bson:"chat_type" json:"chatType"`
-	ChatDetail interface{} `bson:"chat_detail" json:"chatDetail"`
-}
-
-// Chat struct that includes messages.
-// ChatC (Complete Chat) created because `Chat` struct does not contain `Messages` field.
-type ChatC struct {
-	ChatID     ChatID      `bson:"_id" json:"chatId"`
-	ChatType   string      `bson:"chat_type" json:"chatType"`
-	ChatDetail interface{} `bson:"chat_detail" json:"chatDetail"`
-	Messages   []Message   `bson:"messages" json:"messages"`
+	ChatID      ChatID       `bson:"_id" json:"chatId"`
+	ChatType    string       `bson:"chat_type" json:"chatType"`
+	ChatDetail  interface{}  `bson:"chat_detail" json:"chatDetail"`
+	LastMessage *LastMessage `bson:"last_message" json:"lastMessage"`
 }
 
 type Member struct {
@@ -110,6 +102,7 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.ChatType = chatType
 	m.ChatDetail = chatDetail
 	m.ChatID = primitive.NewObjectID()
+	m.LastMessage = nil
 
 	return m
 }

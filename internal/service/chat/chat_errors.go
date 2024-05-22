@@ -1,0 +1,9 @@
+package chat
+
+import "errors"
+
+var (
+	ErrCreateChat   = errors.New("unable to create chat")
+	ErrUserNotFound = errors.New("user not found")
+	ErrGetUserChats = errors.New("failed to get user chats")
+)

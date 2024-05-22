@@ -1,4 +1,4 @@
-package service
+package auth
 
 type RegisterValidation struct {
 	Name     string `validate:"required"`

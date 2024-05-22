@@ -13,6 +13,11 @@ const (
 	TypeImageMessage = "image"
 )
 
+type LastMessage struct {
+	MessageType    string `bson:"type" json:"type"`
+	MessageCaption string `bson:"caption" json:"caption"`
+}
+
 type MessageStore struct {
 	ChatID   ChatID    `bson:"chat_id"`
 	Messages []Message `bson:"messages"`
@@ -50,4 +55,11 @@ func NewMessage(messageType string, content interface{}, senderID UserID) *Messa
 	m.CreatedAt = now
 
 	return m
+}
+
+func NewLastMessage(messageType string, messageCaption string) *LastMessage {
+	return &LastMessage{
+		MessageType:    messageType,
+		MessageCaption: messageCaption,
+	}
 }

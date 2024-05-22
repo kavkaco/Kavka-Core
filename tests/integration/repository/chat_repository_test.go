@@ -133,6 +133,37 @@ func (s *ChatTestSuite) TestFindBySides() {
 	require.Equal(s.T(), chat.ChatID, s.createdDirectChatID)
 }
 
+func (s *ChatTestSuite) TestUpdateChatLastMessage() {
+	ctx := context.TODO()
+
+	// Create message model
+	messageContent := model.TextMessage{Data: "Sample message..."}
+	model.NewMessage(model.TypeTextMessage, messageContent, s.userID)
+
+	// Create last message model and update it in chat repository
+	lastMessageModel := model.NewLastMessage(model.TypeTextMessage, messageContent.Data)
+	err := s.repo.UpdateChatLastMessage(ctx, s.createdDirectChatID, *lastMessageModel)
+	require.NoError(s.T(), err)
+
+	// Get the chat to be sure thats changed
+	chat, err := s.repo.FindByID(ctx, s.createdDirectChatID)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), chat.LastMessage)
+	require.Equal(s.T(), chat.LastMessage.MessageCaption, lastMessageModel.MessageCaption)
+	require.Equal(s.T(), chat.LastMessage.MessageType, lastMessageModel.MessageType)
+}
+
+func (s *ChatTestSuite) TestFindMany() {
+	ctx := context.TODO()
+
+	chatIDs := []model.ChatID{s.createdChannelChatID, s.createdGroupChatID, s.createdDirectChatID}
+	chats, err := s.repo.FindMany(ctx, chatIDs)
+	require.NoError(s.T(), err)
+
+	require.Len(s.T(), chats, 3)
+}
+
 func TestChatSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(ChatTestSuite))
