@@ -20,3 +20,23 @@ type LoginValidation struct {
 	Email    string `validate:"required"`
 	Password string `validate:"required"`
 }
+
+type ChangePasswordValidation struct {
+	Email       string `validate:"required"`
+	OldPassword string `validate:"required"`
+	NewPassword string `validate:"required"`
+}
+
+type RefreshTokenValidation struct {
+	RefreshToken string `validate:"required"`
+	AccessToken  string `validate:"required"`
+}
+
+type SendResetPasswordVerificationValidation struct {
+	Email string `validate:"required"`
+}
+
+type SubmitResetPasswordValidation struct {
+	ResetPasswordToken string `validate:"required"`
+	NewPassword        string `validate:"required"`
+}

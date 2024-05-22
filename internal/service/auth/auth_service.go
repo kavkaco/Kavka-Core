@@ -13,20 +13,19 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 )
 
-const VerifyEmailTokenExpr = time.Minute * 10
+const ResetPasswordTokenExpr = time.Minute * 10
+const VerifyEmailTokenExpr = time.Minute * 5
 const MaximumFailedLoginAttempts = 5
+const AccessTokenExpr = time.Hour * 24 * 2   // 2 days
+const RefreshTokenExpr = time.Hour * 24 * 14 // 2 weeks
 
 type AuthService interface {
-	Login(ctx context.Context, email, password string) (*model.User, error)
+	Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, _ error)
 	Register(ctx context.Context, name string, lastName string, username string, email string, password string) (user *model.User, verifyEmailToken string, err error)
-
-	VerifyEmail(ctx context.Context, verifyEmailToken string) error
-
-	SendResetPasswordVerification(ctx context.Context, email string) (timeout time.Time, err error)
+	VerifyEmail(ctx context.Context, email string) error
+	SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, err error)
 	SubmitResetPassword(ctx context.Context, token string, newPassword string) error
-
-	ChangePassword(ctx context.Context, oldPassword string, newPassword string) error
-
+	ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) error
 	Authenticate(ctx context.Context, accessToken string) (*model.User, error)
 	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, error)
 }
@@ -79,7 +78,6 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 	return savedUser, verifyEmailToken, nil
 }
 
-// Authenticate implements AuthService.
 func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*model.User, error) {
 	err := a.validator.Struct(AuthenticateValidation{accessToken})
 	if err != nil {
@@ -103,7 +101,6 @@ func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*mo
 	return user, nil
 }
 
-// VerifyEmail implements AuthService.
 func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) error {
 	err := a.validator.Struct(VerifyEmailValidation{verifyEmailToken})
 	if err != nil {
@@ -123,29 +120,28 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 	return nil
 }
 
-// Login implements AuthService.
-func (a *AuthManager) Login(ctx context.Context, email string, password string) (*model.User, error) {
+func (a *AuthManager) Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, _ error) {
 	err := a.validator.Struct(LoginValidation{email, password})
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+		return nil, "", "", fmt.Errorf("%w: %v", ErrInvalidValidation, err)
 	}
 
 	user, err := a.userRepo.FindByEmail(ctx, email)
 	if err != nil {
-		return nil, ErrInvalidEmailOrPassword
+		return nil, "", "", ErrInvalidEmailOrPassword
 	}
 
 	auth, err := a.authRepo.GetUserAuth(ctx, user.UserID)
 	if err != nil {
-		return nil, ErrInvalidEmailOrPassword
+		return nil, "", "", ErrInvalidEmailOrPassword
 	}
 
 	if !auth.EmailVerified {
-		return nil, ErrEmailNotVerified
+		return nil, "", "", ErrEmailNotVerified
 	}
 
 	if auth.FailedLoginAttempts >= MaximumFailedLoginAttempts {
-		return nil, fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil.String())
+		return nil, "", "", fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil.String())
 	}
 
 	validPassword := a.hashManager.CheckPasswordHash(password, auth.PasswordHash)
@@ -153,31 +149,152 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		// Increment the filed login attempts
 		err := a.authRepo.IncrementFailedLoginAttempts(ctx, user.UserID)
 		if err != nil {
-			return nil, ErrInvalidEmailOrPassword
+			return nil, "", "", ErrInvalidEmailOrPassword
 		}
 
-		return nil, ErrInvalidEmailOrPassword
+		return nil, "", "", ErrInvalidEmailOrPassword
 	}
 
-	return user, nil
+	// Generate refresh token and access token
+	accessToken, err := a.authManager.GenerateToken(ctx, auth_manager.AccessToken, auth_manager.NewTokenClaims(user.UserID, auth_manager.AccessToken), AccessTokenExpr)
+	if err != nil {
+		return nil, "", "", ErrGenerateToken
+	}
+
+	refreshToken, err := a.authManager.GenerateToken(ctx, auth_manager.RefreshToken, auth_manager.NewTokenClaims(user.UserID, auth_manager.RefreshToken), RefreshTokenExpr)
+	if err != nil {
+		return nil, "", "", ErrGenerateToken
+	}
+
+	return user, accessToken, refreshToken, nil
 }
 
-// ChangePassword implements AuthService.
-func (a *AuthManager) ChangePassword(ctx context.Context, oldPassword string, newPassword string) error {
-	panic("unimplemented")
+func (a *AuthManager) ChangePassword(ctx context.Context, email string, oldPassword string, newPassword string) error {
+	err := a.validator.Struct(ChangePasswordValidation{email, oldPassword, newPassword})
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+	}
+
+	user, err := a.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	auth, err := a.authRepo.GetUserAuth(ctx, user.UserID)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	// Validate with old password
+	validPassword := a.hashManager.CheckPasswordHash(oldPassword, auth.PasswordHash)
+	if !validPassword {
+		return ErrInvalidPassword
+	}
+
+	newPasswordHash, err := a.hashManager.HashPassword(newPassword)
+	if err != nil {
+		return ErrHashingPassword
+	}
+
+	err = a.authRepo.ChangePassword(ctx, user.UserID, newPasswordHash)
+	if err != nil {
+		return ErrChangePassword
+	}
+
+	return nil
 }
 
-// RefreshToken implements AuthService.
 func (a *AuthManager) RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, error) {
-	panic("unimplemented")
+	err := a.validator.Struct(RefreshTokenValidation{refreshToken, accessToken})
+	if err != nil {
+		return "", fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+	}
+
+	// Let's check that refresh token not be invalid or expired
+	rftClaims, err := a.authManager.DecodeToken(ctx, refreshToken, auth_manager.RefreshToken)
+	if err != nil {
+		return "", ErrAccessDenied
+	}
+
+	// Find auth with user_id
+	_, err = a.authRepo.GetUserAuth(ctx, rftClaims.UserID)
+	if err != nil {
+		return "", ErrAccessDenied
+	}
+
+	// Generate new access token
+	newAccessToken, err := a.authManager.GenerateToken(ctx, auth_manager.AccessToken, auth_manager.NewTokenClaims(rftClaims.UserID, auth_manager.AccessToken), AccessTokenExpr)
+	if err != nil {
+		return "", ErrGenerateToken
+	}
+
+	// Expire old access token
+	err = a.authManager.Destroy(ctx, accessToken)
+	if err != nil {
+		return "", ErrDestroyToken
+	}
+
+	return newAccessToken, nil
 }
 
-// SendResetPasswordVerification implements AuthService.
-func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email string) (timeout time.Time, err error) {
-	panic("unimplemented")
+// email should be verified and not be locked to enter to reset password process
+func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, _ error) {
+	err := a.validator.Struct(SendResetPasswordVerificationValidation{email})
+	if err != nil {
+		return "", 0, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+	}
+
+	user, err := a.userRepo.FindByEmail(ctx, email)
+	if err != nil {
+		return "", 0, err
+	}
+
+	auth, err := a.authRepo.GetUserAuth(ctx, user.UserID)
+	if err != nil {
+		return "", 0, err
+	}
+
+	if !auth.EmailVerified {
+		return "", 0, ErrEmailNotVerified
+	}
+
+	if auth.FailedLoginAttempts >= MaximumFailedLoginAttempts {
+		return "", 0, fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil.String())
+	}
+
+	resetPasswordToken, err := a.authManager.GenerateToken(ctx, auth_manager.ResetPassword, auth_manager.NewTokenClaims(auth.UserID, auth_manager.ResetPassword), ResetPasswordTokenExpr)
+	if err != nil {
+		return "", 0, ErrGenerateToken
+	}
+
+	return resetPasswordToken, ResetPasswordTokenExpr, nil
 }
 
-// SubmitResetPassword implements AuthService.
 func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, newPassword string) error {
-	panic("unimplemented")
+	err := a.validator.Struct(SubmitResetPasswordValidation{token, newPassword})
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+	}
+
+	tokenClaims, err := a.authManager.DecodeToken(ctx, token, auth_manager.ResetPassword)
+	if err != nil {
+		return ErrAccessDenied
+	}
+
+	auth, err := a.authRepo.GetUserAuth(ctx, tokenClaims.UserID)
+	if err != nil {
+		return ErrAccessDenied
+	}
+
+	newPasswordHash, err := a.hashManager.HashPassword(newPassword)
+	if err != nil {
+		return ErrHashingPassword
+	}
+
+	err = a.authRepo.ChangePassword(ctx, auth.UserID, newPasswordHash)
+	if err != nil {
+		return ErrChangePassword
+	}
+
+	return nil
 }

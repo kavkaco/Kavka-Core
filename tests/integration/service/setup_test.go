@@ -35,9 +35,13 @@ func getMongoTestInstance(pool *dockertest.Pool) (*mongo.Client, *dockertest.Res
 	}
 
 	err = pool.Retry(func() error {
+		ipAddr := resource.Container.NetworkSettings.IPAddress + ":27017"
+
+		fmt.Printf("Docker mongo container network ip address: %s\n", ipAddr)
+
 		c, err = mongo.Connect(context.TODO(),
 			options.Client().ApplyURI(
-				fmt.Sprintf("mongodb://test:test@localhost:%s", resource.GetPort("27017/tcp")),
+				fmt.Sprintf("mongodb://test:test@%s", ipAddr),
 			),
 		)
 		if err != nil {
@@ -63,6 +67,8 @@ func getRedisTestInstance(pool *dockertest.Pool) (*redis.Client, *dockertest.Res
 
 	err = pool.Retry(func() error {
 		ipAddr := resource.Container.NetworkSettings.IPAddress + ":6379"
+
+		fmt.Printf("Docker redis container network ip address: %s\n", ipAddr)
 
 		c = redis.NewClient(&redis.Options{
 			Addr: ipAddr,
@@ -99,6 +105,8 @@ func TestMain(m *testing.M) {
 
 	mc, mongoResource := getMongoTestInstance(pool)
 	rc, redisResource := getRedisTestInstance(pool)
+
+	fmt.Print("\n")
 
 	db = mc.Database("test")
 	database.ConfigureCollections(db)

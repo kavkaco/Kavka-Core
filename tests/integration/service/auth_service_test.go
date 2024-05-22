@@ -19,7 +19,11 @@ type AuthTestSuite struct {
 	service service.AuthService
 	lem     *lorem.Lorem
 
-	authToken, verifyEmailToken string
+	verifyEmailToken   string
+	email, password    string
+	accessToken        string
+	refreshToken       string
+	resetPasswordToken string
 }
 
 func (s *AuthTestSuite) SetupSuite() {
@@ -55,6 +59,8 @@ func (s *AuthTestSuite) TestA_Register() {
 	require.Equal(s.T(), user.Email, email)
 
 	s.verifyEmailToken = verifyEmailToken
+	s.email = email
+	s.password = password
 }
 
 func (s *AuthTestSuite) TestB_VerifyEmail() {
@@ -64,26 +70,88 @@ func (s *AuthTestSuite) TestB_VerifyEmail() {
 	require.NoError(s.T(), err)
 }
 
-// ANCHOR - write test for login method
+func (s *AuthTestSuite) TestC_Login() {
+	ctx := context.TODO()
 
-// func (s *AuthTestSuite) TestC_Authenticate() {
-// 	ctx := context.TODO()
+	user, accessToken, refreshToken, err := s.service.Login(ctx, s.email, s.password)
+	require.NoError(s.T(), err)
 
-// 	name := s.lem.FirstName(0)
-// 	lastName := s.lem.LastName()
-// 	username := s.lem.Word(1, 10)
-// 	email := s.lem.Email()
-// 	password := "strong-password"
+	require.NotEmpty(s.T(), accessToken)
+	require.NotEmpty(s.T(), refreshToken)
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
 
-// 	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
-// 	require.NoError(s.T(), err)
+	s.accessToken = accessToken
+	s.refreshToken = refreshToken
+}
 
-// 	require.NotEmpty(s.T(), verifyEmailToken)
-// 	require.Equal(s.T(), user.Name, name)
-// 	require.Equal(s.T(), user.LastName, lastName)
-// 	require.Equal(s.T(), user.Username, username)
-// 	require.Equal(s.T(), user.Email, email)
-// }
+func (s *AuthTestSuite) TestD_ChangePassword() {
+	ctx := context.TODO()
+
+	newPassword := "password-changed"
+
+	err := s.service.ChangePassword(ctx, s.email, s.password, newPassword)
+	require.NoError(s.T(), err)
+
+	// Login again with new password to be sure that's changed!
+
+	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
+
+	s.password = newPassword
+}
+
+func (s *AuthTestSuite) TestE_Authenticate() {
+	ctx := context.TODO()
+
+	user, err := s.service.Authenticate(ctx, s.accessToken)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), user.Email, s.email)
+}
+
+func (s *AuthTestSuite) TestF_RefreshToken() {
+	ctx := context.TODO()
+
+	newAccessToken, err := s.service.RefreshToken(ctx, s.refreshToken, s.accessToken)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), newAccessToken)
+	require.NotEqual(s.T(), newAccessToken, s.accessToken)
+}
+
+func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
+	ctx := context.TODO()
+
+	resetPasswordToken, timeout, err := s.service.SendResetPasswordVerification(ctx, s.email)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), timeout)
+	require.NotEmpty(s.T(), resetPasswordToken)
+
+	s.resetPasswordToken = resetPasswordToken
+}
+
+func (s *AuthTestSuite) TestH_SubmitResetPassword() {
+	ctx := context.TODO()
+
+	newPassword := "reset-password"
+
+	err := s.service.SubmitResetPassword(ctx, s.resetPasswordToken, newPassword)
+	require.NoError(s.T(), err)
+
+	// Login again with new password to be sure that's changed!
+
+	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
+
+	s.password = newPassword
+}
 
 func TestAuthSuite(t *testing.T) {
 	t.Helper()
