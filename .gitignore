@@ -1,7 +1,7 @@
 .vscode
 .idea
 build/
-configs/configs.yml
+configs/config.yml
 ./test.go
 vendor/
 minio_data/*

@@ -1,4 +1,4 @@
-package sms_service
+package email
 
 import (
 	"bytes"
@@ -13,21 +13,20 @@ import (
 
 const TEMPLATE_FORMAT = "txt"
 
-type SmsService struct {
+type EmailOtp struct {
 	logger        *zap.Logger
-	configs       *config.SMS
+	config        *config.Email
 	templatesPath string
 }
 
-func NewSmsService(logger *zap.Logger, configs *config.SMS, templatesPath string) *SmsService {
-	return &SmsService{logger, configs, templatesPath}
+func NewEmailService(logger *zap.Logger, configs *config.Email, templatesPath string) *EmailOtp {
+	return &EmailOtp{logger, configs, templatesPath}
 }
 
-// TODO - Write sms service for production.
-func (s *SmsService) SendSMS(msg string, receivers []string) error {
+func (s *EmailOtp) SendEmail(body string, receivers []string) error {
 	if config.CurrentEnv == config.Development {
-		fmt.Println("------ SMS Sent ------")
-		fmt.Printf("%s\n", strings.TrimSpace(msg))
+		fmt.Println("------ Email Sent ------")
+		fmt.Printf("%s\n", strings.TrimSpace(body))
 		fmt.Println("-----------------------")
 	}
 
@@ -35,7 +34,7 @@ func (s *SmsService) SendSMS(msg string, receivers []string) error {
 }
 
 // Parses and returns the template.
-func (s *SmsService) Template(name string, args interface{}) (string, error) {
+func (s *EmailOtp) Template(name string, args interface{}) (string, error) {
 	filename := fmt.Sprintf("%s/%s.%s", s.templatesPath, name, TEMPLATE_FORMAT)
 
 	fileData, readErr := os.ReadFile(filename)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 )
 
@@ -27,6 +28,7 @@ const (
 	AccessToken TokenType = iota
 	RefreshToken
 	ResetPassword
+	VerifyEmail
 )
 
 type AuthManager interface {
@@ -45,10 +47,18 @@ type AuthManagerOpts struct {
 
 // Used as jwt claims
 type TokenClaims struct {
-	UserStaticID string    `json:"userStaticID"`
-	CreatedAt    time.Time `json:"createdAt"`
-	TokenType    TokenType `json:"tokenType"`
+	UserID    model.UserID `json:"userID"`
+	CreatedAt time.Time    `json:"createdAt"`
+	TokenType TokenType    `json:"tokenType"`
 	jwt.StandardClaims
+}
+
+func NewTokenClaims(userID model.UserID, tokenType TokenType) *TokenClaims {
+	return &TokenClaims{
+		UserID:    userID,
+		CreatedAt: time.Now(),
+		TokenType: tokenType,
+	}
 }
 
 type authManager struct {

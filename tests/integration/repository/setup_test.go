@@ -73,10 +73,10 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	// Expire the container
-	// if err = pool.Purge(resource); err != nil {
-	// 	log.Fatalf("Could not purge resource: %s", err)
-	// }
+	// Kill the container
+	if err = pool.Purge(resource); err != nil {
+		log.Fatalf("Could not purge resource: %s", err)
+	}
 
 	os.Exit(code)
 }

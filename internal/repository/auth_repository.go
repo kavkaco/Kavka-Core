@@ -13,9 +13,11 @@ import (
 var ErrAuthNotFound = errors.New("auth not found")
 
 type AuthRepository interface {
-	Create(ctx context.Context, userID model.UserID, passwordHash string) (*model.Auth, error)
+	Create(ctx context.Context, authModel *model.Auth) (*model.Auth, error)
 	GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error)
 	ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) error
+	VerifyEmail(ctx context.Context, userID model.UserID) error
+	IncrementFailedLoginAttempts(ctx context.Context, userID model.UserID) error
 }
 
 type authRepository struct {
@@ -26,20 +28,37 @@ func NewAuthRepository(db *mongo.Database) AuthRepository {
 	return &authRepository{db.Collection(database.AuthCollection)}
 }
 
-func (a *authRepository) Create(ctx context.Context, userID model.UserID, passwordHash string) (*model.Auth, error) {
-	authModel := model.Auth{
-		UserID:              userID,
-		PasswordHash:        passwordHash,
-		FailedLoginAttempts: 0,
-		AccountLockedFor:    nil,
+func (a *authRepository) IncrementFailedLoginAttempts(ctx context.Context, userID string) error {
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$inc": bson.M{"failed_login_attempts": 1}}
+
+	_, err := a.authCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
 	}
 
+	return nil
+}
+
+func (a *authRepository) VerifyEmail(ctx context.Context, userID model.UserID) error {
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$set": bson.M{"email_verified": true}}
+
+	_, err := a.authCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (a *authRepository) Create(ctx context.Context, authModel *model.Auth) (*model.Auth, error) {
 	_, err := a.authCollection.InsertOne(ctx, authModel)
 	if err != nil {
 		return nil, err
 	}
 
-	return &authModel, nil
+	return authModel, nil
 }
 
 func (a *authRepository) GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error) {

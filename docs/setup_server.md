@@ -22,7 +22,7 @@ Let's begin to clone and configure Kavka!
 
 3. Edit configuration
 ```bash
-vim ./config/configs.yml
+vim ./config/config.yml
 ```
 
 5. Start services

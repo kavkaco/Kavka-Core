@@ -38,10 +38,13 @@ func (s *AuthTestSuite) TestA_Create() {
 	passwordHash, err := s.hashManager.HashPassword(s.plainPassword)
 	require.NoError(s.T(), err)
 
-	auth, err := s.repo.Create(ctx, s.userID, passwordHash)
+	authModel := model.NewAuth(s.userID, passwordHash)
+
+	auth, err := s.repo.Create(ctx, authModel)
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), auth.UserID, s.userID)
 	require.Equal(s.T(), auth.PasswordHash, passwordHash)
+	require.False(s.T(), auth.EmailVerified)
 }
 
 func (s *AuthTestSuite) TestB_GetUserAuth() {
@@ -52,7 +55,31 @@ func (s *AuthTestSuite) TestB_GetUserAuth() {
 	require.Equal(s.T(), userAuth.UserID, s.userID)
 }
 
-func (s *AuthTestSuite) TestChangePassword() {
+func (s *AuthTestSuite) TestC_IncrementFailedLoginAttempts() {
+	ctx := context.TODO()
+
+	err := s.repo.IncrementFailedLoginAttempts(ctx, s.userID)
+	require.NoError(s.T(), err)
+
+	// Fetch user to check the value of failed login attempts
+	userAuth, err := s.repo.GetUserAuth(ctx, s.userID)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), userAuth.FailedLoginAttempts, 1)
+}
+
+func (s *AuthTestSuite) TestD_VerifyEmail() {
+	ctx := context.TODO()
+
+	err := s.repo.VerifyEmail(ctx, s.userID)
+	require.NoError(s.T(), err)
+
+	// Fetch user to see email verified or not
+	userAuth, err := s.repo.GetUserAuth(ctx, s.userID)
+	require.NoError(s.T(), err)
+	require.True(s.T(), userAuth.EmailVerified)
+}
+
+func (s *AuthTestSuite) TestE_ChangePassword() {
 	ctx := context.TODO()
 
 	newPlainPassword := "kavkaco-new"
