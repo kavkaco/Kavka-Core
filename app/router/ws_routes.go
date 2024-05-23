@@ -12,8 +12,14 @@ import (
 func WebsocketRoute(logger *zap.Logger, websocketAdapter socket.SocketAdapter, handlerServices handlers.HandlerServices) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		// Get UserStaticID form AuthenticatedMiddleware and cast to primitive.ObjectId!
-		if userStaticIDAny, ok := ctx.Get("user_static_id"); ok {
-			userStaticIDStr, _ := userStaticIDAny.(string)
+		userStaticIDAny, getOk := ctx.Get("user_static_id")
+		if getOk {
+			userStaticIDStr, castOk := userStaticIDAny.(string)
+			if !castOk {
+				logger.Error("Unable to cast any to string")
+				ctx.Next()
+				return
+			}
 
 			userStaticID, err := primitive.ObjectIDFromHex(userStaticIDStr)
 			if err != nil {

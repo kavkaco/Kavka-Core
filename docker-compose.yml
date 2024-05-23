@@ -35,7 +35,7 @@ services:
     container_name: "kavka_server"
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: app.Dockerfile
     depends_on:
       - redis
       - mongo
@@ -43,6 +43,11 @@ services:
     image: "golang:latest"
     ports:
       - "8000:8000"
+  integration_test:
+    container_name: "kavka_integration_test"
+    build:
+      context: ./
+      dockerfile: integration.Dockerfile
 
 networks:
   default:

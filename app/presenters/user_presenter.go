@@ -1,13 +1,11 @@
 package presenters
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
-	"github.com/kavkaco/Kavka-Core/pkg/session"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 )
 
 // the data and information that would be send to user after authentication.
@@ -27,11 +25,6 @@ func AccessDenied(ctx *gin.Context) {
 		Code:    code,
 		Message: "Forbidden",
 	})
-}
-
-func SendTokensHeader(ctx *gin.Context, tokens session.LoginTokens) {
-	ctx.Header("refresh", tokens.RefreshToken)
-	ctx.Header("authorization", fmt.Sprintf("Bearer %s", tokens.AccessToken))
 }
 
 func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.ChatC) error {

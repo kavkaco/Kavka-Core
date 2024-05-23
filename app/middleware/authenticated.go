@@ -3,11 +3,11 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/utils/bearer"
 )
 
-func AuthenticatedMiddleware(userService user.Service) func(ctx *gin.Context) {
+func AuthenticatedMiddleware(userService service.UserService) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		accessToken, bearerOk := bearer.AccessToken(ctx)
 

@@ -20,6 +20,7 @@ var (
 	UsersCollection    = "users"
 	ChatsCollection    = "chats"
 	MessagesCollection = "messages"
+	AuthCollection     = "user_auth"
 )
 
 func NewMongoDBConnectionString(host string, port int, username string, password string) string {
@@ -44,15 +45,15 @@ func GetMongoDBInstance(uri, dbName string) (*mongo.Database, error) {
 
 		mongoInstance = client.Database(dbName)
 
-		configureCollections(mongoInstance)
+		ConfigureCollections(mongoInstance)
 	}
 
 	return mongoInstance, nil
 }
 
-func configureCollections(db *mongo.Database) {
+func ConfigureCollections(db *mongo.Database) {
 	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
-		Keys:    bson.D{{Key: "phone", Value: 1}},
+		Keys:    bson.D{{Key: "email", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	})
 

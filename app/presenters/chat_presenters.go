@@ -3,8 +3,8 @@ package presenters
 import (
 	"errors"
 
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/model/chat"
+	"github.com/kavkaco/Kavka-Core/internal/model/user"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -59,13 +59,14 @@ func ChatAsJSON(obj chat.ChatC, userStaticID primitive.ObjectID) (interface{}, e
 			return nil, errors.New("invalid length of fetched users")
 		}
 
-		target := chat.DetectTarget(fetchedUsers, userStaticID)
+		// FIXME
+		// target := chat.DetectTarget(fetchedUsers, userStaticID)
 
-		httpChatDetail = HttpDirectChatDetail{
-			UserID:   target.StaticID,
-			Name:     target.Name,
-			LastName: target.LastName,
-		}
+		// httpChatDetail = HttpDirectChatDetail{
+		// 	UserID:   target.StaticID,
+		// 	Name:     target.Name,
+		// 	LastName: target.LastName,
+		// }
 	case chat.TypeChannel:
 		chatDetailLocal, err := utils.TypeConverter[chat.ChannelChatDetail](obj.ChatDetail)
 		if err != nil {

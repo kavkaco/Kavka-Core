@@ -18,3 +18,9 @@ func TestGenerateUsername(t *testing.T) {
 
 	t.Log(username)
 }
+
+func TestGenerateUserID(t *testing.T) {
+	userID := GenerateUserID()
+
+	t.Log(userID)
+}

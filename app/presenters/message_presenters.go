@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"github.com/kavkaco/Kavka-Core/internal/domain/message"
+	"github.com/kavkaco/Kavka-Core/internal/model/message"
 	"github.com/kavkaco/Kavka-Core/utils"
 )
 

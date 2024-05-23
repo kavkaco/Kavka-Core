@@ -15,16 +15,17 @@ type Env int
 const (
 	Development Env = iota
 	Production
+	Test
 )
 
 var CurrentEnv Env = Development
 
 type (
 	IConfig struct {
-		App   App   `yaml:"app"`
-		Mongo Mongo `yaml:"mongo"`
-		Redis Redis `yaml:"redis"`
-		SMS   `yaml:"sms"`
+		App   App              `yaml:"app"`
+		Mongo Mongo            `yaml:"mongo"`
+		Redis Redis            `yaml:"redis"`
+		Email Email            `yaml:"email"`
 		MinIO MinIOCredentials `yaml:"minio"`
 	}
 	App struct {
@@ -59,7 +60,6 @@ type (
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		Port     int    `yaml:"port"`
-		DB       int    `yaml:"db"`
 		DBName   string `yaml:"db_name"`
 	}
 	MinIOCredentials struct {
@@ -67,8 +67,7 @@ type (
 		AccessKey string `yaml:"access_key"`
 		SecretKey string `yaml:"secret_key"`
 	}
-	// TODO - Add sms-service's configs.
-	SMS struct{}
+	Email struct{}
 )
 
 var ProjectRootPath = ConfigsDirPath() + "/../"
@@ -89,6 +88,8 @@ func Read() *IConfig {
 		CurrentEnv = Development
 	} else if env == "production" {
 		CurrentEnv = Production
+	} else if env == "test" {
+		CurrentEnv = Test
 	} else {
 		panic(errors.New("Invalid ENV: " + env))
 	}
@@ -96,7 +97,7 @@ func Read() *IConfig {
 	// Load YAML configs
 	var cfg *IConfig
 
-	data, readErr := os.ReadFile(ConfigsDirPath() + "/configs.yml")
+	data, readErr := os.ReadFile(ConfigsDirPath() + "/config.yml")
 	if readErr != nil {
 		panic(readErr)
 	}

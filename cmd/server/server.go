@@ -1,91 +1,74 @@
 package main
 
-import (
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-	"github.com/kavkaco/Kavka-Core/app/middleware"
-	"github.com/kavkaco/Kavka-Core/app/router"
-	"github.com/kavkaco/Kavka-Core/config"
-	"github.com/kavkaco/Kavka-Core/database"
-	chatRepository "github.com/kavkaco/Kavka-Core/internal/repository/chat"
-	messageRepository "github.com/kavkaco/Kavka-Core/internal/repository/message"
-	userRepository "github.com/kavkaco/Kavka-Core/internal/repository/user"
-	"github.com/kavkaco/Kavka-Core/internal/service"
-	"github.com/kavkaco/Kavka-Core/logs"
-	"github.com/kavkaco/Kavka-Core/pkg/session"
-	"github.com/kavkaco/Kavka-Core/pkg/sms_service"
-	"github.com/kavkaco/Kavka-Core/socket/adapters"
-	"github.com/kavkaco/Kavka-Core/socket/handlers"
-)
-
 func main() {
-	// Init Zap Logger
-	logger := logs.InitZapLogger()
+	// // Init Zap Logger
+	// logger := logs.InitZapLogger()
 
-	// Define paths
-	TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
+	// // Define paths
+	// TemplatesPath := config.ProjectRootPath + "/app/views/mail/"
 
-	// Load Configs
-	configs := config.Read()
+	// // Load Configs
+	// configs := config.Read()
 
-	// Init MongoDB
-	mongoDB, mongoErr := database.GetMongoDBInstance(
-		database.NewMongoDBConnectionString(
-			configs.Mongo.Host,
-			configs.Mongo.Port,
-			configs.Mongo.Username,
-			configs.Mongo.Password,
-		),
-		configs.Mongo.DBName,
-	)
-	if mongoErr != nil {
-		panic(mongoErr)
-	}
+	// // Init MongoDB
+	// mongoDB, mongoErr := database.GetMongoDBInstance(
+	// 	database.NewMongoDBConnectionString(
+	// 		configs.Mongo.Host,
+	// 		configs.Mongo.Port,
+	// 		configs.Mongo.Username,
+	// 		configs.Mongo.Password,
+	// 	),
+	// 	configs.Mongo.DBName,
+	// )
+	// if mongoErr != nil {
+	// 	panic(mongoErr)
+	// }
 
-	// Init RedisDB
-	redisClient := database.GetRedisDBInstance(configs.Redis)
+	// // Init RedisDB
+	// redisClient := database.GetRedisDBInstance(configs.Redis)
 
-	// Init WebServer
-	app := gin.New()
+	// // Init WebServer
+	// ginEngine := gin.New()
+	// api := ginEngine.Group("/api/v1")
 
-	// Cors
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{configs.App.Server.CORS.AllowOrigins},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Refresh", "Authorization"},
-		ExposeHeaders:    []string{"Refresh", "Authorization"},
-		AllowCredentials: true,
-	}))
+	// // Cors
+	// api.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{configs.App.Server.CORS.AllowOrigins},
+	// 	AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Refresh", "Authorization"},
+	// 	ExposeHeaders:    []string{"Refresh", "Authorization"},
+	// 	AllowCredentials: true,
+	// }))
 
-	// Initializing various services and repositories used in the application
-	session := session.NewSession(logger, redisClient, configs.App.Auth)
-	smsService := sms_service.NewSmsService(logger, &configs.SMS, TemplatesPath)
+	// // Initializing various services and repositories used in the application
+	// session := session.NewSession(logger, redisClient, configs.App.Auth)
+	// smsService := sms_service.NewSmsService(logger, &configs.SMS, TemplatesPath)
 
-	userRepo := userRepository.NewRepository(logger, mongoDB)
-	userService := service.NewUserService(logger, userRepo, session, smsService)
+	// userRepo := userRepository.NewRepository(logger, mongoDB)
+	// userService := service.NewUserService(logger, userRepo, session, smsService)
 
-	chatRepo := chatRepository.NewRepository(logger, mongoDB)
-	chatService := service.NewChatService(logger, chatRepo, userRepo)
+	// chatRepo := chatRepository.NewRepository(logger, mongoDB)
+	// chatService := service.NewChatService(logger, chatRepo, userRepo)
 
-	messageRepo := messageRepository.NewRepository(logger, mongoDB)
-	messageService := service.NewMessageService(logger, messageRepo, chatRepo)
+	// messageRepo := messageRepository.NewRepository(logger, mongoDB)
+	// messageService := service.NewMessageService(logger, messageRepo, chatRepo)
 
-	// Init routes
-	router.NewUserRouter(logger, app.Group("/users"), userService, chatService)
+	// // Init routes
+	// router.NewUserRouter(logger, api.Group("/users"), userService, chatService)
 
-	// Init websocket server
-	websocketAdapter := adapters.NewWebsocketAdapter(logger)
+	// // Init websocket server
+	// websocketAdapter := adapters.NewWebsocketAdapter(logger)
 
-	handlerServices := handlers.HandlerServices{
-		UserService: userService,
-		ChatService: chatService,
-		MsgService:  messageService,
-	}
+	// handlerServices := handlers.HandlerServices{
+	// 	UserService: userService,
+	// 	ChatService: chatService,
+	// 	MsgService:  messageService,
+	// }
 
-	app.GET("/ws", middleware.AuthenticatedMiddleware(userService), router.WebsocketRoute(logger, websocketAdapter, handlerServices))
+	// api.GET("/ws", middleware.AuthenticatedMiddleware(userService), router.WebsocketRoute(logger, websocketAdapter, handlerServices))
 
-	// Everything almost done!
-	err := app.Run(configs.App.HTTP.Address)
-	if err != nil {
-		panic(err)
-	}
+	// // Everything almost done!
+	// err := ginEngine.Run(configs.App.HTTP.Address)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }

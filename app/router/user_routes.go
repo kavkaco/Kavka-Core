@@ -3,19 +3,18 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/controller"
-	"github.com/kavkaco/Kavka-Core/internal/domain/chat"
-	"github.com/kavkaco/Kavka-Core/internal/domain/user"
+	"github.com/kavkaco/Kavka-Core/internal/service"
 	"go.uber.org/zap"
 )
 
 type UserRouter struct {
-	userService user.Service
-	chatService chat.Service
+	userService service.UserService
+	chatService service.ChatService
 	ctrl        *controller.UserController
 	router      *gin.RouterGroup
 }
 
-func NewUserRouter(logger *zap.Logger, router *gin.RouterGroup, userService user.Service, chatService chat.Service) *UserRouter {
+func NewUserRouter(logger *zap.Logger, router *gin.RouterGroup, userService service.UserService, chatService service.ChatService) *UserRouter {
 	ctrl := controller.NewUserController(logger, userService, chatService)
 
 	router.POST("/login", ctrl.HandleLogin)
