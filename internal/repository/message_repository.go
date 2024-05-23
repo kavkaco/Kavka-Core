@@ -10,6 +10,7 @@ import (
 )
 
 type MessageRepository interface {
+	FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error)
 	Create(ctx context.Context, chatID model.ChatID) error
 	FetchMessages(ctx context.Context, chatID model.ChatID) ([]model.Message, error)
 	Insert(ctx context.Context, chatID model.ChatID, message *model.Message) (*model.Message, error)
@@ -23,6 +24,36 @@ type messageRepository struct {
 
 func NewMessageRepository(db *mongo.Database) MessageRepository {
 	return &messageRepository{db.Collection(database.MessagesCollection)}
+}
+
+func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
+	filter := bson.M{"chat_id": chatID}
+
+	result := repo.messagesCollection.FindOne(ctx, filter)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var message *model.Message
+	var messageStore *model.MessageStore
+
+	err := result.Decode(&messageStore)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, m := range messageStore.Messages {
+		if m.MessageID == messageID {
+			message = &m
+			break
+		}
+
+		if i == len(messageStore.Messages)-1 {
+			return nil, ErrMessageNotFound
+		}
+	}
+
+	return message, nil
 }
 
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {
@@ -62,12 +93,16 @@ func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, 
 	filter := bson.M{"chat_id": chatID}
 	update := bson.M{"$push": bson.M{"messages": message}}
 
-	result := repo.messagesCollection.FindOneAndUpdate(ctx, filter, update)
-	if result.Err() != nil {
-		if database.IsRowExistsError(result.Err()) {
+	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		if database.IsRowExistsError(err) {
 			return nil, ErrChatNotFound
 		}
-		return nil, result.Err()
+		return nil, err
+	}
+
+	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
+		return nil, ErrNotModified
 	}
 
 	return message, nil

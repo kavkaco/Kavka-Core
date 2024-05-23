@@ -6,9 +6,7 @@ type Profile struct {
 	Biography     string         `bson:"biography" json:"biography"`
 	ProfilePhotos []ProfilePhoto `bson:"profile_photos" json:"profilePhotos"`
 	Devices       []Device       `bson:"devices" json:"devices"`
-	Contacts      []string       `bson:"contacts" json:"contacts"`
 	BlockedUsers  []string       `bson:"blocked_users" json:"blockedUsers"`
-	Setting       Setting        `bson:"setting" json:"setting"`
 	LastSeen      time.Time      `bson:"last_seen" json:"lastSeen"`
 }
 

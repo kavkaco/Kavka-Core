@@ -36,7 +36,7 @@ func (s *MessageTestSuite) SetupSuite() {
 		Title:       s.lem.Word(1, 10),
 		Username:    s.lem.LastName(),
 		Description: s.lem.Paragraph(1, 2),
-		Owner:       &s.senderID,
+		Owner:       s.senderID,
 		Members:     []model.UserID{s.senderID},
 		Admins:      []model.UserID{s.senderID},
 	})
@@ -74,7 +74,18 @@ func (s *MessageTestSuite) TestB_FetchMessages() {
 	require.Len(s.T(), messages, 1)
 }
 
-func (s *MessageTestSuite) TestC_UpdateTextMessage() {
+func (s *MessageTestSuite) TestC_FindMessage() {
+	ctx := context.TODO()
+
+	message, err := s.repo.FindMessage(ctx, s.chatID, s.savedMessageID)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), message)
+	require.Equal(s.T(), message.MessageID, s.savedMessageID)
+	require.Equal(s.T(), message.SenderID, s.senderID)
+}
+
+func (s *MessageTestSuite) TestD_UpdateTextMessage() {
 	ctx := context.TODO()
 
 	newMessageContent := s.lem.Sentence(1, 2)
@@ -93,7 +104,7 @@ func (s *MessageTestSuite) TestC_UpdateTextMessage() {
 	require.Equal(s.T(), newMessageContent, updatedMessageContent)
 }
 
-func (s *MessageTestSuite) TestD_DeleteMessage() {
+func (s *MessageTestSuite) TestE_DeleteMessage() {
 	ctx := context.TODO()
 
 	err := s.repo.Delete(ctx, s.chatID, s.savedMessageID)

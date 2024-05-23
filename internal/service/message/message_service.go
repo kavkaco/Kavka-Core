@@ -1,110 +1,71 @@
-package service
+package message
 
 import (
 	"context"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.uber.org/zap"
 )
 
 type MessageService interface {
-	InsertTextMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*model.Message, error)
-	DeleteMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error
+	UpdateTextMessage(ctx context.Context, chatID model.ChatID, newMessageContent string) error
+	InsertTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.Message, error)
+	DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) error
 }
 
 type MessageManager struct {
-	logger   *zap.Logger
-	msgRepo  repository.MessageRepository
-	chatRepo repository.ChatRepository
+	messageRepo repository.MessageRepository
+	chatRepo    repository.ChatRepository
 }
 
-func NewMessageService(logger *zap.Logger, msgRepo repository.MessageRepository, chatRepo repository.ChatRepository) MessageService {
-	return &MessageManager{logger, msgRepo, chatRepo}
+func NewMessageService(messageRepo repository.MessageRepository, chatRepo repository.ChatRepository) MessageService {
+	return &MessageManager{messageRepo, chatRepo}
 }
 
-// This function is used to find the chat and check that user has access to send message or not.
-func (s *MessageManager) hasAccessToSendMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(ctx, chatID)
-	if chatErr != nil {
-		return false, chatErr
+func (s *MessageManager) InsertTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.Message, error) {
+	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	if err != nil {
+		return nil, ErrChatNotFound
 	}
 
-	if foundChat.ChatType == chat.TypeDirect {
-		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
-		return hasSide, nil
-	} else if foundChat.ChatType == chat.TypeChannel {
-		chatDetail, err := utils.TypeConverter[chat.ChannelChatDetail](foundChat.ChatDetail)
+	if HasAccessToSendMessage(chat.ChatType, chat.ChatDetail, userID) {
+		messageModel := model.NewMessage(model.TypeTextMessage, model.TextMessage{
+			Data: messageContent,
+		}, userID)
+		message, err := s.messageRepo.Insert(ctx, chatID, messageModel)
 		if err != nil {
-			return false, err
+			return nil, ErrInsertMessage
 		}
 
-		return chatDetail.HasAccessToSendMessage(staticID), nil
-	} else if foundChat.ChatType == chat.TypeGroup {
-		chatDetail, err := utils.TypeConverter[chat.GroupChatDetail](foundChat.ChatDetail)
-		if err != nil {
-			return false, err
-		}
-
-		return chatDetail.HasAccessToSendMessage(staticID), nil
+		return message, nil
 	}
 
-	return false, nil
+	return nil, ErrAccessDenied
 }
 
-// This function is used to find the chat and check that user has access to send message or not.
-func (s *MessageManager) hasAccessToDeleteMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID) (bool, error) {
-	foundChat, chatErr := s.chatRepo.FindByID(ctx, chatID)
-	if chatErr != nil {
-		return false, chatErr
+func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) error {
+	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	if err != nil {
+		return ErrChatNotFound
 	}
 
-	if foundChat.ChatType == chat.TypeDirect {
-		hasSide := foundChat.ChatDetail.(*chat.DirectChatDetail).HasSide(staticID)
-		return hasSide, nil
-	} else if foundChat.ChatType == chat.TypeChannel {
-		chatDetail, err := utils.TypeConverter[chat.ChannelChatDetail](foundChat.ChatDetail)
-		if err != nil {
-			return false, err
-		}
-
-		return chatDetail.HasAccessToDeleteMessage(staticID), nil
-	} else if foundChat.ChatType == chat.TypeGroup {
-		// Get the message from messages_collection
-		chatDetail, err := utils.TypeConverter[chat.GroupChatDetail](foundChat.ChatDetail)
-		if err != nil {
-			return false, err
-		}
-
-		// FIXME
-		println(chatDetail)
-		// return chatDetail.HasAccessToDeleteMessage(staticID, msg), nil
+	message, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
+	if err != nil {
+		return ErrMessageNotFound
 	}
 
-	return false, nil
+	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {
+		err := s.messageRepo.Delete(ctx, chatID, messageID)
+		if err != nil {
+			return ErrDeleteMessage
+		}
+	}
+
+	return ErrAccessDenied
 }
 
-func (s *MessageManager) InsertTextMessage(ctx context.Context, chatID primitive.ObjectID, staticID primitive.ObjectID, messageContent string) (*model.Message, error) {
-	// hasAccess, hasAccessErr := s.hasAccessToSendMessage(ctx, chatID, staticID)
-	// if hasAccessErr != nil {
-	// 	return nil, hasAccessErr
-	// }
-
-	// if hasAccess {
-	// 	msg := model.NewMessage(staticID, model.TypeTextMessage, &model.TextMessage{
-	// 		Data: messageContent,
-	// 	})
-
-	// 	return s.msgRepo.Insert(ctx, chatID, msg)
-	// }
-
-	// return nil, messageRepository.ErrNoAccess
-	return nil, nil
-}
-
-func (s *MessageManager) DeleteMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) error {
-	return s.msgRepo.Delete(ctx, chatID, messageID)
+// UpdateTextMessage implements MessageService.
+func (s *MessageManager) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) error {
+	panic("unimplemented")
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	"go.uber.org/zap"
 )
 
 type ChatService interface {
@@ -21,7 +20,7 @@ type ChatManager struct {
 	userRepo repository.UserRepository
 }
 
-func NewChatService(logger *zap.Logger, chatRepo repository.ChatRepository, userRepo repository.UserRepository) ChatService {
+func NewChatService(chatRepo repository.ChatRepository, userRepo repository.UserRepository) ChatService {
 	return &ChatManager{chatRepo, userRepo}
 }
 
@@ -35,6 +34,7 @@ func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.
 	return chat, nil
 }
 
+// get the chats that belongs to user
 func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, error) {
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
@@ -79,7 +79,7 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 		Members:     []model.UserID{userID},
 		Admins:      []model.UserID{userID},
 		Description: description,
-		Owner:       &userID,
+		Owner:       userID,
 	})
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
@@ -91,13 +91,13 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 }
 
 func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error) {
-	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
+	chatModel := model.NewChat(model.TypeChannel, &model.ChannelChatDetail{
 		Title:       title,
 		Username:    username,
 		Members:     []model.UserID{userID},
 		Admins:      []model.UserID{userID},
 		Description: description,
-		Owner:       &userID,
+		Owner:       userID,
 	})
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)

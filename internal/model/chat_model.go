@@ -34,7 +34,7 @@ type ChannelChatDetail struct {
 	Title        string   `bson:"title" json:"title"`
 	Members      []UserID `bson:"members,omitempty" json:"members"`
 	Admins       []UserID `bson:"admins,omitempty" json:"admins"`
-	Owner        *UserID  `bson:"owner,omitempty"         json:"owner"`
+	Owner        UserID   `bson:"owner,omitempty"         json:"owner"`
 	RemovedUsers []UserID `bson:"removed_users,omitempty" json:"removedUsers"`
 	Username     string   `bson:"username,omitempty" json:"username"`
 	Description  string   `bson:"description,omitempty" json:"description"`
@@ -44,7 +44,7 @@ type GroupChatDetail struct {
 	Title        string   `bson:"title" json:"title"`
 	Members      []UserID `bson:"members,omitempty" json:"members"`
 	Admins       []UserID `bson:"admins,omitempty" json:"admins"`
-	Owner        *UserID  `bson:"owner,omitempty"         json:"owner"`
+	Owner        UserID   `bson:"owner,omitempty"         json:"owner"`
 	RemovedUsers []UserID `bson:"removed_users,omitempty" json:"removedUsers"`
 	Username     string   `bson:"username,omitempty" json:"username"`
 	Description  string   `bson:"description,omitempty" json:"description"`

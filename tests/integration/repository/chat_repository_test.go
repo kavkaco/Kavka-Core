@@ -44,7 +44,7 @@ func (s *ChatTestSuite) TestCreateChannel() {
 		Username:    s.lem.LastName(),
 		Members:     []model.UserID{s.userID},
 		Admins:      []model.UserID{s.userID},
-		Owner:       &s.userID,
+		Owner:       s.userID,
 		Description: s.lem.Paragraph(1, 4),
 	}
 	chatModel := model.NewChat(model.TypeChannel, chatDetail)
@@ -74,7 +74,7 @@ func (s *ChatTestSuite) TestCreateGroup() {
 		Username:    s.lem.LastName(),
 		Members:     []model.UserID{s.userID},
 		Admins:      []model.UserID{s.userID},
-		Owner:       &s.userID,
+		Owner:       s.userID,
 		Description: s.lem.Paragraph(1, 4),
 	}
 	chatModel := model.NewChat(model.TypeGroup, chatDetail)
