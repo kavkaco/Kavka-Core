@@ -13,21 +13,18 @@ func HasAccessToSendMessage(chatType string, detail interface{}, userID model.Us
 		if err != nil {
 			return false
 		}
-
 		return ha_SendMessage_Direct(detail, userID)
 	} else if chatType == model.TypeChannel {
 		detail, err := utils.TypeConverter[model.ChannelChatDetail](detail)
 		if err != nil {
 			return false
 		}
-
 		return ha_SendMessage_Channel(detail, userID)
 	} else if chatType == model.TypeGroup {
 		detail, err := utils.TypeConverter[model.GroupChatDetail](detail)
 		if err != nil {
 			return false
 		}
-
 		return ha_SendMessage_Group(detail, userID)
 	}
 
@@ -35,30 +32,27 @@ func HasAccessToSendMessage(chatType string, detail interface{}, userID model.Us
 }
 
 func HasAccessToDeleteMessage(chatType string, detail interface{}, userID model.UserID, message model.Message) bool {
-	return true
-	// if chatType == model.TypeDirect {
-	// 	detail, err := utils.TypeConverter[model.DirectChatDetail](detail)
-	// 	if err != nil {
-	// 		return false
-	// 	}
-	// 	return ha_DeleteMessage_Direct(detail, userID, &message)
-	// } else if chatType == model.TypeChannel {
-	// 	detail, err := utils.TypeConverter[model.ChannelChatDetail](detail)
-	// 	if err != nil {
-	// 		return false
-	// 	}
+	if chatType == model.TypeDirect {
+		detail, err := utils.TypeConverter[model.DirectChatDetail](detail)
+		if err != nil {
+			return false
+		}
+		return ha_DeleteMessage_Direct(detail, userID, &message)
+	} else if chatType == model.TypeChannel {
+		detail, err := utils.TypeConverter[model.ChannelChatDetail](detail)
+		if err != nil {
+			return false
+		}
+		return ha_DeleteMessage_Channel(detail, userID, &message)
+	} else if chatType == model.TypeGroup {
+		detail, err := utils.TypeConverter[model.GroupChatDetail](detail)
+		if err != nil {
+			return false
+		}
+		return ha_DeleteMessage_Group(detail, userID, &message)
+	}
 
-	// 	return ha_DeleteMessage_Channel(detail, userID, &message)
-	// } else if chatType == model.TypeGroup {
-	// 	detail, err := utils.TypeConverter[model.GroupChatDetail](detail)
-	// 	if err != nil {
-	// 		return false
-	// 	}
-
-	// 	return ha_DeleteMessage_Group(detail, userID, &message)
-	// }
-
-	// return false
+	return false
 }
 
 // Being a member of a group is enough to have access to send the message.
@@ -94,6 +88,6 @@ func ha_DeleteMessage_Channel(detail *model.ChannelChatDetail, userID model.User
 }
 
 // Both users can delete their message in direct chat
-func ha_DeleteMessage_Direct(_ *model.DirectChatDetail, _ model.UserID, _ *model.Message) bool {
-	return true
+func ha_DeleteMessage_Direct(detail *model.DirectChatDetail, userID model.UserID, _ *model.Message) bool {
+	return detail.HasSide(userID)
 }

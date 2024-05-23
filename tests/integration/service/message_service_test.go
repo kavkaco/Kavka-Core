@@ -54,7 +54,7 @@ func (s *MessageTestSuite) SetupSuite() {
 	s.chatID = chat.ChatID
 }
 
-func (s *MessageTestSuite) TestInsertTextMessage() {
+func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	ctx := context.TODO()
 
 	messageContent := s.lem.Paragraph(1, 20)
@@ -70,7 +70,7 @@ func (s *MessageTestSuite) TestInsertTextMessage() {
 	s.savedMessageID = message.MessageID
 }
 
-func (s *MessageTestSuite) TestDeleteMessage() {
+func (s *MessageTestSuite) TestB_DeleteMessage() {
 	ctx := context.TODO()
 
 	err := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)

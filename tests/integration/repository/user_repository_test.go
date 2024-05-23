@@ -90,6 +90,27 @@ func (s *UserTestSuite) TestD_AddToUserChats() {
 	require.Len(s.T(), foundUser.ChatsListIDs, len(s.savedUser.ChatsListIDs)+1)
 }
 
+func (s *UserTestSuite) TestE_Update() {
+	ctx := context.TODO()
+
+	name := s.lem.FirstName(2)
+	lastName := s.lem.LastName()
+	username := s.lem.Word(1, 1)
+	biography := s.lem.Sentence(1, 3)
+
+	err := s.repo.Update(ctx, s.savedUser.UserID, name, lastName, username, biography)
+	require.NoError(s.T(), err)
+
+	// Get the user again to be sure it's updated
+	user, err := s.repo.FindByUserID(ctx, s.savedUser.UserID)
+	require.NoError(s.T(), err)
+
+	require.Equal(s.T(), user.Name, name)
+	require.Equal(s.T(), user.LastName, lastName)
+	require.Equal(s.T(), user.Username, username)
+	require.Equal(s.T(), user.Biography, biography)
+}
+
 func TestUserSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(UserTestSuite))

@@ -10,14 +10,14 @@ import (
 type (
 	UserID = string
 	User   struct {
-		UserID       UserID      `bson:"user_id" json:"user_id"`
-		Name         string      `bson:"name" json:"name"`
-		LastName     string      `bson:"last_name" json:"lastName"`
-		Email        string      `bson:"email" json:"email"`
-		Username     string      `bson:"username" json:"username"`
-		Profile      Profile     `bson:"profile" json:"profile"`
-		OnlineStatus interface{} `bson:"online_status" json:"onlineStatus"`
-		ChatsListIDs []ChatID    `bson:"chats_list_ids"`
+		UserID        UserID         `bson:"user_id" json:"user_id"`
+		Name          string         `bson:"name" json:"name"`
+		LastName      string         `bson:"last_name" json:"lastName"`
+		Email         string         `bson:"email" json:"email"`
+		Username      string         `bson:"username" json:"username"`
+		ChatsListIDs  []ChatID       `bson:"chats_list_ids"`
+		Biography     string         `bson:"biography" json:"biography"`
+		ProfilePhotos []ProfilePhoto `bson:"profile_photos" json:"profilePhotos"`
 	}
 )
 

@@ -3,6 +3,8 @@ package auth
 import "errors"
 
 var (
+	ErrInvalidValidation = errors.New("failed to validate arguments")
+
 	ErrInvalidPassword        = errors.New("invalid password")
 	ErrInvalidOtpCode         = errors.New("invalid otp code")
 	ErrUserNotFound           = errors.New("user not found")
@@ -15,7 +17,6 @@ var (
 	ErrHashingPassword        = errors.New("failed to hash password")
 	ErrCreateAuthStore        = errors.New("failed to to create auth store")
 	ErrCreateUser             = errors.New("failed to to create user")
-	ErrInvalidValidation      = errors.New("failed to validate arguments")
 	ErrCreateEmailToken       = errors.New("failed to create email token")
 	ErrDestroyToken           = errors.New("failed to destroy token")
 	ErrChangePassword         = errors.New("failed to change password")
