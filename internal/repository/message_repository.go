@@ -34,7 +34,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		return nil, result.Err()
 	}
 
-	var message *model.Message
+	var message model.Message
 	var messageStore *model.MessageStore
 
 	err := result.Decode(&messageStore)
@@ -44,7 +44,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 
 	for i, m := range messageStore.Messages {
 		if m.MessageID == messageID {
-			message = &m
+			message = m
 			break
 		}
 
@@ -53,7 +53,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		}
 	}
 
-	return message, nil
+	return &message, nil
 }
 
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {

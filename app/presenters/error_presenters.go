@@ -24,15 +24,13 @@ type CodeMessageDto struct {
 	Message string `json:"message"`
 }
 
-func BadRequestResponse(ctx *gin.Context) error {
+func BadRequestResponse(ctx *gin.Context) {
 	code := http.StatusBadRequest
 
 	ctx.JSON(http.StatusBadRequest, CodeMessageDto{
 		Code:    code,
 		Message: "bad request",
 	})
-
-	return nil
 }
 
 func ErrorResponse(ctx *gin.Context, err error) {

@@ -143,5 +143,5 @@ func (t *authManager) SetOTP(ctx context.Context, uniqueID string, expr time.Dur
 		return "", err
 	}
 
-	return string(otp), nil
+	return otp, nil
 }

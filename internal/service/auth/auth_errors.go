@@ -22,4 +22,5 @@ var (
 	ErrChangePassword           = errors.New("failed to change password")
 	ErrClearFailedLoginAttempts = errors.New("failed to clear failed login attempts")
 	ErrUnlockAccount            = errors.New("failed to unlock account")
+	ErrLockAccount              = errors.New("failed to lock account")
 )

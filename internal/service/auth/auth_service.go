@@ -123,7 +123,10 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 		return ErrVerifyEmail
 	}
 
-	a.authManager.Destroy(ctx, verifyEmailToken)
+	err = a.authManager.Destroy(ctx, verifyEmailToken)
+	if err != nil {
+		return ErrDestroyToken
+	}
 
 	return nil
 }
@@ -149,13 +152,13 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 	}
 
 	// Check the expiration of account locked time
-	if auth.AccountLockedUntil != 0 {
+	if auth.AccountLockedUntil != 0 { //nolint
 		now := time.Now()
 		lockTime := time.Unix(auth.AccountLockedUntil, 0)
 
 		// End of account lock!
 		if now.After(lockTime) {
-			err := a.authRepo.UnlockAccount(ctx, auth.UserID)
+			err = a.authRepo.UnlockAccount(ctx, auth.UserID)
 			if err != nil {
 				return nil, "", "", ErrUnlockAccount
 			}
@@ -176,13 +179,16 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 	}
 
 	if auth.FailedLoginAttempts+1 == MaximumFailedLoginAttempts {
-		a.authRepo.LockAccount(ctx, auth.UserID, LockAccountDuration)
+		err = a.authRepo.LockAccount(ctx, auth.UserID, LockAccountDuration)
+		if err != nil {
+			return nil, "", "", ErrLockAccount
+		}
 	}
 
 	validPassword := a.hashManager.CheckPasswordHash(password, auth.PasswordHash)
 	if !validPassword {
 		// Increment the filed login attempts
-		err := a.authRepo.IncrementFailedLoginAttempts(ctx, user.UserID)
+		err = a.authRepo.IncrementFailedLoginAttempts(ctx, user.UserID)
 		if err != nil {
 			return nil, "", "", ErrInvalidEmailOrPassword
 		}

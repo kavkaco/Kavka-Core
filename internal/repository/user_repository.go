@@ -6,7 +6,6 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/model"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

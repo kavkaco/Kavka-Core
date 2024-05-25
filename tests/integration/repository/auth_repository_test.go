@@ -82,7 +82,7 @@ func (s *AuthTestSuite) TestD_VerifyEmail() {
 func (s *AuthTestSuite) TestE_ChangePassword() {
 	ctx := context.TODO()
 
-	newPlainPassword := "kavkaco-new"
+	newPlainPassword := "kavkaco-new" // nolint
 	newPasswordHash, err := s.hashManager.HashPassword(newPlainPassword)
 	require.NoError(s.T(), err)
 

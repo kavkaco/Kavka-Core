@@ -8,19 +8,20 @@ import (
 )
 
 func HasAccessToSendMessage(chatType string, detail interface{}, userID model.UserID) bool {
-	if chatType == model.TypeDirect {
+	switch chatType {
+	case model.TypeDirect:
 		detail, err := utils.TypeConverter[model.DirectChatDetail](detail)
 		if err != nil {
 			return false
 		}
 		return ha_SendMessage_Direct(detail, userID)
-	} else if chatType == model.TypeChannel {
+	case model.TypeChannel:
 		detail, err := utils.TypeConverter[model.ChannelChatDetail](detail)
 		if err != nil {
 			return false
 		}
 		return ha_SendMessage_Channel(detail, userID)
-	} else if chatType == model.TypeGroup {
+	case model.TypeGroup:
 		detail, err := utils.TypeConverter[model.GroupChatDetail](detail)
 		if err != nil {
 			return false
@@ -32,19 +33,20 @@ func HasAccessToSendMessage(chatType string, detail interface{}, userID model.Us
 }
 
 func HasAccessToDeleteMessage(chatType string, detail interface{}, userID model.UserID, message model.Message) bool {
-	if chatType == model.TypeDirect {
+	switch chatType {
+	case model.TypeDirect:
 		detail, err := utils.TypeConverter[model.DirectChatDetail](detail)
 		if err != nil {
 			return false
 		}
 		return ha_DeleteMessage_Direct(detail, userID, &message)
-	} else if chatType == model.TypeChannel {
+	case model.TypeChannel:
 		detail, err := utils.TypeConverter[model.ChannelChatDetail](detail)
 		if err != nil {
 			return false
 		}
 		return ha_DeleteMessage_Channel(detail, userID, &message)
-	} else if chatType == model.TypeGroup {
+	case model.TypeGroup:
 		detail, err := utils.TypeConverter[model.GroupChatDetail](detail)
 		if err != nil {
 			return false
