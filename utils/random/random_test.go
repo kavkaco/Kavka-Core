@@ -3,12 +3,12 @@ package random
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateOTP(t *testing.T) {
 	otp := GenerateOTP()
-	assert.NotZero(t, otp)
+	require.NotZero(t, otp)
 
 	t.Log(otp)
 }

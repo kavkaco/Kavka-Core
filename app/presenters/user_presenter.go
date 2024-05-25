@@ -4,48 +4,44 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
-	"github.com/kavkaco/Kavka-Core/internal/model/user"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 )
 
-// the data and information that would be send to user after authentication.
-// the messages of chats must not be sent
-
-type UserInfoDto struct {
+type UserDto struct {
 	Message   string       `json:"message"`
 	Code      int          `json:"code"`
-	UserInfo  *user.User   `json:"user"`
-	UserChats []chat.ChatC `json:"chats"`
+	User      *model.User  `json:"user"`
+	UserChats []model.Chat `json:"chats"`
 }
 
 func AccessDenied(ctx *gin.Context) {
 	code := http.StatusForbidden
 
-	ctx.JSON(code, SimpleMessageDto{
+	ctx.JSON(code, CodeMessageDto{
 		Code:    code,
-		Message: "Forbidden",
+		Message: "forbidden",
 	})
 }
 
-func ResponseUserInfo(ctx *gin.Context, userInfo *user.User, userChats []chat.ChatC) error {
+func UserResponse(ctx *gin.Context, user *model.User, userChats []model.Chat) error {
 	// Marshal all of the chats into json using by ChatAsJson function
-	marshaledChatsJson := []chat.ChatC{}
+	marshaledChatsJson := []model.Chat{}
 
 	for _, v := range userChats {
-		chatJson, err := ChatAsJSON(v, userInfo.StaticID)
+		chatJson, err := ChatAsJSON(v, user.UserID)
 		if err != nil {
 			return err
 		}
 
-		marshaledChatsJson = append(marshaledChatsJson, chatJson.(chat.ChatC))
+		marshaledChatsJson = append(marshaledChatsJson, chatJson.(model.Chat))
 	}
 
 	// Response JSON
 
-	ctx.JSON(http.StatusOK, UserInfoDto{
-		Message:   "Success",
+	ctx.JSON(http.StatusOK, UserDto{
+		Message:   "user found",
 		Code:      200,
-		UserInfo:  userInfo,
+		User:      user,
 		UserChats: marshaledChatsJson,
 	})
 

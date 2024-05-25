@@ -23,39 +23,41 @@ func NewChatsHandler(args HandlerArgs) (ok bool, err error) {
 	return false, nil
 }
 
+// FIXME
 func CreateDirect(event string, args HandlerArgs) (bool, error) {
-	staticID := args.Message.Data["static_id"]
+	panic("not implemented")
 
-	staticID, err := primitive.ObjectIDFromHex(staticID.(string))
-	if err != nil {
-		return false, err
-	}
+	// 	userID := args.Message.Data["user_id"]
 
-	_, err = args.Services.ChatService.CreateDirect(args.UserStaticID, staticID.(primitive.ObjectID))
-	if err != nil {
-		return false, err
-	}
+	// 	userID, err := primitive.ObjectIDFromHex(userID.(string))
+	// 	if err != nil {
+	// 		return false, err
+	// 	}
 
-	// FIXME
-	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+	// 	_, err = args.Services.ChatService.CreateDirect(args.Ctx, args.UserID, userID)
+	// 	if err != nil {
+	// 		return false, err
+	// 	}
 
-	return true, nil
+	// 	// err = args.conn.WriteJSON(presenters.ChatAsJSON(event, chat))
+
+	// return true, nil
 }
 
 func GetChat(event string, args HandlerArgs) (bool, error) {
-	staticID := args.Message.Data["static_id"]
+	chatID := args.Message.Data["static_id"]
 
-	staticID, err := primitive.ObjectIDFromHex(staticID.(string))
+	chatID, err := primitive.ObjectIDFromHex(chatID.(string))
 	if err != nil {
 		return false, err
 	}
 
-	foundChat, err := args.Services.ChatService.GetChat(staticID.(primitive.ObjectID))
+	foundChat, err := args.Services.ChatService.GetChat(args.Ctx, chatID.(primitive.ObjectID))
 	if err != nil {
 		return false, err
 	}
 
-	chatJson, err := presenters.ChatAsJSON(*foundChat, args.UserStaticID)
+	chatJson, err := presenters.ChatAsJSON(*foundChat, args.UserID)
 	if err != nil {
 		return false, err
 	}
@@ -78,7 +80,7 @@ func CreateGroup(event string, args HandlerArgs) (bool, error) {
 	description := args.Message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		_, err := args.Services.ChatService.CreateGroup(args.UserStaticID, title.(string), username.(string), description.(string))
+		_, err := args.Services.ChatService.CreateGroup(args.Ctx, args.UserID, title.(string), username.(string), description.(string))
 		if err != nil {
 			return false, err
 		}
@@ -98,7 +100,7 @@ func CreateChannel(event string, args HandlerArgs) (bool, error) {
 	description := args.Message.Data["description"]
 
 	if title != nil && username != nil && description != nil {
-		_, err := args.Services.ChatService.CreateChannel(args.UserStaticID, title.(string), username.(string), description.(string))
+		_, err := args.Services.ChatService.CreateChannel(args.Ctx, args.UserID, title.(string), username.(string), description.(string))
 		if err != nil {
 			return false, err
 		}

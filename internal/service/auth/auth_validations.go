@@ -22,7 +22,7 @@ type LoginValidation struct {
 }
 
 type ChangePasswordValidation struct {
-	Email       string `validate:"required"`
+	AccessToken string `validate:"required"`
 	OldPassword string `validate:"required"`
 	NewPassword string `validate:"required"`
 }

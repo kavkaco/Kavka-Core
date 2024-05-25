@@ -6,5 +6,5 @@ import (
 )
 
 func ErrorHandler(ctx *gin.Context, err error) {
-	presenters.ResponseError(ctx, err)
+	presenters.ErrorResponse(ctx, err)
 }

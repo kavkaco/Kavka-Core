@@ -1,27 +1,26 @@
 package middleware
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
-	"github.com/kavkaco/Kavka-Core/internal/service"
-	"github.com/kavkaco/Kavka-Core/utils/bearer"
+	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 )
 
-func AuthenticatedMiddleware(userService service.UserService) func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
-		accessToken, bearerOk := bearer.AccessToken(ctx)
+func AuthenticatedMiddleware(ctx context.Context, authService auth.AuthService) func(ctx *gin.Context) {
+	return func(ginCtx *gin.Context) {
+		accessToken := ginCtx.GetHeader(presenters.AccessTokenHeaderName)
 
-		if bearerOk {
-			userInfo, err := userService.Authenticate(accessToken)
-			if err != nil {
-				presenters.AccessDenied(ctx)
-				return
-			}
-
-			ctx.Set("user_static_id", userInfo.StaticID.Hex())
-
-			// Process request
-			ctx.Next()
+		user, err := authService.Authenticate(ctx, accessToken)
+		if err != nil {
+			presenters.AccessDenied(ginCtx)
+			return
 		}
+
+		ginCtx.Set("userID", user.UserID)
+
+		// Process request
+		ginCtx.Next()
 	}
 }

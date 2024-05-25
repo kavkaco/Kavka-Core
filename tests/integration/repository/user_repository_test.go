@@ -27,7 +27,7 @@ func (s *UserTestSuite) SetupSuite() {
 func (s *UserTestSuite) TestA_Create() {
 	ctx := context.TODO()
 
-	var chatsListIDs = []model.ChatID{
+	chatsListIDs := []model.ChatID{
 		primitive.NewObjectID(),
 		primitive.NewObjectID(),
 		primitive.NewObjectID(),

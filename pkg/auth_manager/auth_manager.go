@@ -40,9 +40,7 @@ type AuthManager interface {
 }
 
 type AuthManagerOpts struct {
-	RefreshTokenExpiration time.Duration
-	AccessTokenExpiration  time.Duration
-	PrivateKey             string
+	PrivateKey string
 }
 
 // Used as jwt claims

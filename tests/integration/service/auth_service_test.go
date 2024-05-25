@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"testing"
-	"time"
 
 	lorem "github.com/bozaro/golorem"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -32,9 +31,7 @@ func (s *AuthTestSuite) SetupSuite() {
 	authRepo := repository.NewAuthRepository(db)
 	userRepo := repository.NewUserRepository(db)
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
-		RefreshTokenExpiration: time.Second * 10,
-		AccessTokenExpiration:  time.Second * 3,
-		PrivateKey:             "private-key",
+		PrivateKey: "private-key",
 	})
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
@@ -90,7 +87,7 @@ func (s *AuthTestSuite) TestD_ChangePassword() {
 
 	newPassword := "password-changed"
 
-	err := s.service.ChangePassword(ctx, s.email, s.password, newPassword)
+	err := s.service.ChangePassword(ctx, s.accessToken, s.password, newPassword)
 	require.NoError(s.T(), err)
 
 	// Login again with new password to be sure that's changed!

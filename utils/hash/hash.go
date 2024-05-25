@@ -17,19 +17,19 @@ var (
 )
 
 type HashParams struct {
-	memory      uint32
-	iterations  uint32
-	parallelism uint8
-	saltLength  uint32
-	keyLength   uint32
+	Memory      uint32
+	Iterations  uint32
+	Parallelism uint8
+	SaltLength  uint32
+	KeyLength   uint32
 }
 
 var DefaultHashParams = &HashParams{
-	memory:      64 * 1024,
-	iterations:  10,
-	parallelism: 2,
-	saltLength:  16,
-	keyLength:   32,
+	Memory:      8 * 1024,
+	Iterations:  3,
+	Parallelism: 4,
+	SaltLength:  16,
+	KeyLength:   32,
 }
 
 type HashManager struct {
@@ -41,17 +41,17 @@ func NewHashManager(params *HashParams) *HashManager {
 }
 
 func (h *HashManager) HashPassword(password string) (hashedPassword string, err error) {
-	salt, err := h.generateRandomBytes(h.params.saltLength)
+	salt, err := h.generateRandomBytes(h.params.SaltLength)
 	if err != nil {
 		return "", err
 	}
 
-	hash := argon2.IDKey([]byte(password), salt, h.params.iterations, h.params.memory, h.params.parallelism, h.params.keyLength)
+	hash := argon2.IDKey([]byte(password), salt, h.params.Iterations, h.params.Memory, h.params.Parallelism, h.params.KeyLength)
 
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 
-	hashedPassword = fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, h.params.memory, h.params.iterations, h.params.parallelism, b64Salt, b64Hash)
+	hashedPassword = fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, h.params.Memory, h.params.Iterations, h.params.Parallelism, b64Salt, b64Hash)
 
 	return hashedPassword, nil
 }
@@ -64,7 +64,7 @@ func (h *HashManager) CheckPasswordHash(password, hashedPassword string) bool {
 		return false
 	}
 
-	otherHash := argon2.IDKey([]byte(password), salt, p.iterations, p.memory, p.parallelism, p.keyLength)
+	otherHash := argon2.IDKey([]byte(password), salt, p.Iterations, p.Memory, p.Parallelism, p.KeyLength)
 
 	return subtle.ConstantTimeCompare(hash, otherHash) == 1
 }
@@ -95,7 +95,7 @@ func (h *HashManager) decodeHash(encodedHash string) (params *HashParams, salt, 
 	}
 
 	p := &HashParams{}
-	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.memory, &p.iterations, &p.parallelism)
+	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Iterations, &p.Parallelism)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -104,13 +104,13 @@ func (h *HashManager) decodeHash(encodedHash string) (params *HashParams, salt, 
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	p.saltLength = uint32(len(salt))
+	p.SaltLength = uint32(len(salt))
 
 	hash, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	p.keyLength = uint32(len(hash))
+	p.KeyLength = uint32(len(hash))
 
 	return p, salt, hash, nil
 }

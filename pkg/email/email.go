@@ -1,11 +1,7 @@
 package email
 
 import (
-	"bytes"
 	"fmt"
-	"os"
-	"strings"
-	"text/template"
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"go.uber.org/zap"
@@ -14,41 +10,25 @@ import (
 const TEMPLATE_FORMAT = "txt"
 
 type EmailOtp struct {
-	logger        *zap.Logger
-	config        *config.Email
-	templatesPath string
+	Logger        *zap.Logger
+	Config        *config.Email
+	TemplatesPath string
 }
 
 func NewEmailService(logger *zap.Logger, configs *config.Email, templatesPath string) *EmailOtp {
 	return &EmailOtp{logger, configs, templatesPath}
 }
 
-func (s *EmailOtp) SendEmail(body string, receivers []string) error {
+func (s *EmailOtp) SendEmail(template string, receivers []string, args interface{}) error {
 	if config.CurrentEnv == config.Development {
 		fmt.Println("------ Email Sent ------")
-		fmt.Printf("%s\n", strings.TrimSpace(body))
+		fmt.Println(args)
 		fmt.Println("-----------------------")
 	}
 
 	return nil
 }
 
-// Parses and returns the template.
 func (s *EmailOtp) Template(name string, args interface{}) (string, error) {
-	filename := fmt.Sprintf("%s/%s.%s", s.templatesPath, name, TEMPLATE_FORMAT)
-
-	fileData, readErr := os.ReadFile(filename)
-	if readErr != nil {
-		return "", readErr
-	}
-
-	renderedFile := new(bytes.Buffer)
-
-	t := template.Must(template.New(name).Parse(string(fileData)))
-	err := t.Execute(renderedFile, args)
-	if err != nil {
-		return "", err
-	}
-
-	return renderedFile.String(), nil
+	panic("not implemented")
 }

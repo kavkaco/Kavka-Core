@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -13,19 +14,22 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 )
 
-const ResetPasswordTokenExpr = time.Minute * 10
-const VerifyEmailTokenExpr = time.Minute * 5
-const MaximumFailedLoginAttempts = 5
-const AccessTokenExpr = time.Hour * 24 * 2   // 2 days
-const RefreshTokenExpr = time.Hour * 24 * 14 // 2 weeks
+const (
+	ResetPasswordTokenExpr     = time.Minute * 10    // 10 minutes
+	VerifyEmailTokenExpr       = time.Minute * 5     // 5 minutes
+	AccessTokenExpr            = time.Hour * 24 * 2  // 2 days
+	RefreshTokenExpr           = time.Hour * 24 * 14 // 2 weeks
+	LockAccountDuration        = time.Second * 5
+	MaximumFailedLoginAttempts = 5
+)
 
 type AuthService interface {
 	Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, _ error)
 	Register(ctx context.Context, name string, lastName string, username string, email string, password string) (user *model.User, verifyEmailToken string, err error)
-	VerifyEmail(ctx context.Context, email string) error
-	SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, err error)
+	VerifyEmail(ctx context.Context, verifyEmailToken string) error
+	SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, _ error)
 	SubmitResetPassword(ctx context.Context, token string, newPassword string) error
-	ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) error
+	ChangePassword(ctx context.Context, accessToken string, oldPassword string, newPassword string) error
 	Authenticate(ctx context.Context, accessToken string) (*model.User, error)
 	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, error)
 }
@@ -51,7 +55,9 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 
 	userModel := model.NewUser(name, lastName, email, username)
 	savedUser, err := a.userRepo.Create(ctx, userModel)
-	if err != nil {
+	if errors.Is(err, repository.ErrEmailAlreadyTaken) {
+		return nil, "", repository.ErrEmailAlreadyTaken
+	} else if err != nil {
 		return nil, "", ErrCreateUser
 	}
 
@@ -117,6 +123,8 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 		return ErrVerifyEmail
 	}
 
+	a.authManager.Destroy(ctx, verifyEmailToken)
+
 	return nil
 }
 
@@ -140,8 +148,35 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", ErrEmailNotVerified
 	}
 
-	if auth.FailedLoginAttempts >= MaximumFailedLoginAttempts {
-		return nil, "", "", fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil.String())
+	// Check the expiration of account locked time
+	if auth.AccountLockedUntil != 0 {
+		now := time.Now()
+		lockTime := time.Unix(auth.AccountLockedUntil, 0)
+
+		// End of account lock!
+		if now.After(lockTime) {
+			err := a.authRepo.UnlockAccount(ctx, auth.UserID)
+			if err != nil {
+				return nil, "", "", ErrUnlockAccount
+			}
+
+			err = a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID)
+			if err != nil {
+				return nil, "", "", ErrClearFailedLoginAttempts
+			}
+
+			auth.AccountLockedUntil = 0
+		}
+	}
+
+	// Account is still locked
+	if auth.AccountLockedUntil != 0 {
+		lockTime := time.Unix(auth.AccountLockedUntil, 0)
+		return nil, "", "", fmt.Errorf("%w until %v", ErrAccountLocked, lockTime)
+	}
+
+	if auth.FailedLoginAttempts+1 == MaximumFailedLoginAttempts {
+		a.authRepo.LockAccount(ctx, auth.UserID, LockAccountDuration)
 	}
 
 	validPassword := a.hashManager.CheckPasswordHash(password, auth.PasswordHash)
@@ -166,18 +201,23 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", ErrGenerateToken
 	}
 
+	err = a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID)
+	if err != nil {
+		return nil, "", "", ErrClearFailedLoginAttempts
+	}
+
 	return user, accessToken, refreshToken, nil
 }
 
-func (a *AuthManager) ChangePassword(ctx context.Context, email string, oldPassword string, newPassword string) error {
-	err := a.validator.Struct(ChangePasswordValidation{email, oldPassword, newPassword})
+func (a *AuthManager) ChangePassword(ctx context.Context, accessToken string, oldPassword string, newPassword string) error {
+	err := a.validator.Struct(ChangePasswordValidation{accessToken, oldPassword, newPassword})
 	if err != nil {
 		return fmt.Errorf("%w: %v", ErrInvalidValidation, err)
 	}
 
-	user, err := a.userRepo.FindByEmail(ctx, email)
+	user, err := a.Authenticate(ctx, accessToken)
 	if err != nil {
-		return ErrUserNotFound
+		return err
 	}
 
 	auth, err := a.authRepo.GetUserAuth(ctx, user.UserID)
@@ -210,8 +250,13 @@ func (a *AuthManager) RefreshToken(ctx context.Context, refreshToken string, acc
 		return "", fmt.Errorf("%w: %v", ErrInvalidValidation, err)
 	}
 
-	// Let's check that refresh token not be invalid or expired
+	// Let's check that tokens not be invalid or expired
 	rftClaims, err := a.authManager.DecodeToken(ctx, refreshToken, auth_manager.RefreshToken)
+	if err != nil {
+		return "", ErrAccessDenied
+	}
+
+	_, err = a.authManager.DecodeToken(ctx, accessToken, auth_manager.AccessToken)
 	if err != nil {
 		return "", ErrAccessDenied
 	}
@@ -259,7 +304,7 @@ func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email s
 	}
 
 	if auth.FailedLoginAttempts >= MaximumFailedLoginAttempts {
-		return "", 0, fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil.String())
+		return "", 0, fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil)
 	}
 
 	resetPasswordToken, err := a.authManager.GenerateToken(ctx, auth_manager.ResetPassword, auth_manager.NewTokenClaims(auth.UserID, auth_manager.ResetPassword), ResetPasswordTokenExpr)

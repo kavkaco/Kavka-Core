@@ -1,11 +1,13 @@
 package handlers
 
 import (
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
-	"github.com/kavkaco/Kavka-Core/internal/model/message"
-	"github.com/kavkaco/Kavka-Core/internal/model/user"
+	"context"
+
+	"github.com/kavkaco/Kavka-Core/internal/model"
+	chat "github.com/kavkaco/Kavka-Core/internal/service/chat"
+	message "github.com/kavkaco/Kavka-Core/internal/service/message"
+	user "github.com/kavkaco/Kavka-Core/internal/service/user"
 	"github.com/kavkaco/Kavka-Core/socket"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
@@ -15,30 +17,32 @@ var HandlersList = []func(args HandlerArgs) (ok bool, err error){
 }
 
 type HandlerServices struct {
-	UserService user.Service
-	ChatService chat.Service
-	MsgService  message.Service
+	UserService    user.UserService
+	ChatService    chat.ChatService
+	MessageService message.MessageService
 }
 
 type HandlerArgs struct {
-	Logger       *zap.Logger
-	Adapter      socket.SocketAdapter
-	UserStaticID primitive.ObjectID
-	Message      socket.IncomingSocketMessage
-	Services     *HandlerServices
-	Conn         interface{}
+	Ctx      context.Context
+	Logger   *zap.Logger
+	Adapter  socket.SocketAdapter
+	UserID   model.UserID
+	Message  socket.IncomingSocketMessage
+	Services *HandlerServices
+	Conn     interface{}
 }
 
-func NewSocketHandler(logger *zap.Logger, adapter socket.SocketAdapter, conn interface{}, services *HandlerServices, userStaticID primitive.ObjectID) error {
+func NewSocketHandler(ctx context.Context, logger *zap.Logger, adapter socket.SocketAdapter, conn interface{}, services *HandlerServices, userID model.UserID) error {
 	err := adapter.HandleMessages(conn, func(msg socket.IncomingSocketMessage) {
 		// Define HandlerArgs
 		handlerArgs := HandlerArgs{
-			Conn:         conn,
-			Logger:       logger,
-			Adapter:      adapter,
-			Message:      msg,
-			Services:     services,
-			UserStaticID: userStaticID,
+			Ctx:      ctx,
+			Conn:     conn,
+			Logger:   logger,
+			Adapter:  adapter,
+			Message:  msg,
+			Services: services,
+			UserID:   userID,
 		}
 
 		// Add Handlers Of HandlersList

@@ -15,7 +15,7 @@ type UserManager struct {
 	userRepo repository.UserRepository
 }
 
-func NewMessageService(userRepo repository.UserRepository) UserService {
+func NewUserService(userRepo repository.UserRepository) UserService {
 	return &UserManager{userRepo}
 }
 

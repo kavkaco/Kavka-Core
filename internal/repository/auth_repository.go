@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -18,6 +20,9 @@ type AuthRepository interface {
 	ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) error
 	VerifyEmail(ctx context.Context, userID model.UserID) error
 	IncrementFailedLoginAttempts(ctx context.Context, userID model.UserID) error
+	ClearFailedLoginAttempts(ctx context.Context, userID model.UserID) error
+	LockAccount(ctx context.Context, userID model.UserID, lockDuration time.Duration) error
+	UnlockAccount(ctx context.Context, userID model.UserID) error
 }
 
 type authRepository struct {
@@ -31,6 +36,47 @@ func NewAuthRepository(db *mongo.Database) AuthRepository {
 func (a *authRepository) IncrementFailedLoginAttempts(ctx context.Context, userID string) error {
 	filter := bson.M{"user_id": userID}
 	update := bson.M{"$inc": bson.M{"failed_login_attempts": 1}}
+
+	_, err := a.authCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *authRepository) ClearFailedLoginAttempts(ctx context.Context, userID model.UserID) error {
+	fmt.Println("fuck you mother fucker")
+
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$set": bson.M{"failed_login_attempts": 0}}
+
+	_, err := a.authCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *authRepository) LockAccount(ctx context.Context, userID model.UserID, lockDuration time.Duration) error {
+	now := time.Now()
+	now = now.Add(lockDuration)
+
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$set": bson.M{"account_locked_until": now.Unix()}}
+
+	_, err := a.authCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *authRepository) UnlockAccount(ctx context.Context, userID model.UserID) error {
+	filter := bson.M{"user_id": userID}
+	update := bson.M{"$set": bson.M{"account_locked_until": 0}}
 
 	_, err := a.authCollection.UpdateOne(ctx, filter, update)
 	if err != nil {

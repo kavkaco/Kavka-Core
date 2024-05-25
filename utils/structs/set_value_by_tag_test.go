@@ -3,7 +3,7 @@ package structs
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type Sample struct {
@@ -18,8 +18,8 @@ func Test_SetFieldByBSON(t *testing.T) {
 	for _, sample := range samples {
 		err := SetFieldByBSON(sample, "age", newAge)
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	}
 
-	assert.Equal(t, samples[0].Age, newAge)
+	require.Equal(t, samples[0].Age, newAge)
 }

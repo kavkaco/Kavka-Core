@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConfigsDirPath(t *testing.T) {
@@ -14,7 +14,7 @@ func TestConfigsDirPath(t *testing.T) {
 func TestRead(t *testing.T) {
 	configs := Read()
 
-	assert.NotEmpty(t, configs)
+	require.NotEmpty(t, configs)
 
 	t.Log(configs)
 }

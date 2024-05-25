@@ -43,13 +43,9 @@ services:
     image: "golang:latest"
     ports:
       - "8000:8000"
-  integration_test:
-    container_name: "kavka_integration_test"
-    build:
-      context: ./
-      dockerfile: integration.Dockerfile
-
+      
 networks:
   default:
+    external: true
     driver: "host"
     name: kavka_default_network

@@ -1,41 +1,38 @@
 package router
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/kavkaco/Kavka-Core/app/presenters"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/socket"
 	"github.com/kavkaco/Kavka-Core/socket/handlers"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
 
-func WebsocketRoute(logger *zap.Logger, websocketAdapter socket.SocketAdapter, handlerServices handlers.HandlerServices) func(ctx *gin.Context) {
+func WebsocketRoute(ctx context.Context, logger *zap.Logger, websocketAdapter socket.SocketAdapter, handlerServices handlers.HandlerServices) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		// Get UserStaticID form AuthenticatedMiddleware and cast to primitive.ObjectId!
-		userStaticIDAny, getOk := ctx.Get("user_static_id")
+		userIDAny, getOk := ctx.Get("user_static_id")
+
 		if getOk {
-			userStaticIDStr, castOk := userStaticIDAny.(string)
+			userID, castOk := userIDAny.(model.UserID)
 			if !castOk {
 				logger.Error("Unable to cast any to string")
 				ctx.Next()
 				return
 			}
 
-			userStaticID, err := primitive.ObjectIDFromHex(userStaticIDStr)
-			if err != nil {
-				logger.Error("Unable to cast string to ObjectId")
-				ctx.Next()
-			}
-
 			// Call handle from WebsocketAdapter and pass the conn to the handler
-			err = websocketAdapter.Handle(ctx, func(conn interface{}) {
-				handlerErr := handlers.NewSocketHandler(logger, websocketAdapter, conn, &handlerServices, userStaticID)
+			err := websocketAdapter.Handle(ctx, func(conn interface{}) {
+				handlerErr := handlers.NewSocketHandler(ctx, logger, websocketAdapter, conn, &handlerServices, userID)
 				if handlerErr != nil {
-					logger.Error("Unable to create SocketHandler instance: " + err.Error())
+					logger.Error("Unable to create socket handler instance")
 				}
 			})
 			if err != nil {
-				presenters.ResponseInternalServerError(ctx)
+				presenters.InternalServerErrorResponse(ctx)
 			}
 		} else {
 			logger.Error("Unable to read user_static_id from gin.Context")

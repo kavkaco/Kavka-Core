@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -26,7 +27,7 @@ func InsertTextMessage(_ string, args HandlerArgs) (bool, error) {
 		return false, err
 	}
 
-	_, err = args.Services.MsgService.InsertTextMessage(chatID.(primitive.ObjectID), args.UserStaticID, messageContent.(string))
+	_, err = args.Services.MessageService.InsertTextMessage(args.Ctx, chatID.(primitive.ObjectID), args.UserID, messageContent.(string))
 	if err != nil {
 		return false, err
 	}
@@ -48,7 +49,7 @@ func DeleteMessage(_ string, args HandlerArgs) (bool, error) {
 		return false, err
 	}
 
-	err = args.Services.MsgService.DeleteMessage(chatID.(primitive.ObjectID), messageID.(primitive.ObjectID))
+	err = args.Services.MessageService.DeleteMessage(args.Ctx, chatID.(model.ChatID), args.UserID, messageID.(model.MessageID))
 	if err != nil {
 		return false, err
 	}

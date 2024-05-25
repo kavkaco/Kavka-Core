@@ -1,10 +1,9 @@
 package presenters
 
 import (
-	"errors"
+	"log"
 
-	"github.com/kavkaco/Kavka-Core/internal/model/chat"
-	"github.com/kavkaco/Kavka-Core/internal/model/user"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -24,51 +23,36 @@ type HttpDirectChatDetail struct {
 	LastName string             `json:"lastName"`
 }
 
-func UnmarshalFetchedUsers(fetchedUsers primitive.A) ([]user.User, error) {
-	users := []user.User{}
-
-	for _, v := range fetchedUsers {
-		currentUser, err := utils.TypeConverter[user.User](v)
-		if err != nil {
-			return nil, err
-		}
-
-		users = append(users, *currentUser)
-	}
-
-	return users, nil
-}
-
-func ChatAsJSON(obj chat.ChatC, userStaticID primitive.ObjectID) (interface{}, error) {
+func ChatAsJSON(chat model.Chat, userID model.UserID) (interface{}, error) {
 	// Determine the specific ChatDetail type based on chatType
 	var httpChatDetail interface{}
 
-	switch obj.ChatType {
-	case chat.TypeDirect:
-		chatDetailLocal, err := utils.TypeConverter[map[string]interface{}](obj.ChatDetail)
-		if err != nil {
-			return nil, err
-		}
+	switch chat.ChatType {
+	case model.TypeDirect:
+		log.Fatal("Not implemented yet")
+		// chatDetailLocal, err := utils.TypeConverter[map[string]interface{}](chat.ChatDetail)
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		fetchedUsers, err := UnmarshalFetchedUsers((*chatDetailLocal)["fetchedUsers"].(primitive.A))
-		if err != nil {
-			return nil, err
-		}
+		// fetchedUsers, err := UnmarshalFetchedUsers((*chatDetailLocal)["fetchedUsers"].(primitive.A))
+		// if err != nil {
+		// 	return nil, err
+		// }
 
-		if len(fetchedUsers) != 2 {
-			return nil, errors.New("invalid length of fetched users")
-		}
+		// if len(fetchedUsers) != 2 {
+		// 	return nil, errors.New("invalid length of fetched users")
+		// }
 
-		// FIXME
-		// target := chat.DetectTarget(fetchedUsers, userStaticID)
+		// recipientUserID := model.DetectRecipient(fetchedUsers, userID)
 
 		// httpChatDetail = HttpDirectChatDetail{
-		// 	UserID:   target.StaticID,
-		// 	Name:     target.Name,
+		// 	UserID:   recipientUserID,
+		// 	Name:     fetchedUsers,
 		// 	LastName: target.LastName,
 		// }
-	case chat.TypeChannel:
-		chatDetailLocal, err := utils.TypeConverter[chat.ChannelChatDetail](obj.ChatDetail)
+	case model.TypeChannel:
+		chatDetailLocal, err := utils.TypeConverter[model.ChannelChatDetail](chat.ChatDetail)
 		if err != nil {
 			return nil, err
 		}
@@ -77,8 +61,8 @@ func ChatAsJSON(obj chat.ChatC, userStaticID primitive.ObjectID) (interface{}, e
 			Title:    chatDetailLocal.Title,
 			Username: chatDetailLocal.Username,
 		}
-	case chat.TypeGroup:
-		chatDetailLocal, err := utils.TypeConverter[chat.GroupChatDetail](obj.ChatDetail)
+	case model.TypeGroup:
+		chatDetailLocal, err := utils.TypeConverter[model.GroupChatDetail](chat.ChatDetail)
 		if err != nil {
 			return nil, err
 		}
@@ -89,16 +73,16 @@ func ChatAsJSON(obj chat.ChatC, userStaticID primitive.ObjectID) (interface{}, e
 		}
 	}
 
-	obj.ChatDetail = httpChatDetail
+	chat.ChatDetail = httpChatDetail
 
-	for i, msg := range obj.Messages {
-		messageJson, err := MessageAsJSON(*msg)
-		if err != nil {
-			return nil, err
-		}
+	// for i, msg := range chat.Messages {
+	// 	messageJson, err := MessageAsJSON(*msg)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-		obj.Messages[i] = messageJson
-	}
+	// 	chat.Messages[i] = messageJson
+	// }
 
-	return obj, nil
+	return chat, nil
 }

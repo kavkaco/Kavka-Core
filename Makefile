@@ -1,14 +1,12 @@
-PACKAGES=$(shell go list ./... | grep -v 'tests')
-
-# Install tools are needed for development (golangci-lint, gofumpt)
+# Install development tools (golangci-lint, gofumpt)
 devtools:
 	@echo "Installing devtools"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 	go install mvdan.cc/gofumpt@latest
 
-# GoLang Unit-Test
+# Tests
 test:
-	go test ./... -covermode=atomic
+	go test ./... 
 
 # Format
 fmt:
@@ -18,3 +16,15 @@ fmt:
 # Linter
 check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+
+# Run on development
+dev:
+	go run cmd/server/server.go
+
+# Build for production
+build:
+	export GIN_MODE=release
+	export ENV=production
+	go mod tidy
+	go clean -cache
+	go build -o ./build/server cmd/server/server.go
