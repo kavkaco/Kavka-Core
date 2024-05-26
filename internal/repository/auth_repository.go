@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/kavkaco/Kavka-Core/database"
@@ -46,8 +45,6 @@ func (a *authRepository) IncrementFailedLoginAttempts(ctx context.Context, userI
 }
 
 func (a *authRepository) ClearFailedLoginAttempts(ctx context.Context, userID model.UserID) error {
-	fmt.Println("fuck you mother fucker")
-
 	filter := bson.M{"user_id": userID}
 	update := bson.M{"$set": bson.M{"failed_login_attempts": 0}}
 

@@ -44,7 +44,7 @@ func (ctrl *AuthController) HandleLogin(c *gin.Context) {
 		c.Header(presenters.RefreshTokenHeaderName, refreshToken)
 		c.Header(presenters.AccessTokenHeaderName, accessToken)
 
-		c.JSON(http.StatusOK, presenters.UserResponse(c, user, userChats))
+		presenters.UserResponse(c, user, userChats)
 	}
 }
 

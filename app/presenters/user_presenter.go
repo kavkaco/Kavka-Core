@@ -8,10 +8,19 @@ import (
 )
 
 type UserDto struct {
-	Message   string       `json:"message"`
-	Code      int          `json:"code"`
-	User      *model.User  `json:"user"`
-	UserChats []model.Chat `json:"chats"`
+	Message   string         `json:"message"`
+	Code      int            `json:"code"`
+	User      *UserDetailDto `json:"user"`
+	UserChats []model.Chat   `json:"chats"`
+}
+
+type UserDetailDto struct {
+	UserID    model.UserID `json:"userID"`
+	Name      string       `json:"name"`
+	LastName  string       `json:"lastName"`
+	Email     string       `json:"email"`
+	Username  string       `json:"username"`
+	Biography string       `json:"biography"`
 }
 
 func AccessDenied(ctx *gin.Context) {
@@ -37,11 +46,19 @@ func UserResponse(ctx *gin.Context, user *model.User, userChats []model.Chat) er
 	}
 
 	// Response JSON
+	var normalizedUser UserDetailDto
+
+	normalizedUser.UserID = user.UserID
+	normalizedUser.Email = user.Email
+	normalizedUser.Username = user.Username
+	normalizedUser.Name = user.Name
+	normalizedUser.LastName = user.LastName
+	normalizedUser.Biography = user.Biography
 
 	ctx.JSON(http.StatusOK, UserDto{
 		Message:   "user found",
 		Code:      200,
-		User:      user,
+		User:      &normalizedUser,
 		UserChats: marshaledChatsJson,
 	})
 
