@@ -4,6 +4,4 @@ WORKDIR /server
 
 COPY . .
 
-RUN chmod +x ./scripts/run_prod.sh
-
-CMD ["./scripts/run_prod.sh"]
+CMD ["make", "build"]
