@@ -44,7 +44,10 @@ func (ctrl *AuthController) HandleLogin(c *gin.Context) {
 		c.Header(presenters.RefreshTokenHeaderName, refreshToken)
 		c.Header(presenters.AccessTokenHeaderName, accessToken)
 
-		presenters.UserResponse(c, user, userChats)
+		err = presenters.UserResponse(c, user, userChats)
+		if err != nil {
+			presenters.InternalServerErrorResponse(c)
+		}
 	}
 }
 
