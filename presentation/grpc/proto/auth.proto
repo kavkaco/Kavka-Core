@@ -3,17 +3,13 @@ package auth;
 
 option go_package = "pb/";
 
-// import "presentation/grpc/status_proto/status.proto";
-
-service AuthHandler {
+service Auth {
     rpc Login (LoginRequest) returns (LoginResponse);
 }
 
-message User{
-    oneof user_statics {
-        string user_id = 1;
-        string email = 2;
-    }
+message User {
+    string user_id = 1;
+    string email = 2;
     string username = 3;
     string name = 4;
     string last_name = 5;
@@ -26,8 +22,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
-    // repeated Status status = 1;
-    User user = 2;
-    string AccessToken = 3;
-    string RefreshToken = 4;
+    User user = 1;
+    string AccessToken = 2;
+    string RefreshToken = 3;
 }

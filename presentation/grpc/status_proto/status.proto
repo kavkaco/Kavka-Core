@@ -1,7 +1,0 @@
-syntax="proto3";
-package auth_grpc;
-
-message Status{
-    int32 code = 1;
-    string message = 2;
-}

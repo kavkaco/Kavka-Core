@@ -30,8 +30,10 @@ build:
 	go build -o ./build/server cmd/server/server.go
 
 # Generate gRPC 
-generate_grpc:
+gen_proto:
 	protoc \
 		--go_out=./presentation/grpc/ \
 		--go-grpc_out=./presentation/grpc/ \
+		--proto_path=./presentation/grpc/proto/ \
+		--proto_path=./presentation/grpc/proto_imports/ \
 		./presentation/grpc/proto/*.proto
