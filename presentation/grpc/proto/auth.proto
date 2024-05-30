@@ -1,0 +1,33 @@
+syntax="proto3";
+package auth;
+
+option go_package = "pb/";
+
+// import "presentation/grpc/status_proto/status.proto";
+
+service AuthHandler {
+    rpc Login (LoginRequest) returns (LoginResponse);
+}
+
+message User{
+    oneof user_statics {
+        string user_id = 1;
+        string email = 2;
+    }
+    string username = 3;
+    string name = 4;
+    string last_name = 5;
+    string biography = 6;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    // repeated Status status = 1;
+    User user = 2;
+    string AccessToken = 3;
+    string RefreshToken = 4;
+}

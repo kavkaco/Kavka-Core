@@ -28,3 +28,10 @@ build:
 	go mod tidy
 	go clean -cache
 	go build -o ./build/server cmd/server/server.go
+
+# Generate gRPC 
+generate_grpc:
+	protoc \
+		--go_out=./presentation/grpc/ \
+		--go-grpc_out=./presentation/grpc/ \
+		./presentation/grpc/proto/*.proto
