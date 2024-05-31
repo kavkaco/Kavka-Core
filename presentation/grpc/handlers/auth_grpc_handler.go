@@ -2,7 +2,6 @@ package auth_grpc
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
@@ -32,22 +31,19 @@ func transformUserToGrpc(user *model.User) *pb.User {
 	}
 }
 
-func transformGrpcToUser(user *pb.User) *model.User {
-	return &model.User{
-		UserID:    user.UserId,
-		Name:      user.Name,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Username:  user.Username,
-		Biography: user.Biography,
-	}
-}
+// func transformGrpcToUser(user *pb.User) *model.User {
+// 	return &model.User{
+// 		UserID:    user.UserId,
+// 		Name:      user.Name,
+// 		LastName:  user.LastName,
+// 		Email:     user.Email,
+// 		Username:  user.Username,
+// 		Biography: user.Biography,
+// 	}
+// }
 
 func (s *AuthGrpcServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	fmt.Println("called")
-
 	user, accessToken, refreshToken, err := s.authService.Login(ctx, req.Email, req.Password)
-	fmt.Println(err)
 	if err != nil {
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}

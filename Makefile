@@ -19,6 +19,11 @@ check:
 
 # Run on development
 dev:
+	# enable gRPC log tools
+	export GRPC_GO_LOG_VERBOSITY_LEVEL=99
+	export GRPC_GO_LOG_SEVERITY_LEVEL=info
+
+	# run server
 	go run cmd/server/server.go
 
 # Build for production
