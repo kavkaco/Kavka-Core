@@ -19,6 +19,11 @@ check:
 
 # Run on development
 dev:
+	# enable gRPC log tools
+	export GRPC_GO_LOG_VERBOSITY_LEVEL=99
+	export GRPC_GO_LOG_SEVERITY_LEVEL=info
+
+	# run server
 	go run cmd/server/server.go
 
 # Build for production
@@ -28,3 +33,12 @@ build:
 	go mod tidy
 	go clean -cache
 	go build -o ./build/server cmd/server/server.go
+
+# Generate gRPC 
+gen_proto:
+	protoc \
+		--go_out=./presentation/grpc/ \
+		--go-grpc_out=./presentation/grpc/ \
+		--proto_path=./presentation/grpc/proto/ \
+		--proto_path=./presentation/grpc/proto_imports/ \
+		./presentation/grpc/proto/*.proto
