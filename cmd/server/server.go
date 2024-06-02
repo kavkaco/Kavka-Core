@@ -9,7 +9,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/database"
 	auth_grpc "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/pb"
-	"github.com/kavkaco/Kavka-Core/internal/repository"
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
@@ -59,10 +59,10 @@ func main() {
 	// templatesPath := config.ProjectRootPath + "/app/views/mail/"
 	// emailService := email.NewEmailService(logger, &configs.Email, templatesPath)
 
-	userRepo := repository.NewUserRepository(mongoDB)
+	userRepo := repository_mongo.NewUserMongoRepository(mongoDB)
 	// userService := user.NewUserService(userRepo)
 
-	authRepo := repository.NewAuthRepository(mongoDB)
+	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager)
 
 	// chatRepo := repository.NewChatRepository(mongoDB)

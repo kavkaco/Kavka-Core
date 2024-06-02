@@ -7,6 +7,7 @@ import (
 	lorem "github.com/bozaro/golorem"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,7 +22,7 @@ type UserTestSuite struct {
 
 func (s *UserTestSuite) SetupSuite() {
 	s.lem = lorem.New()
-	s.repo = repository.NewUserRepository(db)
+	s.repo = repository_mongo.NewUserMongoRepository(db)
 }
 
 func (s *UserTestSuite) TestA_Create() {

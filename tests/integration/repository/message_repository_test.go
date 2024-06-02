@@ -8,6 +8,7 @@ import (
 	lorem "github.com/bozaro/golorem"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"
@@ -26,8 +27,8 @@ type MessageTestSuite struct {
 
 func (s *MessageTestSuite) SetupSuite() {
 	ctx := context.TODO()
-	chatRepo := repository.NewChatRepository(db)
-	s.repo = repository.NewMessageRepository(db)
+	chatRepo := repository_mongo.NewChatMongoRepository(db)
+	s.repo = repository_mongo.NewMessageMongoRepository(db)
 	s.lem = lorem.New()
 	s.senderID = fmt.Sprintf("%d", random.GenerateUserID())
 

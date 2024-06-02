@@ -57,7 +57,7 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 
 	userChatsListIDs := user.ChatsListIDs
 
-	userChats, err := s.chatRepo.FindMany(ctx, userChatsListIDs)
+	userChats, err := s.chatRepo.FindManyByChatID(ctx, userChatsListIDs)
 	if err != nil {
 		return nil, ErrGetUserChats
 	}

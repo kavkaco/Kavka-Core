@@ -8,6 +8,7 @@ import (
 	lorem "github.com/bozaro/golorem"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"
@@ -29,8 +30,8 @@ type ChatTestSuite struct {
 
 func (s *ChatTestSuite) SetupSuite() {
 	s.lem = lorem.New()
-	s.repo = repository.NewChatRepository(db)
-	s.userRepo = repository.NewUserRepository(db)
+	s.repo = repository_mongo.NewChatMongoRepository(db)
+	s.userRepo = repository_mongo.NewUserMongoRepository(db)
 
 	s.userID = fmt.Sprintf("%d", random.GenerateUserID())
 	s.recipientUserID = fmt.Sprintf("%d", random.GenerateUserID())
@@ -158,7 +159,7 @@ func (s *ChatTestSuite) TestFindMany() {
 	ctx := context.TODO()
 
 	chatIDs := []model.ChatID{s.createdChannelChatID, s.createdGroupChatID, s.createdDirectChatID}
-	chats, err := s.repo.FindMany(ctx, chatIDs)
+	chats, err := s.repo.FindManyByChatID(ctx, chatIDs)
 	require.NoError(s.T(), err)
 
 	require.Len(s.T(), chats, 3)
