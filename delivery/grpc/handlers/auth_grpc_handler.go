@@ -3,9 +3,9 @@ package auth_grpc
 import (
 	"context"
 
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/pb"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
-	"github.com/kavkaco/Kavka-Core/presentation/grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

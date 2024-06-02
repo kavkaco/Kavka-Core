@@ -7,11 +7,11 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
+	auth_grpc "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/pb"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
-	auth_grpc "github.com/kavkaco/Kavka-Core/presentation/grpc/handlers"
-	"github.com/kavkaco/Kavka-Core/presentation/grpc/pb"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"google.golang.org/grpc"
 )
