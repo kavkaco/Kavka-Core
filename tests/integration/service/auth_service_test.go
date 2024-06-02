@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
-	"github.com/kavkaco/Kavka-Core/internal/repository"
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
@@ -28,8 +28,8 @@ type AuthTestSuite struct {
 func (s *AuthTestSuite) SetupSuite() {
 	s.lem = lorem.New()
 
-	authRepo := repository.NewAuthRepository(db)
-	userRepo := repository.NewUserRepository(db)
+	authRepo := repository_mongo.NewAuthMongoRepository(db)
+	userRepo := repository_mongo.NewUserMongoRepository(db)
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
 		PrivateKey: "private-key",
 	})

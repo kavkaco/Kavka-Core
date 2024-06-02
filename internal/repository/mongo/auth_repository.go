@@ -1,4 +1,4 @@
-package repository
+package repository_mongo
 
 import (
 	"context"
@@ -7,28 +7,16 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var ErrAuthNotFound = errors.New("auth not found")
-
-type AuthRepository interface {
-	Create(ctx context.Context, authModel *model.Auth) (*model.Auth, error)
-	GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error)
-	ChangePassword(ctx context.Context, userID model.UserID, passwordHash string) error
-	VerifyEmail(ctx context.Context, userID model.UserID) error
-	IncrementFailedLoginAttempts(ctx context.Context, userID model.UserID) error
-	ClearFailedLoginAttempts(ctx context.Context, userID model.UserID) error
-	LockAccount(ctx context.Context, userID model.UserID, lockDuration time.Duration) error
-	UnlockAccount(ctx context.Context, userID model.UserID) error
-}
 
 type authRepository struct {
 	authCollection *mongo.Collection
 }
 
-func NewAuthRepository(db *mongo.Database) AuthRepository {
+func NewAuthMongoRepository(db *mongo.Database) repository.AuthRepository {
 	return &authRepository{db.Collection(database.AuthCollection)}
 }
 
@@ -107,7 +95,7 @@ func (a *authRepository) Create(ctx context.Context, authModel *model.Auth) (*mo
 func (a *authRepository) GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error) {
 	result := a.authCollection.FindOne(ctx, bson.M{"user_id": userID})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-		return nil, ErrAuthNotFound
+		return nil, repository.ErrAuthNotFound
 	} else if result.Err() != nil {
 		return nil, result.Err()
 	}

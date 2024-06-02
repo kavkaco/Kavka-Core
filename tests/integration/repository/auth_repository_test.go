@@ -7,6 +7,8 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+
+	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"
@@ -26,7 +28,7 @@ func (s *AuthTestSuite) SetupSuite() {
 	s.userID = fmt.Sprintf("%d", random.GenerateUserID())
 
 	s.hashManager = hash.NewHashManager(hash.DefaultHashParams)
-	s.repo = repository.NewAuthRepository(db)
+	s.repo = repository_mongo.NewAuthMongoRepository(db)
 
 	// Set plain password to generate hash in auth creation
 	s.plainPassword = "kavkaco"

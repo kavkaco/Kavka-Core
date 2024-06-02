@@ -1,31 +1,21 @@
-package repository
+package repository_mongo
 
 import (
 	"context"
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
-type ChatRepository interface {
-	SearchInChats(ctx context.Context, key string) ([]model.Chat, error)
-	UpdateChatLastMessage(ctx context.Context, chatID model.ChatID, lastMessage model.LastMessage) error
-	Create(ctx context.Context, chatModel model.Chat) (*model.Chat, error)
-	Destroy(ctx context.Context, chatID model.ChatID) error
-	FindMany(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error)
-	FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
-	FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error)
-	GetChatMembers(chatID model.ChatID) []model.Member
-}
 
 type chatRepository struct {
 	usersCollection *mongo.Collection
 	chatsCollection *mongo.Collection
 }
 
-func NewChatRepository(db *mongo.Database) ChatRepository {
+func NewChatMongoRepository(db *mongo.Database) repository.ChatRepository {
 	return &chatRepository{db.Collection(database.UsersCollection), db.Collection(database.ChatsCollection)}
 }
 
@@ -39,7 +29,7 @@ func (repo *chatRepository) UpdateChatLastMessage(ctx context.Context, chatID mo
 	}
 
 	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
-		return ErrNotModified
+		return repository.ErrNotModified
 	}
 
 	return nil
@@ -76,13 +66,13 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	}
 
 	if result.DeletedCount == 0 {
-		return ErrNotModified
+		return repository.ErrNotModified
 	}
 
 	return nil
 }
 
-func (repo *chatRepository) FindMany(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
+func (repo *chatRepository) FindManyByChatID(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
 	filter := bson.M{"_id": bson.M{"$in": chatIDs}}
 
 	cursor, err := repo.chatsCollection.Find(ctx, filter)

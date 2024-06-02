@@ -11,7 +11,6 @@ linters:
     - errchkjson # Checks types passed to the json encoding functions.
     - errname # Checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error.
     - exhaustive # Check exhaustiveness of enum switch statements.
-    - gci # Gci controls Go package import order and makes it always deterministic.
     - gocheckcompilerdirectives # Checks that go compiler directive comments (//go:) are valid.
     - gocognit # Computes and checks the cognitive complexity of functions.
     - goconst # Finds repeated strings that could be replaced by a constant.

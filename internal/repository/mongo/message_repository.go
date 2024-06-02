@@ -1,28 +1,21 @@
-package repository
+package repository_mongo
 
 import (
 	"context"
 
 	"github.com/kavkaco/Kavka-Core/database"
+	"github.com/kavkaco/Kavka-Core/internal/repository"
+
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MessageRepository interface {
-	FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error)
-	Create(ctx context.Context, chatID model.ChatID) error
-	FetchMessages(ctx context.Context, chatID model.ChatID) ([]model.Message, error)
-	Insert(ctx context.Context, chatID model.ChatID, message *model.Message) (*model.Message, error)
-	UpdateMessageContent(ctx context.Context, chatID model.ChatID, messageID model.MessageID, newMessageContent string) error
-	Delete(ctx context.Context, chatID model.ChatID, messageID model.MessageID) error
-}
-
 type messageRepository struct {
 	messagesCollection *mongo.Collection
 }
 
-func NewMessageRepository(db *mongo.Database) MessageRepository {
+func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository {
 	return &messageRepository{db.Collection(database.MessagesCollection)}
 }
 
@@ -49,7 +42,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		}
 
 		if i == len(messageStore.Messages)-1 {
-			return nil, ErrMessageNotFound
+			return nil, repository.ErrMessageNotFound
 		}
 	}
 
@@ -74,7 +67,7 @@ func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.C
 	result := repo.messagesCollection.FindOne(ctx, filter)
 	if result.Err() != nil {
 		if database.IsRowExistsError(result.Err()) {
-			return nil, ErrChatNotFound
+			return nil, repository.ErrChatNotFound
 		}
 
 		return nil, result.Err()
@@ -96,13 +89,13 @@ func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, 
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		if database.IsRowExistsError(err) {
-			return nil, ErrChatNotFound
+			return nil, repository.ErrChatNotFound
 		}
 		return nil, err
 	}
 
 	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
-		return nil, ErrNotModified
+		return nil, repository.ErrNotModified
 	}
 
 	return message, nil
@@ -120,14 +113,14 @@ func (repo *messageRepository) updateMessageFields(ctx context.Context, chatID m
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, updateQuery)
 	if err != nil {
 		if database.IsRowExistsError(err) {
-			return ErrChatNotFound
+			return repository.ErrChatNotFound
 		}
 
 		return err
 	}
 
 	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
-		return ErrNotModified
+		return repository.ErrNotModified
 	}
 
 	return nil
@@ -140,7 +133,7 @@ func (repo *messageRepository) Delete(ctx context.Context, chatID model.ChatID, 
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil && result.ModifiedCount != 1 {
 		if database.IsRowExistsError(err) {
-			return ErrChatNotFound
+			return repository.ErrChatNotFound
 		}
 
 		return err
