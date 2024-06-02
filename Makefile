@@ -42,3 +42,11 @@ gen_proto:
 		--proto_path=./delivery/grpc/proto/ \
 		--proto_path=./delivery/grpc/proto_imports/ \
 		./delivery/grpc/proto/*.proto
+
+# Pre Push Git Hook
+pre-push:
+	make fmt
+	make check
+	make test
+	make build
+	
