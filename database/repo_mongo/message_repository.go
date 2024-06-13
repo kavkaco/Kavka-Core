@@ -42,7 +42,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		}
 
 		if i == len(messageStore.Messages)-1 {
-			return nil, repository.ErrMessageNotFound
+			return nil, repository.ErrNotFound
 		}
 	}
 
@@ -67,7 +67,7 @@ func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.C
 	result := repo.messagesCollection.FindOne(ctx, filter)
 	if result.Err() != nil {
 		if database.IsRowExistsError(result.Err()) {
-			return nil, repository.ErrChatNotFound
+			return nil, repository.ErrNotFound
 		}
 
 		return nil, result.Err()
@@ -89,7 +89,7 @@ func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, 
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		if database.IsRowExistsError(err) {
-			return nil, repository.ErrChatNotFound
+			return nil, repository.ErrNotFound
 		}
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (repo *messageRepository) updateMessageFields(ctx context.Context, chatID m
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, updateQuery)
 	if err != nil {
 		if database.IsRowExistsError(err) {
-			return repository.ErrChatNotFound
+			return repository.ErrNotFound
 		}
 
 		return err
@@ -133,7 +133,7 @@ func (repo *messageRepository) Delete(ctx context.Context, chatID model.ChatID, 
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
 	if err != nil && result.ModifiedCount != 1 {
 		if database.IsRowExistsError(err) {
-			return repository.ErrChatNotFound
+			return repository.ErrNotFound
 		}
 
 		return err

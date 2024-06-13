@@ -66,7 +66,7 @@ func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID,
 
 	message, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
 	if err != nil {
-		return ErrMessageNotFound
+		return ErrNotFound
 	}
 
 	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {

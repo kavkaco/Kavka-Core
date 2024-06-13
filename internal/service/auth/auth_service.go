@@ -55,8 +55,8 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 
 	userModel := model.NewUser(name, lastName, email, username)
 	savedUser, err := a.userRepo.Create(ctx, userModel)
-	if errors.Is(err, repository.ErrEmailAlreadyTaken) {
-		return nil, "", repository.ErrEmailAlreadyTaken
+	if errors.Is(err, repository.ErrUniqueConstraint) {
+		return nil, "", repository.ErrUniqueConstraint
 	} else if err != nil {
 		return nil, "", ErrCreateUser
 	}
@@ -228,7 +228,7 @@ func (a *AuthManager) ChangePassword(ctx context.Context, accessToken string, ol
 
 	auth, err := a.authRepo.GetUserAuth(ctx, user.UserID)
 	if err != nil {
-		return ErrUserNotFound
+		return ErrNotFound
 	}
 
 	// Validate with old password

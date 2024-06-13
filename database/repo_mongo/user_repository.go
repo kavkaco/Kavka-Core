@@ -69,7 +69,7 @@ func (repo *userRepository) GetChats(ctx context.Context, userID model.UserID) (
 func (repo *userRepository) Create(ctx context.Context, userModel *model.User) (*model.User, error) {
 	_, err := repo.usersCollection.InsertOne(context.TODO(), userModel)
 	if database.IsDuplicateKeyError(err) {
-		return nil, repository.ErrEmailAlreadyTaken
+		return nil, repository.ErrUniqueConstraint
 	} else if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (repo *userRepository) FindOne(ctx context.Context, filter bson.M) (*model.
 
 	result := repo.usersCollection.FindOne(context.TODO(), filter)
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-		return nil, repository.ErrUserNotFound
+		return nil, repository.ErrNotFound
 	} else if result.Err() != nil {
 		return nil, result.Err()
 	}

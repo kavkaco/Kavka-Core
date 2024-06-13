@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
+	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 
-	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"

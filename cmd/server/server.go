@@ -7,9 +7,9 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
+	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	auth_grpc "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/pb"
-	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"

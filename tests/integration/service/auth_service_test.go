@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
-	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
+	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"

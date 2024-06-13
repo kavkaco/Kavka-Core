@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
+	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/random"

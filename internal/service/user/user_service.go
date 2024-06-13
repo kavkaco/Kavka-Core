@@ -22,7 +22,7 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) error {
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return ErrUserNotFound
+		return ErrNotFound
 	}
 
 	if name != user.Name {

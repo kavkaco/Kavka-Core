@@ -7,7 +7,7 @@ var (
 
 	ErrInvalidPassword          = errors.New("invalid password")
 	ErrInvalidOtpCode           = errors.New("invalid otp code")
-	ErrUserNotFound             = errors.New("user not found")
+	ErrNotFound                 = errors.New("user not found")
 	ErrInvalidEmailOrPassword   = errors.New("invalid email or password")
 	ErrAccessDenied             = errors.New("access denied")
 	ErrEmailNotVerified         = errors.New("email not verified")

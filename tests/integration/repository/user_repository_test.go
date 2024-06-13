@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
+	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	repository_mongo "github.com/kavkaco/Kavka-Core/internal/repository/mongo"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"

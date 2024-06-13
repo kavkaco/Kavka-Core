@@ -52,7 +52,7 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return nil, ErrUserNotFound
+		return nil, ErrNotFound
 	}
 
 	userChatsListIDs := user.ChatsListIDs
@@ -76,7 +76,7 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 	// Check to do not be duplicated!
 	dup, _ := s.chatRepo.FindBySides(ctx, sides)
 	if dup != nil {
-		return nil, repository.ErrChatAlreadyExists
+		return nil, repository.ErrUniqueConstraint
 	}
 
 	chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{

@@ -95,7 +95,7 @@ func (a *authRepository) Create(ctx context.Context, authModel *model.Auth) (*mo
 func (a *authRepository) GetUserAuth(ctx context.Context, userID model.UserID) (*model.Auth, error) {
 	result := a.authCollection.FindOne(ctx, bson.M{"user_id": userID})
 	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
-		return nil, repository.ErrAuthNotFound
+		return nil, repository.ErrNotFound
 	} else if result.Err() != nil {
 		return nil, result.Err()
 	}
