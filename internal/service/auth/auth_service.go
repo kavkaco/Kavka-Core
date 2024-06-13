@@ -31,7 +31,7 @@ type AuthService interface {
 	SubmitResetPassword(ctx context.Context, token string, newPassword string) error
 	ChangePassword(ctx context.Context, accessToken string, oldPassword string, newPassword string) error
 	Authenticate(ctx context.Context, accessToken string) (*model.User, error)
-	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, error)
+	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (newAccessToken string, err error)
 }
 
 type AuthManager struct {
