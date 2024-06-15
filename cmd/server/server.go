@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
@@ -81,6 +82,12 @@ func main() {
 
 	mux.Handle(path, handler)
 
-	err := http.ListenAndServe(grpcListenAddr, h2c.NewHandler(mux, &http2.Server{}))
+	server := &http.Server{
+		Addr:         grpcListenAddr,
+		Handler:      h2c.NewHandler(mux, &http2.Server{}),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 2 * time.Second,
+	}
+	err := server.ListenAndServe()
 	handleError(err)
 }
