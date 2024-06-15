@@ -33,7 +33,7 @@ func GetRedisDBInstance(redisConfigs config.Redis) *redis.Client {
 }
 
 func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
-	var dockerContainerEnvVariables = []string{}
+	dockerContainerEnvVariables := []string{}
 
 	err := os.Setenv("ENV", "test")
 	if err != nil {

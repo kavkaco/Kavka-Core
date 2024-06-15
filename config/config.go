@@ -30,7 +30,7 @@ type (
 		Email   Email  `yaml:"email"`
 		MinIO   MinIO  `yaml:"minio"`
 		HTTP    HTTP   `yaml:"http"`
-		Auth    Auth
+		Auth    Auth   `yaml:"auth"`
 	}
 	Auth struct {
 		SecretKey string `yaml:"secret"`
@@ -38,9 +38,10 @@ type (
 	HTTP struct {
 		Host string `yaml:"host"`
 		Port int    `yaml:"port"`
-		Cors struct {
-			AllowOrigins string `yaml:"allow_origins"`
-		}
+		Cors Cors   `yaml:"cors"`
+	}
+	Cors struct {
+		AllowOrigins string `yaml:"allow_origins"`
 	}
 	Redis struct {
 		Host     string `yaml:"host"`
