@@ -3,17 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
+	"net/http"
 
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
-	auth_grpc "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/pb"
+	grpc_service "github.com/kavkaco/Kavka-Core/delivery/grpc"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
-	"google.golang.org/grpc"
+	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1/authv1connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func handleError(err error) {
@@ -50,7 +51,7 @@ func main() {
 	redisClient := database.GetRedisDBInstance(configs.Redis)
 
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
-		PrivateKey: configs.App.Auth.SECRET,
+		PrivateKey: configs.Auth.SecretKey,
 	})
 
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
@@ -71,15 +72,15 @@ func main() {
 	// messageRepo := repository.NewMessageRepository(mongoDB)
 	// messageService := message.NewMessageService(messageRepo, chatRepo)
 
-	// Init gRPC Server
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 8089))
-	handleError(err)
+	// Init grpc server
+	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
+	mux := http.NewServeMux()
 
-	grpcServerRegistrar := grpc.NewServer()
+	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
+	path, handler := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	authGrpcServer := auth_grpc.NewAuthServerGrpc(grpcServerRegistrar, authService)
-	pb.RegisterAuthServer(grpcServerRegistrar, &authGrpcServer)
+	mux.Handle(path, handler)
 
-	err = grpcServerRegistrar.Serve(lis)
+	err := http.ListenAndServe(grpcListenAddr, h2c.NewHandler(mux, &http2.Server{}))
 	handleError(err)
 }

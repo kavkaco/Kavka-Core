@@ -37,11 +37,22 @@ build:
 # Generate gRPC 
 gen_proto:
 	protoc \
-		--go_out=./delivery/grpc/ \
-		--go-grpc_out=./delivery/grpc/ \
+		--go_out=./delivery/grpc/pb \
+		--go-grpc_out=./delivery/grpc/pb \
 		--proto_path=./delivery/grpc/proto/ \
 		--proto_path=./delivery/grpc/proto_imports/ \
 		./delivery/grpc/proto/*.proto
+
+	protoc \
+		--go_out=./delivery/grpc/proto_imports \
+		--go-grpc_out=./delivery/grpc/proto_imports \
+		./delivery/grpc/proto_imports/*.proto
+# protoc \
+# 	--go_out=./delivery/grpc/ \
+# 	--go-grpc_out=./delivery/grpc/ \
+# 	--proto_path=./delivery/grpc/proto/ \
+# 	--proto_path=./delivery/grpc/proto_imports/ \
+# 	./delivery/grpc/proto/*.proto
 
 # Pre Push Git Hook
 pre-push:

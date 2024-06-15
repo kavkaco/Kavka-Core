@@ -28,7 +28,7 @@ type (
 	}
 )
 
-func NewUploaderService(config *config.IConfig) *Service {
+func NewUploaderService(config *config.Config) *Service {
 	minioCredentials := config.MinIO
 
 	endpoint := minioCredentials.Endpoint
