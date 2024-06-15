@@ -1,22 +1,28 @@
 package repository
 
 import (
-	"os"
+	"fmt"
 	"testing"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/kavkaco/Kavka-Core/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
-	dbClient *mongo.Client
-	db       *mongo.Database
+	db          *mongo.Database
+	redisClient *redis.Client
 )
 
 func TestMain(m *testing.M) {
-	database.GetMongoDBTestInstance(func(db *mongo.Database) {
-		code := m.Run()
+	database.GetMongoDBTestInstance(func(_db *mongo.Database) {
+		database.GetRedisTestInstance(func(_redisClient *redis.Client) {
+			fmt.Print("\n")
 
-		os.Exit(code)
+			db = _db
+			redisClient = _redisClient
+
+			m.Run()
+		})
 	})
 }

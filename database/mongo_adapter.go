@@ -94,7 +94,7 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 	var client *mongo.Client
 	var db *mongo.Database
 
-	DockerContainerEnvVariables := []string{
+	dockerContainerEnvVariables := []string{
 		"MONGO_INITDB_ROOT_USERNAME=test",
 		"MONGO_INITDB_ROOT_PASSWORD=test",
 	}
@@ -114,10 +114,17 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 		log.Fatalf("Could not connect to Docker: %s", err)
 	}
 
-	resource, err := pool.Run("mongo", "latest", DockerContainerEnvVariables)
+	resource, err := pool.Run("mongo", "latest", dockerContainerEnvVariables)
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
+
+	// Kill the container
+	defer func() {
+		if err = pool.Purge(resource); err != nil {
+			log.Fatalf("Could not purge resource: %s", err)
+		}
+	}()
 
 	err = pool.Retry(func() error {
 		client, err = mongo.Connect(context.TODO(),
@@ -146,10 +153,5 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 
 	if err = client.Disconnect(context.Background()); err != nil {
 		panic(err)
-	}
-
-	// Kill the container
-	if err = pool.Purge(resource); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
 	}
 }

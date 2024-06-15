@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
@@ -13,8 +14,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1/authv1connect"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 func handleError(err error) {
@@ -73,14 +72,26 @@ func main() {
 	// messageService := message.NewMessageService(messageRepo, chatRepo)
 
 	// Init grpc server
+
 	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
-	mux := http.NewServeMux()
+	app := fiber.New()
 
 	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
-	path, handler := authv1connect.NewAuthServiceHandler(authGrpcHandler)
+	authPath, authHandler := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	mux.Handle(path, handler)
+	app.All(authPath, adaptor.HTTPHandler(authHandler))
 
-	err := http.ListenAndServe(grpcListenAddr, h2c.NewHandler(mux, &http2.Server{}))
+	err := app.Listen(grpcListenAddr)
 	handleError(err)
+
+	// grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
+	// mux := http.NewServeMux()
+
+	// authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
+	// path, handler := authv1connect.NewAuthServiceHandler(authGrpcHandler)
+
+	// mux.Handle(path, handler)
+
+	// err := http.ListenAndServe(grpcListenAddr, h2c.NewHandler(mux, &http2.Server{}))
+	// handleError(err)
 }
