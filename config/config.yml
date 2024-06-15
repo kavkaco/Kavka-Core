@@ -1,14 +1,9 @@
-app:
-  name: "kavka"
-  http:
-    host: "127.0.0.1"
-    port: 8000
-    address: "127.0.0.1:8000"
-  server:
-    cors:
-      allow_origins: "*"
-  auth:
-    secret: "secret-key"
+app_name: "kavka"
+http:
+  host: "127.0.0.1"
+  port: 8000
+  cors:
+    allow_origins: "*"
 mongo:
   host: "127.0.0.1"
   username: "mongo"
@@ -21,8 +16,8 @@ redis:
   password:
   port: 6379
   db: 0
-sms:
 minio:
   endpoint: 127.0.0.1:9000
   access_key: uD3h2W3CONpYe8Tb4nbp
   secret_key: fKF98iAk1eDSpdtdJWcJHgivjpF4Su4HCdgkpYvQ
+sms:

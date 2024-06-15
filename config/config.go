@@ -10,6 +10,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ProjectRootPath = ConfigsDirPath() + "/../"
+
 type Env int
 
 const (
@@ -21,32 +23,24 @@ const (
 var CurrentEnv Env = Development
 
 type (
-	IConfig struct {
-		App   App              `yaml:"app"`
-		Mongo Mongo            `yaml:"mongo"`
-		Redis Redis            `yaml:"redis"`
-		Email Email            `yaml:"email"`
-		MinIO MinIOCredentials `yaml:"minio"`
-	}
-	App struct {
-		Name   string `yaml:"name"`
-		HTTP   HTTP   `yaml:"http"`
-		Server Server `yaml:"server"`
-		Auth   Auth   `yaml:"auth"`
-	}
-	HTTP struct {
-		Host    string `yaml:"host"`
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
+	Config struct {
+		AppName string `yaml:"app_name"`
+		Mongo   Mongo  `yaml:"mongo"`
+		Redis   Redis  `yaml:"redis"`
+		Email   Email  `yaml:"email"`
+		MinIO   MinIO  `yaml:"minio"`
+		HTTP    HTTP   `yaml:"http"`
+		Auth    Auth
 	}
 	Auth struct {
-		SECRET string `yaml:"secret"`
+		SecretKey string `yaml:"secret"`
 	}
-	Server struct {
-		CORS CORS `yaml:"cors"`
-	}
-	CORS struct {
-		AllowOrigins string `yaml:"allow_origins"`
+	HTTP struct {
+		Host string `yaml:"host"`
+		Port int    `yaml:"port"`
+		Cors struct {
+			AllowOrigins string `yaml:"allow_origins"`
+		}
 	}
 	Redis struct {
 		Host     string `yaml:"host"`
@@ -62,15 +56,13 @@ type (
 		Port     int    `yaml:"port"`
 		DBName   string `yaml:"db_name"`
 	}
-	MinIOCredentials struct {
+	MinIO struct {
 		Endpoint  string `yaml:"endpoint"`
 		AccessKey string `yaml:"access_key"`
 		SecretKey string `yaml:"secret_key"`
 	}
 	Email struct{}
 )
-
-var ProjectRootPath = ConfigsDirPath() + "/../"
 
 func ConfigsDirPath() string {
 	_, f, _, ok := runtime.Caller(0)
@@ -81,7 +73,7 @@ func ConfigsDirPath() string {
 	return filepath.Dir(f)
 }
 
-func Read() *IConfig {
+func Read() *Config {
 	// Load ENV
 	env := strings.ToLower(os.Getenv("ENV"))
 	if len(strings.TrimSpace(env)) == 0 || env == "development" {
@@ -95,7 +87,7 @@ func Read() *IConfig {
 	}
 
 	// Load YAML configs
-	var cfg *IConfig
+	var cfg *Config
 
 	data, readErr := os.ReadFile(ConfigsDirPath() + "/config.yml")
 	if readErr != nil {
@@ -113,7 +105,7 @@ func Read() *IConfig {
 		panic(secretErr)
 	}
 
-	cfg.App.Auth.SECRET = strings.TrimSpace(string(secretData))
+	cfg.Auth.SecretKey = strings.TrimSpace(string(secretData))
 
 	return cfg
 }
