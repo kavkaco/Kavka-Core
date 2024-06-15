@@ -30,9 +30,6 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 		RefreshToken: refreshToken,
 	})
 
-	// FIXME
-	// res.Header().Set("Greet-Version", "v1")
-
 	return res, nil
 }
 
