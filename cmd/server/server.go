@@ -82,10 +82,6 @@ func main() {
 
 	mux.Handle(path, handler)
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("https://github.com/kavkaco"))
-	})
-
 	server := &http.Server{
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(mux, &http2.Server{}),

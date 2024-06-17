@@ -19,7 +19,7 @@ type AuthTestSuite struct {
 	client authv1connect.AuthServiceClient
 
 	name, lastName, username, email, password string
-	accessToken, refreshToken                 string
+	accessToken, refreshToken                 string //nolint
 }
 
 func (s *AuthTestSuite) SetupSuite() {
