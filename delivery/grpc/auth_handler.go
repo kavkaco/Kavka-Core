@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
-	grpc_common "github.com/kavkaco/Kavka-Core/delivery/grpc/common"
+	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	authv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1"
 )
@@ -17,7 +17,6 @@ func NewAuthGrpcHandler(authService auth.AuthService) AuthGrpcServer {
 	return AuthGrpcServer{authService}
 }
 
-// Login implements authv1connect.AuthServiceHandler.
 func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.LoginRequest]) (*connect.Response[authv1.LoginResponse], error) {
 	user, accessToken, refreshToken, err := a.authService.Login(ctx, req.Msg.Email, req.Msg.Password)
 	if err != nil {
@@ -25,7 +24,7 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 	}
 
 	res := connect.NewResponse(&authv1.LoginResponse{
-		User:         grpc_common.TransformUserToGrpcModel(user),
+		User:         grpc_model.TransformUserToGrpcModel(user),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
@@ -33,8 +32,22 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 	return res, nil
 }
 
+func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
+	user, verifyEmailToken, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	res := connect.NewResponse(&authv1.RegisterResponse{
+		User:             grpc_model.TransformUserToGrpcModel(user),
+		VerifyEmailToken: verifyEmailToken,
+	})
+
+	return res, nil
+}
+
 // Authenticate implements authv1connect.AuthServiceHandler.
-func (a AuthGrpcServer) Authenticate(context.Context, *connect.Request[authv1.AuthenticateRequest]) (*connect.Response[authv1.AuthenticateResponse], error) {
+func (a AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[authv1.AuthenticateRequest]) (*connect.Response[authv1.AuthenticateResponse], error) {
 	panic("unimplemented")
 }
 
@@ -45,11 +58,6 @@ func (a AuthGrpcServer) ChangePassword(context.Context, *connect.Request[authv1.
 
 // RefreshToken implements authv1connect.AuthServiceHandler.
 func (a AuthGrpcServer) RefreshToken(context.Context, *connect.Request[authv1.RefreshTokenRequest]) (*connect.Response[authv1.RefreshTokenResponse], error) {
-	panic("unimplemented")
-}
-
-// Register implements authv1connect.AuthServiceHandler.
-func (a AuthGrpcServer) Register(context.Context, *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
 	panic("unimplemented")
 }
 

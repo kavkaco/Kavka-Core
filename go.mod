@@ -9,7 +9,7 @@ require (
 	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/golang-jwt/jwt/v4 v4.4.2
-	github.com/kavkaco/Kavka-ProtoBuf v0.1.1
+	github.com/kavkaco/Kavka-ProtoBuf v0.1.3
 	github.com/minio/minio-go/v7 v7.0.69
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/stretchr/testify v1.9.0

@@ -1,12 +1,12 @@
-package grpc_common
+package grpc_model
 
 import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
-	commonv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/common/v1"
+	modelv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/model/user/v1"
 )
 
-func TransformUserToGrpcModel(user *model.User) *commonv1.User {
-	return &commonv1.User{
+func TransformUserToGrpcModel(user *model.User) *modelv1.User {
+	return &modelv1.User{
 		UserId:    user.UserID,
 		Name:      user.Name,
 		LastName:  user.LastName,
@@ -16,7 +16,7 @@ func TransformUserToGrpcModel(user *model.User) *commonv1.User {
 	}
 }
 
-func TransformGrpcModelToUser(user *commonv1.User) *model.User {
+func TransformGrpcModelToUser(user *modelv1.User) *model.User {
 	return &model.User{
 		UserID:    user.UserId,
 		Name:      user.Name,

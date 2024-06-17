@@ -2,27 +2,26 @@ package e2e
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"testing"
 
-	"github.com/go-redis/redis/v8"
-	"github.com/kavkaco/Kavka-Core/database"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/kavkaco/Kavka-Core/config"
+	"github.com/kavkaco/Kavka-Core/utils/net"
 )
 
-var (
-	db          *mongo.Database
-	redisClient *redis.Client
-)
+var BaseUrl string
 
 func TestMain(m *testing.M) {
-	database.GetMongoDBTestInstance(func(_db *mongo.Database) {
-		database.GetRedisTestInstance(func(_redisClient *redis.Client) {
-			fmt.Print("\n")
+	configs := config.Read()
+	baseAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
 
-			db = _db
-			redisClient = _redisClient
+	if net.IsHostReachable(baseAddr) {
+		BaseUrl = fmt.Sprintf("http://%s", baseAddr)
 
-			m.Run()
-		})
-	})
+		os.Exit(m.Run())
+		return
+	}
+
+	log.Fatal("Connection refused!")
 }
