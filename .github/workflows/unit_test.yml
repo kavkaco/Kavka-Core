@@ -18,4 +18,4 @@ jobs:
     - name: Installing dependencies
       run: go mod tidy
     - name: Build source
-      run: make unit-test
+      run: make unit_test
