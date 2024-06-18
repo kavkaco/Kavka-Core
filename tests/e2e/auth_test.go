@@ -18,8 +18,8 @@ type AuthTestSuite struct {
 	suite.Suite
 	client authv1connect.AuthServiceClient
 
-	name, lastName, username, email, password string
-	accessToken, refreshToken                 string //nolint
+	name, lastName, username, email, password   string
+	verifyEmailToken, accessToken, refreshToken string //nolint
 }
 
 func (s *AuthTestSuite) SetupSuite() {
@@ -31,7 +31,7 @@ func (s *AuthTestSuite) SetupSuite() {
 	s.email = l.Email()
 	s.password = l.Word(10, 30)
 
-	s.client = authv1connect.NewAuthServiceClient(http.DefaultClient, "http://127.0.0.1:8000")
+	s.client = authv1connect.NewAuthServiceClient(http.DefaultClient, BaseUrl)
 }
 
 func (s *AuthTestSuite) TestA_Register() {
@@ -53,21 +53,40 @@ func (s *AuthTestSuite) TestA_Register() {
 	require.Equal(s.T(), resp.Msg.User.LastName, s.lastName)
 	require.Equal(s.T(), resp.Msg.User.Username, s.username)
 	require.Equal(s.T(), resp.Msg.User.Email, s.email)
+	require.NotEmpty(s.T(), resp.Msg.VerifyEmailToken)
+
+	s.verifyEmailToken = resp.Msg.VerifyEmailToken
 }
 
-// func (s *AuthTestSuite) TestB_Login() {
-// 	ctx, _ := context.WithTimeout(context.TODO(), time.Second*5)
+func (s *AuthTestSuite) TestB_VerifyEmail() {
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
+	defer cancel()
 
-// 	resp, err := s.client.Login(ctx, &connect.Request[authv1.LoginRequest]{
-// 		Msg: &authv1.LoginRequest{
-// 			Email:    "mr.tahadostifam@gmail.com",
-// 			Password: "12345678",
-// 		},
-// 	})
-// 	require.NoError(s.T(), err)
+	_, err := s.client.VerifyEmail(ctx, &connect.Request[authv1.VerifyEmailRequest]{
+		Msg: &authv1.VerifyEmailRequest{
+			VerifyEmailToken: s.verifyEmailToken,
+		},
+	})
+	require.NoError(s.T(), err)
+}
 
-// 	s.T().Log(resp.Msg.User)
-// }
+func (s *AuthTestSuite) TestC_Login() {
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
+	defer cancel()
+
+	resp, err := s.client.Login(ctx, &connect.Request[authv1.LoginRequest]{
+		Msg: &authv1.LoginRequest{
+			Email:    s.email,
+			Password: s.password,
+		},
+	})
+	require.NoError(s.T(), err)
+
+	require.Equal(s.T(), resp.Msg.User.Name, s.name)
+	require.Equal(s.T(), resp.Msg.User.LastName, s.lastName)
+	require.Equal(s.T(), resp.Msg.User.Username, s.username)
+	require.Equal(s.T(), resp.Msg.User.Email, s.email)
+}
 
 func TestAuthSuite(t *testing.T) {
 	t.Helper()
