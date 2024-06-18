@@ -26,6 +26,7 @@ func (s *UserTestSuite) SetupSuite() {
 	s.repo = repository_mongo.NewUserMongoRepository(db)
 	s.service = service.NewUserService(s.repo)
 }
+
 func (s *UserTestSuite) TestA_CreateUser() {
 	ctx := context.TODO()
 
@@ -54,6 +55,7 @@ func (s *UserTestSuite) TestA_CreateUser() {
 
 	s.userId = saved.UserID
 }
+
 func (s *UserTestSuite) TestB_UpdateProfile() {
 	ctx := context.TODO()
 	name := s.lem.FirstName(0)
@@ -63,6 +65,7 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	err := s.service.UpdateProfile(ctx, s.userId, name, lastName, username, biography)
 	require.NoError(s.T(), err)
 }
+
 func (s *UserTestSuite) TestC_DeleteUser() {
 	ctx := context.TODO()
 
