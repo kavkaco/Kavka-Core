@@ -1,4 +1,4 @@
-name: Go Build Source
+name: Go Build
 
 on:
   push:
@@ -8,20 +8,14 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Set up Go
+      uses: actions/setup-go@v4
       with:
         go-version: '1.22.4'
     - name: Installing dependencies
       run: go mod tidy
     - name: Build source
-      run: |
-        if [ runner.os == "windows" ]; then
-          # FIXME - Add windows builder script!
-        else
-          make build
-        fi
+      run: make build
