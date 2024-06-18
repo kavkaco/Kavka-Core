@@ -13,12 +13,22 @@
     <a href="https://github.com/kavkaco/Kavka-Core/tree/main/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/go.yml">
-      <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/go.yml/badge.svg"
-    </a>
-    <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/linting.yml">
-      <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/linting.yml/badge.svg"
-    </a>
+    <div>
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/build.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/build.yml/badge.svg"
+      </a>
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/integration_test.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/integration_test.yml/badge.svg"
+      </a>
+    </div>
+    <div>
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/unit_test.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/unit_test.yml/badge.svg"
+      </a>
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/linter.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/linter.yml/badge.svg"
+      </a>
+    </div>
   </p>
 </div>
  
