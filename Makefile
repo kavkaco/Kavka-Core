@@ -5,13 +5,23 @@ devtools:
 	go install mvdan.cc/gofumpt@latest
 
 # Tests
+unit_test:
+	go test $(shell go list ./... | grep -v /tests)
+
 integration_test:
-	go test ./tests/integration/*
+	go test -v ./tests/integration/*
+
+e2e_test:
+	go test -v ./tests/e2e/*
+
+test:
+	make unit_test
+	make integration_test
+	make e2e_test
 
 # Format
 fmt:
 	gofumpt -l -w .
-	go mod tidy
 
 # Linter
 check:
