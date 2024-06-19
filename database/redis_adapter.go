@@ -1,10 +1,12 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/kavkaco/Kavka-Core/config"
@@ -47,17 +49,17 @@ func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
 
 	var client *redis.Client
 
-	resource, err := pool.Run("redis", "alpine", dockerContainerEnvVariables)
+	resource, err := pool.Run("redis", "latest", dockerContainerEnvVariables)
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
 	// Kill the container
-	defer func() {
-		if err = pool.Purge(resource); err != nil {
-			log.Fatalf("Could not purge resource: %s", err)
-		}
-	}()
+	// defer func() {
+	// 	if err = pool.Purge(resource); err != nil {
+	// 		log.Fatalf("Could not purge resource: %s", err)
+	// 	}
+	// }()
 
 	err = pool.Retry(func() error {
 		ipAddr := resource.Container.NetworkSettings.IPAddress + ":6379"
@@ -70,6 +72,18 @@ func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
 		})
 		if err != nil {
 			return err
+		}
+
+		s := client.Ping(context.TODO())
+		fmt.Println(s.Err())
+		fmt.Println(s.FullName())
+
+		type data struct {
+			Name string `json:"name"`
+		}
+		err = client.Set(context.TODO(), "name", nil, time.Hour*2).Err()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		return nil
