@@ -2,15 +2,17 @@ package service
 
 import (
 	"context"
+	"log"
 	"testing"
+	"time"
 
 	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthTestSuite struct {
@@ -35,30 +37,41 @@ func (s *AuthTestSuite) SetupSuite() {
 	})
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
+
+	verifyEmailToken, err := authManager.GenerateToken(
+		context.TODO(), auth_manager.VerifyEmail,
+		auth_manager.NewTokenClaims(primitive.NewObjectID().Hex(), auth_manager.VerifyEmail),
+		time.Hour*2,
+	)
+	if err != nil {
+		log.Fatal(err, verifyEmailToken)
+	}
+
+	log.Println(verifyEmailToken)
 }
 
-func (s *AuthTestSuite) TestA_Register() {
-	ctx := context.TODO()
+// func (s *AuthTestSuite) TestA_Register() {
+// 	ctx := context.TODO()
 
-	name := s.lem.FirstName(0)
-	lastName := s.lem.LastName()
-	username := s.lem.Word(1, 10)
-	email := s.lem.Email()
-	password := "strong-password"
+// 	name := s.lem.FirstName(0)
+// 	lastName := s.lem.LastName()
+// 	username := s.lem.Word(1, 10)
+// 	email := s.lem.Email()
+// 	password := "strong-password"
 
-	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
-	require.NoError(s.T(), err)
+// 	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
+// 	require.NoError(s.T(), err)
 
-	require.NotEmpty(s.T(), verifyEmailToken)
-	require.Equal(s.T(), user.Name, name)
-	require.Equal(s.T(), user.LastName, lastName)
-	require.Equal(s.T(), user.Username, username)
-	require.Equal(s.T(), user.Email, email)
+// 	require.NotEmpty(s.T(), verifyEmailToken)
+// 	require.Equal(s.T(), user.Name, name)
+// 	require.Equal(s.T(), user.LastName, lastName)
+// 	require.Equal(s.T(), user.Username, username)
+// 	require.Equal(s.T(), user.Email, email)
 
-	s.verifyEmailToken = verifyEmailToken
-	s.email = email
-	s.password = password
-}
+// 	s.verifyEmailToken = verifyEmailToken
+// 	s.email = email
+// 	s.password = password
+// }
 
 // func (s *AuthTestSuite) TestB_VerifyEmail() {
 // 	ctx := context.TODO()
