@@ -111,6 +111,11 @@ func (s *UserTestSuite) TestE_Update() {
 	require.Equal(s.T(), user.Username, username)
 	require.Equal(s.T(), user.Biography, biography)
 }
+func (s *UserTestSuite) TestF_Delete(){
+	ctx := context.TODO()
+	err := s.repo.DeleteById(ctx,s.savedUser.UserID)
+	require.NoError(s.T(), err)
+}
 
 func TestUserSuite(t *testing.T) {
 	t.Helper()
