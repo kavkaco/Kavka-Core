@@ -71,7 +71,13 @@ func (a AuthGrpcServer) SubmitResetPassword(context.Context, *connect.Request[au
 	panic("unimplemented")
 }
 
-// VerifyEmail implements authv1connect.AuthServiceHandler.
-func (a AuthGrpcServer) VerifyEmail(context.Context, *connect.Request[authv1.VerifyEmailRequest]) (*connect.Response[authv1.VerifyEmailResponse], error) {
-	panic("unimplemented")
+func (a AuthGrpcServer) VerifyEmail(ctx context.Context, req *connect.Request[authv1.VerifyEmailRequest]) (*connect.Response[authv1.VerifyEmailResponse], error) {
+	err := a.authService.VerifyEmail(ctx, req.Msg.VerifyEmailToken)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	res := connect.NewResponse(&authv1.VerifyEmailResponse{})
+
+	return res, nil
 }

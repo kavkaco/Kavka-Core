@@ -5,13 +5,23 @@ devtools:
 	go install mvdan.cc/gofumpt@latest
 
 # Tests
+unit_test:
+	go test $(shell go list ./... | grep -v /tests)
+
+integration_test:
+	go test -v ./tests/integration/*
+
+e2e_test:
+	go test -v ./tests/e2e/*
+
 test:
-	go test ./... 
+	make unit_test
+	make integration_test
+	make e2e_test
 
 # Format
 fmt:
 	gofumpt -l -w .
-	go mod tidy
 
 # Linter
 check:
@@ -33,26 +43,6 @@ build:
 	go mod tidy
 	go clean -cache
 	go build -o ./build/server cmd/server/server.go
-
-# Generate gRPC 
-gen_proto:
-	protoc \
-		--go_out=./delivery/grpc/pb \
-		--go-grpc_out=./delivery/grpc/pb \
-		--proto_path=./delivery/grpc/proto/ \
-		--proto_path=./delivery/grpc/proto_imports/ \
-		./delivery/grpc/proto/*.proto
-
-	protoc \
-		--go_out=./delivery/grpc/proto_imports \
-		--go-grpc_out=./delivery/grpc/proto_imports \
-		./delivery/grpc/proto_imports/*.proto
-# protoc \
-# 	--go_out=./delivery/grpc/ \
-# 	--go-grpc_out=./delivery/grpc/ \
-# 	--proto_path=./delivery/grpc/proto/ \
-# 	--proto_path=./delivery/grpc/proto_imports/ \
-# 	./delivery/grpc/proto/*.proto
 
 # Pre Push Git Hook
 pre-push:
