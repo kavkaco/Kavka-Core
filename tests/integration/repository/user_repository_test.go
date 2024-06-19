@@ -114,6 +114,7 @@ func (s *UserTestSuite) TestE_Update() {
 
 func (s *UserTestSuite) TestF_Delete() {
 	ctx := context.TODO()
+
 	err := s.repo.DeleteByID(ctx, s.savedUser.UserID)
 	require.NoError(s.T(), err)
 }

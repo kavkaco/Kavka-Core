@@ -117,3 +117,20 @@ func (a *authRepository) ChangePassword(ctx context.Context, userID model.UserID
 
 	return nil
 }
+
+func (repo *authRepository) DeleteByID(ctx context.Context, userID model.UserID) error {
+	filter := bson.M{"user_id": userID}
+
+	result, err := repo.authCollection.DeleteOne(ctx, filter)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return repository.ErrNotFound
+	} else if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return repository.ErrNotDeleted
+	}
+
+	return nil
+}

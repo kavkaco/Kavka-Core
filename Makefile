@@ -9,10 +9,10 @@ unit_test:
 	go test $(shell go list ./... | grep -v /tests)
 
 integration_test:
-	go test -v ./tests/integration/*
+	go test ./tests/integration/*
 
 e2e_test:
-	go test -v ./tests/e2e/*
+	go test ./tests/e2e/*
 
 test:
 	make unit_test

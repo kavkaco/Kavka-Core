@@ -92,6 +92,13 @@ func (s *AuthTestSuite) TestE_ChangePassword() {
 	require.NoError(s.T(), err)
 }
 
+func (s *AuthTestSuite) TestF_Delete() {
+	ctx := context.TODO()
+
+	err := s.repo.DeleteByID(ctx, s.userID)
+	require.NoError(s.T(), err)
+}
+
 func TestAuthSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(AuthTestSuite))

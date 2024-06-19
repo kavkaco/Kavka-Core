@@ -16,7 +16,9 @@ type UserManager struct {
 }
 
 func NewUserService(userRepo repository.UserRepository) UserService {
-	return &UserManager{userRepo}
+	return &UserManager{
+		userRepo: userRepo,
+	}
 }
 
 func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) error {
