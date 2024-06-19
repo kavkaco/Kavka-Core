@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -12,6 +11,7 @@ import (
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -52,31 +52,27 @@ func (s *AuthTestSuite) SetupSuite() {
 }
 
 func (s *AuthTestSuite) TestA_Register() {
-	fmt.Println("sakdmalkd")
+	ctx := context.TODO()
+
+	name := s.lem.FirstName(0)
+	lastName := s.lem.LastName()
+	username := s.lem.Word(1, 10)
+	email := s.lem.Email()
+	password := "strong-password"
+
+	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
+	require.NoError(s.T(), err)
+
+	require.NotEmpty(s.T(), verifyEmailToken)
+	require.Equal(s.T(), user.Name, name)
+	require.Equal(s.T(), user.LastName, lastName)
+	require.Equal(s.T(), user.Username, username)
+	require.Equal(s.T(), user.Email, email)
+
+	s.verifyEmailToken = verifyEmailToken
+	s.email = email
+	s.password = password
 }
-
-// func (s *AuthTestSuite) TestA_Register() {
-// 	ctx := context.TODO()
-
-// 	name := s.lem.FirstName(0)
-// 	lastName := s.lem.LastName()
-// 	username := s.lem.Word(1, 10)
-// 	email := s.lem.Email()
-// 	password := "strong-password"
-
-// 	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
-// 	require.NoError(s.T(), err)
-
-// 	require.NotEmpty(s.T(), verifyEmailToken)
-// 	require.Equal(s.T(), user.Name, name)
-// 	require.Equal(s.T(), user.LastName, lastName)
-// 	require.Equal(s.T(), user.Username, username)
-// 	require.Equal(s.T(), user.Email, email)
-
-// 	s.verifyEmailToken = verifyEmailToken
-// 	s.email = email
-// 	s.password = password
-// }
 
 // func (s *AuthTestSuite) TestB_VerifyEmail() {
 // 	ctx := context.TODO()
