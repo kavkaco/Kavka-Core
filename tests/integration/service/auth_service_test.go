@@ -2,9 +2,7 @@ package service
 
 import (
 	"context"
-	"log"
 	"testing"
-	"time"
 
 	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
@@ -13,7 +11,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthTestSuite struct {
@@ -38,17 +35,6 @@ func (s *AuthTestSuite) SetupSuite() {
 	})
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
-
-	verifyEmailToken, err := authManager.GenerateToken(
-		context.TODO(), auth_manager.VerifyEmail,
-		auth_manager.NewTokenClaims(primitive.NewObjectID().Hex(), auth_manager.VerifyEmail),
-		time.Hour*2,
-	)
-	if err != nil {
-		log.Fatal(err, verifyEmailToken)
-	}
-
-	log.Println(verifyEmailToken)
 }
 
 func (s *AuthTestSuite) TestA_Register() {
@@ -74,95 +60,95 @@ func (s *AuthTestSuite) TestA_Register() {
 	s.password = password
 }
 
-// func (s *AuthTestSuite) TestB_VerifyEmail() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestB_VerifyEmail() {
+	ctx := context.TODO()
 
-// 	err := s.service.VerifyEmail(ctx, s.verifyEmailToken)
-// 	require.NoError(s.T(), err)
-// }
+	err := s.service.VerifyEmail(ctx, s.verifyEmailToken)
+	require.NoError(s.T(), err)
+}
 
-// func (s *AuthTestSuite) TestC_Login() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestC_Login() {
+	ctx := context.TODO()
 
-// 	user, accessToken, refreshToken, err := s.service.Login(ctx, s.email, s.password)
-// 	require.NoError(s.T(), err)
+	user, accessToken, refreshToken, err := s.service.Login(ctx, s.email, s.password)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), accessToken)
-// 	require.NotEmpty(s.T(), refreshToken)
-// 	require.NotEmpty(s.T(), user)
-// 	require.Equal(s.T(), user.Email, s.email)
+	require.NotEmpty(s.T(), accessToken)
+	require.NotEmpty(s.T(), refreshToken)
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
 
-// 	s.accessToken = accessToken
-// 	s.refreshToken = refreshToken
-// }
+	s.accessToken = accessToken
+	s.refreshToken = refreshToken
+}
 
-// func (s *AuthTestSuite) TestD_ChangePassword() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestD_ChangePassword() {
+	ctx := context.TODO()
 
-// 	newPassword := "password-changed"
+	newPassword := "password-changed"
 
-// 	err := s.service.ChangePassword(ctx, s.accessToken, s.password, newPassword)
-// 	require.NoError(s.T(), err)
+	err := s.service.ChangePassword(ctx, s.accessToken, s.password, newPassword)
+	require.NoError(s.T(), err)
 
-// 	// Login again with new password to be sure that's changed!
+	// Login again with new password to be sure that's changed!
 
-// 	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
-// 	require.NoError(s.T(), err)
+	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), user)
-// 	require.Equal(s.T(), user.Email, s.email)
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
 
-// 	s.password = newPassword
-// }
+	s.password = newPassword
+}
 
-// func (s *AuthTestSuite) TestE_Authenticate() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestE_Authenticate() {
+	ctx := context.TODO()
 
-// 	user, err := s.service.Authenticate(ctx, s.accessToken)
-// 	require.NoError(s.T(), err)
-// 	require.Equal(s.T(), user.Email, s.email)
-// }
+	user, err := s.service.Authenticate(ctx, s.accessToken)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), user.Email, s.email)
+}
 
-// func (s *AuthTestSuite) TestF_RefreshToken() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestF_RefreshToken() {
+	ctx := context.TODO()
 
-// 	newAccessToken, err := s.service.RefreshToken(ctx, s.refreshToken, s.accessToken)
-// 	require.NoError(s.T(), err)
+	newAccessToken, err := s.service.RefreshToken(ctx, s.refreshToken, s.accessToken)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), newAccessToken)
-// 	require.NotEqual(s.T(), newAccessToken, s.accessToken)
-// }
+	require.NotEmpty(s.T(), newAccessToken)
+	require.NotEqual(s.T(), newAccessToken, s.accessToken)
+}
 
-// func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
+	ctx := context.TODO()
 
-// 	resetPasswordToken, timeout, err := s.service.SendResetPasswordVerification(ctx, s.email)
-// 	require.NoError(s.T(), err)
+	resetPasswordToken, timeout, err := s.service.SendResetPasswordVerification(ctx, s.email)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), timeout)
-// 	require.NotEmpty(s.T(), resetPasswordToken)
+	require.NotEmpty(s.T(), timeout)
+	require.NotEmpty(s.T(), resetPasswordToken)
 
-// 	s.resetPasswordToken = resetPasswordToken
-// }
+	s.resetPasswordToken = resetPasswordToken
+}
 
-// func (s *AuthTestSuite) TestH_SubmitResetPassword() {
-// 	ctx := context.TODO()
+func (s *AuthTestSuite) TestH_SubmitResetPassword() {
+	ctx := context.TODO()
 
-// 	newPassword := "reset-password"
+	newPassword := "reset-password"
 
-// 	err := s.service.SubmitResetPassword(ctx, s.resetPasswordToken, newPassword)
-// 	require.NoError(s.T(), err)
+	err := s.service.SubmitResetPassword(ctx, s.resetPasswordToken, newPassword)
+	require.NoError(s.T(), err)
 
-// 	// Login again with new password to be sure that's changed!
+	// Login again with new password to be sure that's changed!
 
-// 	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
-// 	require.NoError(s.T(), err)
+	user, _, _, err := s.service.Login(ctx, s.email, newPassword)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), user)
-// 	require.Equal(s.T(), user.Email, s.email)
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, s.email)
 
-// 	s.password = newPassword
-// }
+	s.password = newPassword
+}
 
 func TestAuthSuite(t *testing.T) {
 	t.Helper()
