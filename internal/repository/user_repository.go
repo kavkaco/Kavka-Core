@@ -14,4 +14,5 @@ type UserRepository interface {
 	FindByUserID(ctx context.Context, userID model.UserID) (*model.User, error)
 	FindByUsername(ctx context.Context, username string) (*model.User, error)
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	DeleteByID(ctx context.Context, userID model.UserID) error
 }
