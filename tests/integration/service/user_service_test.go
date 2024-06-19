@@ -8,6 +8,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	service "github.com/kavkaco/Kavka-Core/internal/service/user"
+	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,17 +17,20 @@ import (
 type UserTestSuite struct {
 	suite.Suite
 	service service.UserService
-	repo    repository.UserRepository
+	userRepo    repository.UserRepository
 	lem     *lorem.Lorem
 	userId  model.UserID
+	authRepo repository.AuthRepository
 }
 
 func (s *UserTestSuite) SetupSuite() {
 	s.lem = lorem.New()
-	s.repo = repository_mongo.NewUserMongoRepository(db)
-	s.service = service.NewUserService(s.repo)
+	s.userRepo = repository_mongo.NewUserMongoRepository(db)
+	s.authRepo = repository_mongo.NewAuthMongoRepository(db)
+	hashManager := hash.NewHashManager(hash.DefaultHashParams)
+	s.service = service.NewUserService(s.userRepo,s.authRepo,hashManager)
 }
-
+//Check here
 func (s *UserTestSuite) TestA_CreateUser() {
 	ctx := context.TODO()
 
@@ -44,7 +48,7 @@ func (s *UserTestSuite) TestA_CreateUser() {
 	userModel := model.NewUser(name, lastName, email, username)
 	userModel.ChatsListIDs = chatsListIDs
 
-	saved, err := s.repo.Create(ctx, userModel)
+	saved, err := s.userRepo.Create(ctx, userModel)
 
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), saved.UserID, userModel.UserID)
@@ -65,32 +69,5 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	err := s.service.UpdateProfile(ctx, s.userId, name, lastName, username, biography)
 	require.NoError(s.T(), err)
 }
-
-func (s *UserTestSuite) TestC_DeleteUser() {
-	ctx := context.TODO()
-
-	chatsListIDs := []model.ChatID{
-		primitive.NewObjectID(),
-		primitive.NewObjectID(),
-		primitive.NewObjectID(),
-		primitive.NewObjectID(),
-	}
-
-	name := s.lem.FirstName(2)
-	lastName := s.lem.LastName()
-	email := s.lem.Email()
-	username := s.lem.Word(1, 1)
-	userModel := model.NewUser(name, lastName, email, username)
-	userModel.ChatsListIDs = chatsListIDs
-
-	saved, err := s.repo.Create(ctx, userModel)
-
-	require.NoError(s.T(), err)
-	require.Equal(s.T(), saved.UserID, userModel.UserID)
-	require.Equal(s.T(), saved.Email, email)
-	require.Equal(s.T(), saved.Username, username)
-	require.Equal(s.T(), saved.Name, name)
-	require.Equal(s.T(), saved.LastName, lastName)
-
-	s.userId = saved.UserID
-}
+//Check here
+func (s *UserTestSuite) TestC_DeleteUser() {}
