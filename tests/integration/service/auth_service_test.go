@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -48,6 +49,10 @@ func (s *AuthTestSuite) SetupSuite() {
 	}
 
 	log.Println(verifyEmailToken)
+}
+
+func (s *AuthTestSuite) TestA_Register() {
+	fmt.Println("sakdmalkd")
 }
 
 // func (s *AuthTestSuite) TestA_Register() {
