@@ -8,9 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var (
-	db *mongo.Database
-)
+var db *mongo.Database
 
 func TestMain(m *testing.M) {
 	database.GetMongoDBTestInstance(func(_db *mongo.Database) {
