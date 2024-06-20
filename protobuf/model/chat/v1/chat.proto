@@ -1,0 +1,61 @@
+syntax = "proto3";
+package protobuf.model.chat.v1;
+
+option go_package = "protobuf/model/chat/v1";
+
+enum ChatType {
+  CHAT_TYPE_UNSPECIFIED = 0;
+  CHAT_TYPE_CHANNEL = 1;
+  CHAT_TYPE_GROUP = 2;
+  CHAT_TYPE_DIRECT = 3;
+}
+
+message Member {
+  string user_id = 1;
+  string name = 2;
+  string last_name = 3;
+}
+
+message LastMessage {
+  string message_type = 1;
+  string message_caption = 2;
+}
+
+message ChatDetail {
+  oneof chat_detail_type {
+    ChannelChatDetail channel_detail = 1;
+    GroupChatDetail group_detail = 2;
+    DirectChatDetail direct_detail = 3;
+  }
+}
+
+message ChannelChatDetail {
+  string title = 1;
+  repeated string members = 2;
+  repeated string admins = 3;
+  string owner = 4;
+  repeated string removed_users = 5;
+  string username = 6;
+  string description = 7;
+}
+
+message GroupChatDetail {
+  string title = 1;
+  repeated string members = 2;
+  repeated string admins = 3;
+  string owner = 4;
+  repeated string removed_users = 5;
+  string username = 6;
+  string description = 7;
+}
+
+message DirectChatDetail {
+  string sides = 1;
+}
+
+message Chat {
+  string chat_id = 1;
+  ChatType chat_type = 2;
+  ChatDetail chat_detail = 3;
+  LastMessage last_message = 4;
+}
