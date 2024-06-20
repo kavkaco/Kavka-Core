@@ -22,10 +22,12 @@ test:
 # Format
 fmt:
 	gofumpt -l -w .
+	buf format -w 
 
 # Linter
 check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+	buf lint
 
 # Run on development
 dev:
@@ -44,10 +46,6 @@ build:
 	go clean -cache
 	go build -o ./build/server cmd/server/server.go
 
-# Pre Push Git Hook
-pre-push:
-	make fmt
-	make check
-	make test
-	make build
-	
+gen_protobuf:
+	rm -rdf ./gen
+	buf generate --path ./protobuf

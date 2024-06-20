@@ -1,0 +1,59 @@
+syntax = "proto3";
+package proto.chat.v1;
+
+import "protobuf/model/chat/v1/chat.proto";
+
+service ChatService {
+  rpc GetChat(GetChatRequest) returns (GetChatResponse) {}
+  rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse) {}
+  rpc CreateDirect(CreateDirectRequest) returns (CreateDirectResponse) {}
+  rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
+  rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse) {}
+}
+
+message GetChatRequest {
+  string chat_id = 1;
+}
+
+message GetChatResponse {
+  model.chat.v1.Chat chat = 1;
+}
+
+message GetUserChatsRequest {
+  string user_id = 1;
+}
+
+message GetUserChatsResponse {
+  repeated model.chat.v1.Chat chats = 1;
+}
+
+message CreateDirectRequest {
+  string user_id = 1;
+  string recipient_user_id = 2;
+}
+
+message CreateDirectResponse {
+  model.chat.v1.Chat chat = 1;
+}
+
+message CreateGroupRequest {
+  string user_id = 1;
+  string title = 2;
+  string username = 3;
+  string description = 4;
+}
+
+message CreateGroupResponse {
+  model.chat.v1.Chat chat = 1;
+}
+
+message CreateChannelRequest {
+  string user_id = 1;
+  string title = 2;
+  string username = 3;
+  string description = 4;
+}
+
+message CreateChannelResponse {
+  model.chat.v1.Chat chat = 1;
+}

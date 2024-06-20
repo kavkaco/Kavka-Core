@@ -1,0 +1,89 @@
+syntax = "proto3";
+package proto.auth.v1;
+
+import "google/protobuf/duration.proto";
+import "protobuf/model/user/v1/user.proto";
+
+option go_package = "proto/auth/v1";
+
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
+  rpc SendResetPasswordVerification(SendResetPasswordVerificationRequest) returns (SendResetPasswordVerificationResponse);
+  rpc SubmitResetPassword(SubmitResetPasswordRequest) returns (SubmitResetPasswordResponse);
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  model.user.v1.User user = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+}
+
+message RegisterRequest {
+  string name = 1;
+  string last_name = 2;
+  string username = 3;
+  string email = 4;
+  string password = 5;
+}
+
+message RegisterResponse {
+  model.user.v1.User user = 1;
+  string verify_email_token = 2;
+}
+
+message VerifyEmailRequest {
+  string verify_email_token = 1;
+}
+
+message VerifyEmailResponse {}
+
+message SendResetPasswordVerificationRequest {
+  string email = 1;
+}
+
+message SendResetPasswordVerificationResponse {
+  string verify_email_token = 1;
+  google.protobuf.Duration timeout = 2;
+}
+
+message SubmitResetPasswordRequest {
+  string token = 1;
+  string new_password = 2;
+}
+
+message SubmitResetPasswordResponse {}
+
+message ChangePasswordRequest {
+  string access_token = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message ChangePasswordResponse {}
+
+message AuthenticateRequest {
+  string access_token = 1;
+}
+
+message AuthenticateResponse {
+  model.user.v1.User user = 1;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+  string access_token = 2;
+}
+
+message RefreshTokenResponse {
+  string access_token = 1;
+}

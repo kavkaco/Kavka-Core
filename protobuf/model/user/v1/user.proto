@@ -1,0 +1,11 @@
+syntax = "proto3";
+package proto.model.user.v1;
+
+message User {
+  string user_id = 1;
+  string email = 2;
+  string username = 3;
+  string name = 4;
+  string last_name = 5;
+  string biography = 6;
+}

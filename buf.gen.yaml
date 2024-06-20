@@ -1,0 +1,20 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/kavkaco/Kavka-Core/protobuf/gen/go
+plugins:
+  # Generate for GoLang
+  - remote: buf.build/protocolbuffers/go:v1.34.2
+    out: protobuf/gen/go
+    opt: paths=source_relative
+  - remote: buf.build/connectrpc/go
+    out: protobuf/gen/go
+    opt: paths=source_relative
+  # Generate for ES
+  - remote: buf.build/bufbuild/es:v1.10.0
+    out: protobuf/gen/es
+  - remote: buf.build/connectrpc/es:v1.4.0
+    out: protobuf/gen/es
+
