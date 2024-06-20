@@ -22,7 +22,7 @@ const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// AuthServiceName is the fully-qualified name of the AuthService service.
-	AuthServiceName = "proto.auth.v1.AuthService"
+	AuthServiceName = "protobuf.auth.v1.AuthService"
 )
 
 // These constants are the fully-qualified names of the RPCs defined in this package. They're
@@ -34,26 +34,26 @@ const (
 // period.
 const (
 	// AuthServiceLoginProcedure is the fully-qualified name of the AuthService's Login RPC.
-	AuthServiceLoginProcedure = "/proto.auth.v1.AuthService/Login"
+	AuthServiceLoginProcedure = "/protobuf.auth.v1.AuthService/Login"
 	// AuthServiceRegisterProcedure is the fully-qualified name of the AuthService's Register RPC.
-	AuthServiceRegisterProcedure = "/proto.auth.v1.AuthService/Register"
+	AuthServiceRegisterProcedure = "/protobuf.auth.v1.AuthService/Register"
 	// AuthServiceVerifyEmailProcedure is the fully-qualified name of the AuthService's VerifyEmail RPC.
-	AuthServiceVerifyEmailProcedure = "/proto.auth.v1.AuthService/VerifyEmail"
+	AuthServiceVerifyEmailProcedure = "/protobuf.auth.v1.AuthService/VerifyEmail"
 	// AuthServiceSendResetPasswordVerificationProcedure is the fully-qualified name of the
 	// AuthService's SendResetPasswordVerification RPC.
-	AuthServiceSendResetPasswordVerificationProcedure = "/proto.auth.v1.AuthService/SendResetPasswordVerification"
+	AuthServiceSendResetPasswordVerificationProcedure = "/protobuf.auth.v1.AuthService/SendResetPasswordVerification"
 	// AuthServiceSubmitResetPasswordProcedure is the fully-qualified name of the AuthService's
 	// SubmitResetPassword RPC.
-	AuthServiceSubmitResetPasswordProcedure = "/proto.auth.v1.AuthService/SubmitResetPassword"
+	AuthServiceSubmitResetPasswordProcedure = "/protobuf.auth.v1.AuthService/SubmitResetPassword"
 	// AuthServiceChangePasswordProcedure is the fully-qualified name of the AuthService's
 	// ChangePassword RPC.
-	AuthServiceChangePasswordProcedure = "/proto.auth.v1.AuthService/ChangePassword"
+	AuthServiceChangePasswordProcedure = "/protobuf.auth.v1.AuthService/ChangePassword"
 	// AuthServiceAuthenticateProcedure is the fully-qualified name of the AuthService's Authenticate
 	// RPC.
-	AuthServiceAuthenticateProcedure = "/proto.auth.v1.AuthService/Authenticate"
+	AuthServiceAuthenticateProcedure = "/protobuf.auth.v1.AuthService/Authenticate"
 	// AuthServiceRefreshTokenProcedure is the fully-qualified name of the AuthService's RefreshToken
 	// RPC.
-	AuthServiceRefreshTokenProcedure = "/proto.auth.v1.AuthService/RefreshToken"
+	AuthServiceRefreshTokenProcedure = "/protobuf.auth.v1.AuthService/RefreshToken"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -69,7 +69,7 @@ var (
 	authServiceRefreshTokenMethodDescriptor                  = authServiceServiceDescriptor.Methods().ByName("RefreshToken")
 )
 
-// AuthServiceClient is a client for the proto.auth.v1.AuthService service.
+// AuthServiceClient is a client for the protobuf.auth.v1.AuthService service.
 type AuthServiceClient interface {
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
@@ -81,10 +81,10 @@ type AuthServiceClient interface {
 	RefreshToken(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error)
 }
 
-// NewAuthServiceClient constructs a client for the proto.auth.v1.AuthService service. By default,
-// it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses, and
-// sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the connect.WithGRPC()
-// or connect.WithGRPCWeb() options.
+// NewAuthServiceClient constructs a client for the protobuf.auth.v1.AuthService service. By
+// default, it uses the Connect protocol with the binary Protobuf Codec, asks for gzipped responses,
+// and sends uncompressed requests. To use the gRPC or gRPC-Web protocols, supply the
+// connect.WithGRPC() or connect.WithGRPCWeb() options.
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
@@ -154,47 +154,47 @@ type authServiceClient struct {
 	refreshToken                  *connect.Client[v1.RefreshTokenRequest, v1.RefreshTokenResponse]
 }
 
-// Login calls proto.auth.v1.AuthService.Login.
+// Login calls protobuf.auth.v1.AuthService.Login.
 func (c *authServiceClient) Login(ctx context.Context, req *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
 	return c.login.CallUnary(ctx, req)
 }
 
-// Register calls proto.auth.v1.AuthService.Register.
+// Register calls protobuf.auth.v1.AuthService.Register.
 func (c *authServiceClient) Register(ctx context.Context, req *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error) {
 	return c.register.CallUnary(ctx, req)
 }
 
-// VerifyEmail calls proto.auth.v1.AuthService.VerifyEmail.
+// VerifyEmail calls protobuf.auth.v1.AuthService.VerifyEmail.
 func (c *authServiceClient) VerifyEmail(ctx context.Context, req *connect.Request[v1.VerifyEmailRequest]) (*connect.Response[v1.VerifyEmailResponse], error) {
 	return c.verifyEmail.CallUnary(ctx, req)
 }
 
-// SendResetPasswordVerification calls proto.auth.v1.AuthService.SendResetPasswordVerification.
+// SendResetPasswordVerification calls protobuf.auth.v1.AuthService.SendResetPasswordVerification.
 func (c *authServiceClient) SendResetPasswordVerification(ctx context.Context, req *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error) {
 	return c.sendResetPasswordVerification.CallUnary(ctx, req)
 }
 
-// SubmitResetPassword calls proto.auth.v1.AuthService.SubmitResetPassword.
+// SubmitResetPassword calls protobuf.auth.v1.AuthService.SubmitResetPassword.
 func (c *authServiceClient) SubmitResetPassword(ctx context.Context, req *connect.Request[v1.SubmitResetPasswordRequest]) (*connect.Response[v1.SubmitResetPasswordResponse], error) {
 	return c.submitResetPassword.CallUnary(ctx, req)
 }
 
-// ChangePassword calls proto.auth.v1.AuthService.ChangePassword.
+// ChangePassword calls protobuf.auth.v1.AuthService.ChangePassword.
 func (c *authServiceClient) ChangePassword(ctx context.Context, req *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error) {
 	return c.changePassword.CallUnary(ctx, req)
 }
 
-// Authenticate calls proto.auth.v1.AuthService.Authenticate.
+// Authenticate calls protobuf.auth.v1.AuthService.Authenticate.
 func (c *authServiceClient) Authenticate(ctx context.Context, req *connect.Request[v1.AuthenticateRequest]) (*connect.Response[v1.AuthenticateResponse], error) {
 	return c.authenticate.CallUnary(ctx, req)
 }
 
-// RefreshToken calls proto.auth.v1.AuthService.RefreshToken.
+// RefreshToken calls protobuf.auth.v1.AuthService.RefreshToken.
 func (c *authServiceClient) RefreshToken(ctx context.Context, req *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error) {
 	return c.refreshToken.CallUnary(ctx, req)
 }
 
-// AuthServiceHandler is an implementation of the proto.auth.v1.AuthService service.
+// AuthServiceHandler is an implementation of the protobuf.auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
@@ -260,7 +260,7 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceRefreshTokenMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	return "/proto.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return "/protobuf.auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceLoginProcedure:
 			authServiceLoginHandler.ServeHTTP(w, r)
@@ -288,33 +288,33 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 type UnimplementedAuthServiceHandler struct{}
 
 func (UnimplementedAuthServiceHandler) Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.Login is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.Login is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.Register is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.Register is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) VerifyEmail(context.Context, *connect.Request[v1.VerifyEmailRequest]) (*connect.Response[v1.VerifyEmailResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.VerifyEmail is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.VerifyEmail is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) SendResetPasswordVerification(context.Context, *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.SendResetPasswordVerification is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.SendResetPasswordVerification is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) SubmitResetPassword(context.Context, *connect.Request[v1.SubmitResetPasswordRequest]) (*connect.Response[v1.SubmitResetPasswordResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.SubmitResetPassword is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.SubmitResetPassword is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.ChangePassword is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.ChangePassword is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) Authenticate(context.Context, *connect.Request[v1.AuthenticateRequest]) (*connect.Response[v1.AuthenticateResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.Authenticate is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.Authenticate is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) RefreshToken(context.Context, *connect.Request[v1.RefreshTokenRequest]) (*connect.Response[v1.RefreshTokenResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("proto.auth.v1.AuthService.RefreshToken is not implemented"))
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.RefreshToken is not implemented"))
 }

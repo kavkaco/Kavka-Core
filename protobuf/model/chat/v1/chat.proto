@@ -1,5 +1,5 @@
 syntax = "proto3";
-package proto.model.chat.v1;
+package protobuf.model.chat.v1;
 
 option go_package = "protobuf/model/chat/v1";
 

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package proto.auth.v1;
+package protobuf.auth.v1;
 
 import "google/protobuf/duration.proto";
 import "protobuf/model/user/v1/user.proto";

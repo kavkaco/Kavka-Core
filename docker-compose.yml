@@ -1,12 +1,16 @@
 version: "3.9"
 services:
   redis:
+    networks:
+      - default_network
     container_name: "kavka_redis_db"
     image: "redis:alpine"
     ports:
       - "6379:6379"
     restart: always
   mongo:
+    networks:
+      - default_network
     container_name: "kavka_mongo_db"
     image: "mongo:latest"
     ports:
@@ -17,6 +21,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: mongo
       MONGO_INITDB_DATABASE: kavka
   minio:
+    networks:
+      - default_network
     image: quay.io/minio/minio
     command: server /data --console-address ":9001"
     volumes:
@@ -28,6 +34,7 @@ services:
       MINIO_ROOT_USER: minio_admin
       MINIO_ROOT_PASSWORD: minio_password
   app:
+    network_mode: host
     container_name: "kavka_server"
     build:
       context: ./
@@ -39,7 +46,7 @@ services:
     ports:
       - "8000:8000"
       
-# networks:
-#   default_network:
-#     driver: "host"
-#     name: "kavka_default_network"
+networks:
+  default_network:
+    driver: "bridge"
+    name: "kavka_default_network"
