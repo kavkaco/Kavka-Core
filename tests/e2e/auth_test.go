@@ -8,8 +8,8 @@ import (
 
 	"connectrpc.com/connect"
 	lorem "github.com/bozaro/golorem"
-	authv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1"
-	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1/authv1connect"
+	authv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )

@@ -4,7 +4,7 @@ package proto.auth.v1;
 import "google/protobuf/duration.proto";
 import "protobuf/model/user/v1/user.proto";
 
-option go_package = "proto/auth/v1";
+option go_package = "protobuf/auth/v1";
 
 service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);

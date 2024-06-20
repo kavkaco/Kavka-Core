@@ -1,6 +1,8 @@
 syntax = "proto3";
 package proto.chat.v1;
 
+option go_package = "protobuf/chat/v1";
+
 import "protobuf/model/chat/v1/chat.proto";
 
 service ChatService {
