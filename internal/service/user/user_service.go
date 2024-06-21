@@ -10,12 +10,12 @@ import (
 
 type UserService interface {
 	UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) error
-	DeleteAccount(ctx context.Context,userId model.UserID,password string)error
+	DeleteAccount(ctx context.Context, userId model.UserID, password string) error
 }
 
 type UserManager struct {
-	userRepo repository.UserRepository
-	authRepo repository.AuthRepository
+	userRepo    repository.UserRepository
+	authRepo    repository.AuthRepository
 	hashManager *hash.HashManager
 }
 
@@ -54,6 +54,7 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 
 	return nil
 }
+
 func (s *UserManager) DeleteAccount(ctx context.Context, userId model.UserID, password string) error {
 	auth, err := s.authRepo.GetUserAuth(ctx, userId)
 	if err != nil {
@@ -63,11 +64,11 @@ func (s *UserManager) DeleteAccount(ctx context.Context, userId model.UserID, pa
 		return ErrDeleteUser
 	}
 	validPassword := s.hashManager.CheckPasswordHash(password, auth.PasswordHash)
-	if !validPassword{
+	if !validPassword {
 		return ErrDeleteUser
 	}
-	err = s.userRepo.DeleteByID(ctx,userId)
-	if err != nil{
+	err = s.userRepo.DeleteByID(ctx, userId)
+	if err != nil {
 		return ErrDeleteUser
 	}
 	return nil
