@@ -99,7 +99,7 @@ export const SendResetPasswordVerificationResponse = /*@__PURE__*/ proto3.makeMe
 export const SubmitResetPasswordRequest = /*@__PURE__*/ proto3.makeMessageType(
   "protobuf.auth.v1.SubmitResetPasswordRequest",
   () => [
-    { no: 1, name: "token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "reset_password_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "new_password", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ],
 );

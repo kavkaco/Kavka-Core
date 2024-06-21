@@ -99,7 +99,7 @@ func (a AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *
 }
 
 func (a AuthGrpcServer) SubmitResetPassword(ctx context.Context, req *connect.Request[authv1.SubmitResetPasswordRequest]) (*connect.Response[authv1.SubmitResetPasswordResponse], error) {
-	err := a.authService.SubmitResetPassword(ctx, req.Msg.Token, req.Msg.NewPassword)
+	err := a.authService.SubmitResetPassword(ctx, req.Msg.ResetPasswordToken, req.Msg.NewPassword)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}

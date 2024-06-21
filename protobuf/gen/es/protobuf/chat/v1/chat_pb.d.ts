@@ -224,22 +224,17 @@ export declare class CreateGroupResponse extends Message<CreateGroupResponse> {
  */
 export declare class CreateChannelRequest extends Message<CreateChannelRequest> {
   /**
-   * @generated from field: string user_id = 1;
-   */
-  userId: string;
-
-  /**
-   * @generated from field: string title = 2;
+   * @generated from field: string title = 1;
    */
   title: string;
 
   /**
-   * @generated from field: string username = 3;
+   * @generated from field: string username = 2;
    */
   username: string;
 
   /**
-   * @generated from field: string description = 4;
+   * @generated from field: string description = 3;
    */
   description: string;
 

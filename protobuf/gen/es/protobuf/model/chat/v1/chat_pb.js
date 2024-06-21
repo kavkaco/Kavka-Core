@@ -91,7 +91,7 @@ export const GroupChatDetail = /*@__PURE__*/ proto3.makeMessageType(
 export const DirectChatDetail = /*@__PURE__*/ proto3.makeMessageType(
   "protobuf.model.chat.v1.DirectChatDetail",
   () => [
-    { no: 1, name: "sides", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "sides", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ],
 );
 

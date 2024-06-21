@@ -15,14 +15,3 @@ func TransformUserToGrpcModel(user *model.User) *modelv1.User {
 		Biography: user.Biography,
 	}
 }
-
-func TransformGrpcModelToUser(user *modelv1.User) *model.User {
-	return &model.User{
-		UserID:    user.UserId,
-		Name:      user.Name,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Username:  user.Username,
-		Biography: user.Biography,
-	}
-}

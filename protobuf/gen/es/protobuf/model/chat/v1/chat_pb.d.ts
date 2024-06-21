@@ -249,9 +249,9 @@ export declare class GroupChatDetail extends Message<GroupChatDetail> {
  */
 export declare class DirectChatDetail extends Message<DirectChatDetail> {
   /**
-   * @generated from field: string sides = 1;
+   * @generated from field: repeated string sides = 1;
    */
-  sides: string;
+  sides: string[];
 
   constructor(data?: PartialMessage<DirectChatDetail>);
 

@@ -244,9 +244,9 @@ export declare class SendResetPasswordVerificationResponse extends Message<SendR
  */
 export declare class SubmitResetPasswordRequest extends Message<SubmitResetPasswordRequest> {
   /**
-   * @generated from field: string token = 1;
+   * @generated from field: string reset_password_token = 1;
    */
-  token: string;
+  resetPasswordToken: string;
 
   /**
    * @generated from field: string new_password = 2;

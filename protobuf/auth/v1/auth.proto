@@ -57,7 +57,7 @@ message SendResetPasswordVerificationResponse {
 }
 
 message SubmitResetPasswordRequest {
-  string token = 1;
+  string reset_password_token = 1;
   string new_password = 2;
 }
 
