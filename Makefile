@@ -26,8 +26,10 @@ fmt:
 	buf format -w 
 
 # Linter
-check:
+linter:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+
+buf_linter:
 	buf lint
 
 # Run on development
