@@ -2,3 +2,6 @@ version: v2
 
 name: buf.build/tahadostifam/kavka-protobuf
 
+lint:
+  use:
+    - DEFAULT
