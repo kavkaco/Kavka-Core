@@ -9,7 +9,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	service "github.com/kavkaco/Kavka-Core/internal/service/user"
-	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,9 +16,9 @@ import (
 
 type UserTestSuite struct {
 	suite.Suite
-	service service.UserService
-	userRepo    repository.UserRepository
-	lem     *lorem.Lorem
+	service  service.UserService
+	userRepo repository.UserRepository
+	lem      *lorem.Lorem
 
 	userID model.UserID
 	email  string
@@ -28,11 +27,10 @@ type UserTestSuite struct {
 func (s *UserTestSuite) SetupSuite() {
 	s.lem = lorem.New()
 	s.userRepo = repository_mongo.NewUserMongoRepository(db)
-	s.authRepo = repository_mongo.NewAuthMongoRepository(db)
-	hashManager := hash.NewHashManager(hash.DefaultHashParams)
-	s.service = service.NewUserService(s.userRepo,s.authRepo,hashManager)
+	s.service = service.NewUserService(s.userRepo)
 }
-//Check here
+
+// Check here
 func (s *UserTestSuite) TestA_CreateUser() {
 	ctx := context.TODO()
 
@@ -74,7 +72,7 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	require.NoError(s.T(), err)
 
 	// Find user again to be sure that his profile changed!
-	user, err := s.repo.FindByUserID(ctx, s.userID)
+	user, err := s.userRepo.FindByUserID(ctx, s.userID)
 	require.NoError(s.T(), err)
 
 	require.NoError(s.T(), err)
