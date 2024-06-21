@@ -3,6 +3,7 @@ devtools:
 	@echo "Installing devtools"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 	go install mvdan.cc/gofumpt@latest
+	go install github.com/bufbuild/buf/cmd/buf@v1.33.0
 
 # Tests
 unit_test:
