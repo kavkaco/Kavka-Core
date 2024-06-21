@@ -32,6 +32,7 @@ type AuthService interface {
 	ChangePassword(ctx context.Context, accessToken string, oldPassword string, newPassword string) error
 	Authenticate(ctx context.Context, accessToken string) (*model.User, error)
 	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (newAccessToken string, err error)
+	DeleteAccount(ctx context.Context, userID model.UserID, password string) error
 }
 
 type AuthManager struct {
@@ -345,6 +346,30 @@ func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, new
 	err = a.authRepo.ChangePassword(ctx, auth.UserID, newPasswordHash)
 	if err != nil {
 		return ErrChangePassword
+	}
+
+	return nil
+}
+
+func (s *AuthManager) DeleteAccount(ctx context.Context, userID model.UserID, password string) error {
+	auth, err := s.authRepo.GetUserAuth(ctx, userID)
+	if err != nil {
+		return ErrNotFound
+	}
+
+	validPassword := s.hashManager.CheckPasswordHash(password, auth.PasswordHash)
+	if !validPassword {
+		return ErrDeleteUser
+	}
+
+	err = s.authRepo.DeleteByID(ctx, userID)
+	if err != nil {
+		return ErrDeleteUser
+	}
+
+	err = s.userRepo.DeleteByID(ctx, userID)
+	if err != nil {
+		return ErrDeleteUser
 	}
 
 	return nil

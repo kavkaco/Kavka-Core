@@ -25,5 +25,5 @@ jobs:
     - name: Install devtools
       run: make devtools
       
-    - name: Run Linter
+    - name: Run linter
       run: make check

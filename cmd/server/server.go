@@ -12,8 +12,8 @@ import (
 	grpc_service "github.com/kavkaco/Kavka-Core/delivery/grpc"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
-	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1/authv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

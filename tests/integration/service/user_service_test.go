@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"testing"
 
 	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
@@ -19,8 +20,9 @@ type UserTestSuite struct {
 	service service.UserService
 	userRepo    repository.UserRepository
 	lem     *lorem.Lorem
-	userId  model.UserID
-	authRepo repository.AuthRepository
+
+	userID model.UserID
+	email  string
 }
 
 func (s *UserTestSuite) SetupSuite() {
@@ -57,7 +59,8 @@ func (s *UserTestSuite) TestA_CreateUser() {
 	require.Equal(s.T(), saved.Name, name)
 	require.Equal(s.T(), saved.LastName, lastName)
 
-	s.userId = saved.UserID
+	s.userID = saved.UserID
+	s.email = email
 }
 
 func (s *UserTestSuite) TestB_UpdateProfile() {
@@ -66,8 +69,23 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	lastName := s.lem.LastName()
 	username := s.lem.Word(1, 10)
 	biography := s.lem.Word(1, 30)
-	err := s.service.UpdateProfile(ctx, s.userId, name, lastName, username, biography)
+
+	err := s.service.UpdateProfile(ctx, s.userID, name, lastName, username, biography)
 	require.NoError(s.T(), err)
+
+	// Find user again to be sure that his profile changed!
+	user, err := s.repo.FindByUserID(ctx, s.userID)
+	require.NoError(s.T(), err)
+
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), user.UserID, s.userID)
+	require.Equal(s.T(), user.Email, s.email)
+	require.Equal(s.T(), user.Username, username)
+	require.Equal(s.T(), user.Name, name)
+	require.Equal(s.T(), user.LastName, lastName)
 }
-//Check here
-func (s *UserTestSuite) TestC_DeleteUser() {}
+
+func TestUserSuite(t *testing.T) {
+	t.Helper()
+	suite.Run(t, new(UserTestSuite))
+}

@@ -16,4 +16,5 @@ type AuthRepository interface {
 	ClearFailedLoginAttempts(ctx context.Context, userID model.UserID) error
 	LockAccount(ctx context.Context, userID model.UserID, lockDuration time.Duration) error
 	UnlockAccount(ctx context.Context, userID model.UserID) error
+	DeleteByID(ctx context.Context, userID model.UserID) error
 }

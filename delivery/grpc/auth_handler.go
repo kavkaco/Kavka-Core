@@ -6,7 +6,7 @@ import (
 	"connectrpc.com/connect"
 	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
-	authv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/proto/auth/v1"
+	authv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1"
 )
 
 type AuthGrpcServer struct {

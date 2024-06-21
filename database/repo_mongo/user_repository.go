@@ -110,7 +110,7 @@ func (repo *userRepository) FindByEmail(ctx context.Context, email string) (*mod
 	return repo.FindOne(ctx, filter)
 }
 
-func (repo *userRepository) DeleteById(ctx context.Context, userID model.UserID) error {
+func (repo *userRepository) DeleteByID(ctx context.Context, userID model.UserID) error {
 	filter := bson.M{"user_id": userID}
 	result, err := repo.usersCollection.DeleteOne(ctx, filter)
 	if errors.Is(err, mongo.ErrNoDocuments) {

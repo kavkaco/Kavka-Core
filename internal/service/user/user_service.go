@@ -19,11 +19,9 @@ type UserManager struct {
 	hashManager *hash.HashManager
 }
 
-func NewUserService(userRepo repository.UserRepository,authRepo repository.AuthRepository,hashManager *hash.HashManager) UserService {
+func NewUserService(userRepo repository.UserRepository) UserService {
 	return &UserManager{
 		userRepo: userRepo,
-		authRepo: authRepo,
-		hashManager: hashManager,
 	}
 }
 
@@ -68,7 +66,7 @@ func (s *UserManager) DeleteAccount(ctx context.Context, userId model.UserID, pa
 	if !validPassword{
 		return ErrDeleteUser
 	}
-	err = s.userRepo.DeleteById(ctx,userId)
+	err = s.userRepo.DeleteByID(ctx,userId)
 	if err != nil{
 		return ErrDeleteUser
 	}

@@ -9,10 +9,10 @@ unit_test:
 	go test $(shell go list ./... | grep -v /tests)
 
 integration_test:
-	go test -v ./tests/integration/*
+	go test ./tests/integration/*
 
 e2e_test:
-	go test -v ./tests/e2e/*
+	go test ./tests/e2e/*
 
 test:
 	make unit_test
@@ -22,10 +22,12 @@ test:
 # Format
 fmt:
 	gofumpt -l -w .
+	buf format -w 
 
 # Linter
 check:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+	buf lint
 
 # Run on development
 dev:
@@ -44,10 +46,6 @@ build:
 	go clean -cache
 	go build -o ./build/server cmd/server/server.go
 
-# Pre Push Git Hook
-pre-push:
-	make fmt
-	make check
-	make test
-	make build
-	
+gen_protobuf:
+	rm -rdf ./protobuf/gen
+	buf generate --path ./protobuf

@@ -47,7 +47,7 @@ func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
 
 	var client *redis.Client
 
-	resource, err := pool.Run("redis", "alpine", dockerContainerEnvVariables)
+	resource, err := pool.Run("redis", "latest", dockerContainerEnvVariables)
 	if err != nil {
 		log.Fatalf("Could not start resource: %s", err)
 	}
