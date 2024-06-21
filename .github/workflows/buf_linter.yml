@@ -19,11 +19,11 @@ jobs:
       with:
         go-version: '1.22.4'
 
+    - name: Install Buf Cli
+    - run: go install github.com/bufbuild/buf/cmd/buf@v1.33.0
+
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install devtools
-      run: make devtools
-      
     - name: Run linter
       run: make buf_lint

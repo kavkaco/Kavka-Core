@@ -29,7 +29,7 @@ lint:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
 
 buf_lint:
-	buf lint --path ./protobuf
+	buf lint
 
 # Run on development
 dev:
