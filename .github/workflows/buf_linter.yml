@@ -26,5 +26,4 @@ jobs:
       run: make devtools
       
     - name: Run linter
-      # run: make buf_lint
-      run: ls
+      run: make buf_lint
