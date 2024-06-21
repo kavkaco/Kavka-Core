@@ -26,4 +26,4 @@ jobs:
       run: make devtools
       
     - name: Run linter
-      run: make check
+      run: make linter
