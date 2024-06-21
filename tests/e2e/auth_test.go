@@ -67,6 +67,7 @@ func (s *AuthTestSuite) TestB_VerifyEmail() {
 			VerifyEmailToken: s.verifyEmailToken,
 		},
 	})
+
 	require.NoError(s.T(), err)
 }
 
@@ -86,11 +87,15 @@ func (s *AuthTestSuite) TestC_Login() {
 	require.Equal(s.T(), resp.Msg.User.LastName, s.lastName)
 	require.Equal(s.T(), resp.Msg.User.Username, s.username)
 	require.Equal(s.T(), resp.Msg.User.Email, s.email)
+
+	s.accessToken = resp.Msg.AccessToken
+	s.refreshToken = resp.Msg.RefreshToken
 }
 
 func (s *AuthTestSuite) TestD_ChangePassword() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
+
 	newPassword := "new-password"
 	_, err := s.client.ChangePassword(ctx, &connect.Request[authv1.ChangePasswordRequest]{
 		Msg: &authv1.ChangePasswordRequest{
@@ -115,17 +120,20 @@ func (s *AuthTestSuite) TestD_ChangePassword() {
 	require.Equal(s.T(), loginResp.Msg.User.LastName, s.lastName)
 	require.Equal(s.T(), loginResp.Msg.User.Username, s.username)
 	require.Equal(s.T(), loginResp.Msg.User.Email, s.email)
+
 	s.password = newPassword
 }
 
 func (s *AuthTestSuite) TestE_Authenticate() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
+
 	resp, err := s.client.Authenticate(ctx, &connect.Request[authv1.AuthenticateRequest]{
 		Msg: &authv1.AuthenticateRequest{
 			AccessToken: s.accessToken,
 		},
 	})
+
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), resp.Msg.User.Name, s.name)
 	require.Equal(s.T(), resp.Msg.User.LastName, s.lastName)
@@ -136,12 +144,14 @@ func (s *AuthTestSuite) TestE_Authenticate() {
 func (s *AuthTestSuite) TestF_RefreshToken() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
+
 	resp, err := s.client.RefreshToken(ctx, &connect.Request[authv1.RefreshTokenRequest]{
 		Msg: &authv1.RefreshTokenRequest{
 			AccessToken:  s.accessToken,
 			RefreshToken: s.refreshToken,
 		},
 	})
+
 	require.NoError(s.T(), err)
 	s.accessToken = resp.Msg.AccessToken
 }
@@ -149,18 +159,22 @@ func (s *AuthTestSuite) TestF_RefreshToken() {
 func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
+
 	resp, err := s.client.SendResetPasswordVerification(ctx, &connect.Request[authv1.SendResetPasswordVerificationRequest]{
 		Msg: &authv1.SendResetPasswordVerificationRequest{
 			Email: s.email,
 		},
 	})
+
 	require.NoError(s.T(), err)
+
 	s.verifyEmailToken = resp.Msg.VerifyEmailToken
 }
 
 func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
+
 	newPassword := "new-password2"
 	_, err := s.client.SubmitResetPassword(ctx, &connect.Request[authv1.SubmitResetPasswordRequest]{
 		Msg: &authv1.SubmitResetPasswordRequest{
@@ -169,6 +183,7 @@ func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 		},
 	})
 	require.NoError(s.T(), err)
+
 	// Login again with new password to be sure that's changed!
 	loginResp, err := s.client.Login(ctx, &connect.Request[authv1.LoginRequest]{
 		Msg: &authv1.LoginRequest{
@@ -183,6 +198,7 @@ func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 	require.Equal(s.T(), loginResp.Msg.User.LastName, s.lastName)
 	require.Equal(s.T(), loginResp.Msg.User.Username, s.username)
 	require.Equal(s.T(), loginResp.Msg.User.Email, s.email)
+
 	s.password = newPassword
 }
 
