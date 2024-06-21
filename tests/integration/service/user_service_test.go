@@ -16,9 +16,9 @@ import (
 
 type UserTestSuite struct {
 	suite.Suite
-	service service.UserService
-	repo    repository.UserRepository
-	lem     *lorem.Lorem
+	service  service.UserService
+	userRepo repository.UserRepository
+	lem      *lorem.Lorem
 
 	userID model.UserID
 	email  string
@@ -26,10 +26,11 @@ type UserTestSuite struct {
 
 func (s *UserTestSuite) SetupSuite() {
 	s.lem = lorem.New()
-	s.repo = repository_mongo.NewUserMongoRepository(db)
-	s.service = service.NewUserService(s.repo)
+	s.userRepo = repository_mongo.NewUserMongoRepository(db)
+	s.service = service.NewUserService(s.userRepo)
 }
 
+// Check here
 func (s *UserTestSuite) TestA_CreateUser() {
 	ctx := context.TODO()
 
@@ -47,7 +48,7 @@ func (s *UserTestSuite) TestA_CreateUser() {
 	userModel := model.NewUser(name, lastName, email, username)
 	userModel.ChatsListIDs = chatsListIDs
 
-	saved, err := s.repo.Create(ctx, userModel)
+	saved, err := s.userRepo.Create(ctx, userModel)
 
 	require.NoError(s.T(), err)
 	require.Equal(s.T(), saved.UserID, userModel.UserID)
@@ -71,7 +72,7 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	require.NoError(s.T(), err)
 
 	// Find user again to be sure that his profile changed!
-	user, err := s.repo.FindByUserID(ctx, s.userID)
+	user, err := s.userRepo.FindByUserID(ctx, s.userID)
 	require.NoError(s.T(), err)
 
 	require.NoError(s.T(), err)
