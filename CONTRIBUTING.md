@@ -21,7 +21,7 @@ Please follow these guidelines when contributing code to the project:
 The following commands are available in the Makefile:
 
 - `make fmt` formats the code according to the Go standards.
-- `make check` runs various checks on the code, including formatting and linting.
+- `make linter` runs various checks on the code, including formatting and linting.
 - `make test` runs the tests to ensure that all functionality is working as intended.
 
 ## Commit guidelines
