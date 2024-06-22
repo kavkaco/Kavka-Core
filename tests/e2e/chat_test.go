@@ -24,19 +24,19 @@ func (s *ChatTestSuite) SetupSuite() {
 	s.client = chatv1connect.NewChatServiceClient(http.DefaultClient, BaseUrl)
 }
 
-func (s *ChatTestSuite) CreateChannel() {
+func (s *ChatTestSuite) TestA_CreateChannel() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
 
-	resp, err := s.client.CreateChannel(ctx, &connect.Request[chatv1.CreateChannelRequest]{
-		Msg: &chatv1.CreateChannelRequest{
-			Title:       s.l.Word(2, 7),
-			Username:    s.l.Word(1, 1),
-			Description: s.l.Sentence(1, 1),
-		},
+	req := connect.NewRequest(&chatv1.CreateChannelRequest{
+		Title:       "My channel",
+		Username:    "my_channel",
+		Description: "Sample channel only for test",
 	})
-	require.NoError(s.T(), err)
+	req.Header().Set("X-Access-Token", "sample000")
 
+	resp, err := s.client.CreateChannel(ctx, req)
+	require.NoError(s.T(), err)
 	s.T().Log(resp)
 }
 

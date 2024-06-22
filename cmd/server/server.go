@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -30,8 +29,8 @@ func handleError(err error) {
 }
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 
 	// Init Zap Logger
 	// logger := logs.InitZapLogger()
@@ -80,9 +79,9 @@ func main() {
 
 	// Init grpc server
 	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
-	mux := http.NewServeMux()
+	router := http.NewServeMux()
 
-	authInterceptor := interceptor.NewAuthInterceptor(ctx, authService)
+	authInterceptor := interceptor.NewAuthInterceptor(authService)
 	interceptors := connect.WithInterceptors(authInterceptor)
 
 	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
@@ -91,14 +90,14 @@ func main() {
 	chatGrpcHandler := grpc_service.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
-	mux.Handle(authGrpcRoute, authGrpcRouter)
-	mux.Handle(chatGrpcRoute, chatGrpcRouter)
+	router.Handle(authGrpcRoute, authGrpcRouter)
+	router.Handle(chatGrpcRoute, chatGrpcRouter)
 
 	server := &http.Server{
 		Addr:         grpcListenAddr,
-		Handler:      h2c.NewHandler(mux, &http2.Server{}),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 2 * time.Second,
+		Handler:      h2c.NewHandler(router, &http2.Server{}),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 7 * time.Second,
 	}
 	err := server.ListenAndServe()
 	handleError(err)

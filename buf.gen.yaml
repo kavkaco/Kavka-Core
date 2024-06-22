@@ -17,4 +17,9 @@ plugins:
     out: protobuf/gen/es
   - remote: buf.build/connectrpc/es:v1.4.0
     out: protobuf/gen/es
+  # Generate for Ruby
+  - remote: buf.build/grpc/ruby:v1.64.2
+    out: gen/ruby
+  - remote: buf.build/protocolbuffers/ruby
+    out: gen/ruby
 

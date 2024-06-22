@@ -22,7 +22,7 @@ func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceH
 }
 
 func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
-	userID := ctx.Value(interceptor.CtxUserID{}).(model.UserID)
+	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
 
 	chat, err := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if err != nil {
@@ -42,7 +42,10 @@ func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.
 }
 
 func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
-	panic("unimplemented")
+	res := connect.NewResponse(&chatv1.CreateDirectResponse{
+		Chat: nil,
+	})
+	return res, nil
 }
 
 func (h handler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {

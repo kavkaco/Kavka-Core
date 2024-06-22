@@ -10,9 +10,9 @@ import (
 
 const accessTokenHeader = "X-Access-Token"
 
-type CtxUserID struct{}
+type UserIDKey struct{}
 
-func NewAuthInterceptor(ctx context.Context, authService auth.AuthService) connect.UnaryInterceptorFunc {
+func NewAuthInterceptor(authService auth.AuthService) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			accessToken := req.Header().Get(accessTokenHeader)
@@ -22,13 +22,18 @@ func NewAuthInterceptor(ctx context.Context, authService auth.AuthService) conne
 			}
 
 			user, err := authService.Authenticate(ctx, accessToken)
-			if err != nil && user != nil {
+			if err != nil || user == nil {
 				return nil, connect.NewError(connect.CodeUnauthenticated, nil)
 			}
 
-			newCtx := context.WithValue(ctx, CtxUserID{}, user.UserID)
+			ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
 
-			return next(newCtx, req)
+			resp, err := next(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+
+			return resp, nil
 		})
 	}
 
