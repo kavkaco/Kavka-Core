@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,10 +12,16 @@ func TestConfigsDirPath(t *testing.T) {
 	t.Log(ProjectRootPath)
 }
 
-func TestRead(t *testing.T) {
+func TestDevelopmentConfig(t *testing.T) {
+	os.Setenv("ENV", "development")
 	configs := Read()
-
 	require.NotEmpty(t, configs)
+	require.Equal(t, configs.Mongo.Username, "mongo")
+}
 
-	t.Log(configs)
+func TestProductionConfig(t *testing.T) {
+	os.Setenv("ENV", "production")
+	configs := Read()
+	require.NotEmpty(t, configs)
+	require.Equal(t, configs.Mongo.Username, "amir")
 }
