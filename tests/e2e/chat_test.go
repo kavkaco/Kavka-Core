@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	lorem "github.com/bozaro/golorem"
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/stretchr/testify/require"
@@ -17,7 +16,6 @@ import (
 type ChatTestSuite struct {
 	suite.Suite
 	client chatv1connect.ChatServiceClient
-	l      lorem.Lorem
 }
 
 func (s *ChatTestSuite) SetupSuite() {

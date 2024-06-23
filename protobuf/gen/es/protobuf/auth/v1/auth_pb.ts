@@ -313,9 +313,9 @@ export class SendResetPasswordVerificationRequest extends Message<SendResetPassw
  */
 export class SendResetPasswordVerificationResponse extends Message<SendResetPasswordVerificationResponse> {
   /**
-   * @generated from field: string verify_email_token = 1;
+   * @generated from field: string reset_password_token = 1;
    */
-  verifyEmailToken = "";
+  resetPasswordToken = "";
 
   /**
    * @generated from field: google.protobuf.Duration timeout = 2;
@@ -330,7 +330,7 @@ export class SendResetPasswordVerificationResponse extends Message<SendResetPass
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "protobuf.auth.v1.SendResetPasswordVerificationResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "verify_email_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "reset_password_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "timeout", kind: "message", T: Duration },
   ]);
 

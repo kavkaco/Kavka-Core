@@ -52,7 +52,7 @@ message SendResetPasswordVerificationRequest {
 }
 
 message SendResetPasswordVerificationResponse {
-  string verify_email_token = 1;
+  string reset_password_token = 1;
   google.protobuf.Duration timeout = 2;
 }
 
