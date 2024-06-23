@@ -93,6 +93,8 @@ func main() {
 	router.Handle(authGrpcRoute, authGrpcRouter)
 	router.Handle(chatGrpcRoute, chatGrpcRouter)
 
+	log.Println(authGrpcRoute)
+
 	server := &http.Server{
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(router, &http2.Server{}),
