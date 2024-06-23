@@ -6,13 +6,17 @@ import (
 	"net/http"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	grpc_service "github.com/kavkaco/Kavka-Core/delivery/grpc"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
+	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -67,26 +71,35 @@ func main() {
 	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager)
 
-	// chatRepo := repository.NewChatRepository(mongoDB)
-	// chatService := chat.NewChatService(chatRepo, userRepo)
+	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
+	chatService := chat.NewChatService(chatRepo, userRepo)
 
 	// messageRepo := repository.NewMessageRepository(mongoDB)
 	// messageService := message.NewMessageService(messageRepo, chatRepo)
 
 	// Init grpc server
 	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
-	mux := http.NewServeMux()
+	router := http.NewServeMux()
+
+	authInterceptor := interceptor.NewAuthInterceptor(authService)
+	interceptors := connect.WithInterceptors(authInterceptor)
 
 	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
-	path, handler := authv1connect.NewAuthServiceHandler(authGrpcHandler)
+	authGrpcRoute, authGrpcRouter := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	mux.Handle(path, handler)
+	chatGrpcHandler := grpc_service.NewChatGrpcHandler(chatService)
+	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
+
+	router.Handle(authGrpcRoute, authGrpcRouter)
+	router.Handle(chatGrpcRoute, chatGrpcRouter)
+
+	log.Println(authGrpcRoute)
 
 	server := &http.Server{
 		Addr:         grpcListenAddr,
-		Handler:      h2c.NewHandler(mux, &http2.Server{}),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 2 * time.Second,
+		Handler:      h2c.NewHandler(router, &http2.Server{}),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 7 * time.Second,
 	}
 	err := server.ListenAndServe()
 	handleError(err)

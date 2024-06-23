@@ -84,22 +84,22 @@ func (a AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[a
 }
 
 func (a AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *connect.Request[authv1.SendResetPasswordVerificationRequest]) (*connect.Response[authv1.SendResetPasswordVerificationResponse], error) {
-	token, timeout, err := a.authService.SendResetPasswordVerification(ctx, req.Msg.Email)
+	resetPasswordToken, timeout, err := a.authService.SendResetPasswordVerification(ctx, req.Msg.Email)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	timeoutProto := durationpb.New(timeout)
 	res := connect.NewResponse(&authv1.SendResetPasswordVerificationResponse{
-		VerifyEmailToken: token,
-		Timeout:          timeoutProto,
+		ResetPasswordToken: resetPasswordToken,
+		Timeout:            timeoutProto,
 	})
 
 	return res, nil
 }
 
 func (a AuthGrpcServer) SubmitResetPassword(ctx context.Context, req *connect.Request[authv1.SubmitResetPasswordRequest]) (*connect.Response[authv1.SubmitResetPasswordResponse], error) {
-	err := a.authService.SubmitResetPassword(ctx, req.Msg.Token, req.Msg.NewPassword)
+	err := a.authService.SubmitResetPassword(ctx, req.Msg.ResetPasswordToken, req.Msg.NewPassword)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}

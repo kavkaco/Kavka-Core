@@ -12,9 +12,7 @@ plugins:
   - remote: buf.build/connectrpc/go
     out: protobuf/gen/go
     opt: paths=source_relative
-  # Generate for ES
+  # Generate for TypeScript
   - remote: buf.build/bufbuild/es:v1.10.0
     out: protobuf/gen/es
-  - remote: buf.build/connectrpc/es:v1.4.0
-    out: protobuf/gen/es
-
+    opt: target=ts
