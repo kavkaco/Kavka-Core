@@ -1,4 +1,4 @@
-name: Linter check
+name: Proto Buf Linter Check
 
 on:
   push:
@@ -24,6 +24,6 @@ jobs:
 
     - name: Install devtools
       run: make devtools
-      
+
     - name: Run linter
-      run: make linter
+      run: make buf_linter

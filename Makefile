@@ -3,6 +3,7 @@ devtools:
 	@echo "Installing devtools"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
 	go install mvdan.cc/gofumpt@latest
+	go install github.com/bufbuild/buf/cmd/buf@v1.33.0
 
 # Tests
 unit_test:
@@ -25,8 +26,10 @@ fmt:
 	buf format -w 
 
 # Linter
-check:
+linter:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
+
+buf_linter:
 	buf lint
 
 # Run on development

@@ -5,13 +5,10 @@
     <img src="./docs/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Kavka</h3>
+  <h3 align="center">Private & Secure Messenger</h3>
 
   <p align="center">
-    Messaging Application
-    <br />
     <a href="https://github.com/kavkaco/Kavka-Core/tree/main/docs"><strong>Explore the docs »</strong></a>
-    <br />
     <br />
     <div>
       <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/build.yml">
@@ -25,8 +22,11 @@
       <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/unit_test.yml">
         <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/unit_test.yml/badge.svg"
       </a>
-      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/linter.yml">
-        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/linter.yml/badge.svg"
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/code_linter.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/code_linter.yml/badge.svg"
+      </a>
+      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/buf_linter.yml">
+        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/buf_linter.yml/badge.svg"
       </a>
     </div>
   </p>
