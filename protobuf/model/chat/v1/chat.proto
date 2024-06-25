@@ -50,7 +50,7 @@ message GroupChatDetail {
 }
 
 message DirectChatDetail {
-  string sides = 1;
+  repeated string sides = 1;
 }
 
 message Chat {
