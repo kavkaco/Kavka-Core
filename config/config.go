@@ -102,8 +102,9 @@ func Read() *Config {
 	}
 
 	// Load YAML configs
-	k := koanf.New(ConfigsDirPath())
-	if err := k.Load(file.Provider(filename), yaml.Parser()); err != nil {
+	path := ConfigsDirPath()
+	k := koanf.New(path)
+	if err := k.Load(file.Provider(path+"/"+filename), yaml.Parser()); err != nil {
 		log.Fatalf("error loading config: %v", err)
 	}
 	config := &Config{}
