@@ -30,17 +30,12 @@ func handleError(err error) {
 	}
 }
 
-func newRouterCORS(currentEnv config.Env, prodCORS []string, h http.Handler) http.Handler {
+func newRouterCORS(allowedOrigins []string, h http.Handler) http.Handler {
 	opts := cors.Options{
-		AllowedMethods: connectcors.AllowedMethods(),
-		AllowedHeaders: connectcors.AllowedHeaders(),
-		ExposedHeaders: connectcors.ExposedHeaders(),
-	}
-
-	if currentEnv == config.Production {
-		opts.AllowedOrigins = prodCORS
-	} else {
-		opts.AllowedOrigins = []string{"*"}
+		AllowedOrigins:      allowedOrigins,
+		AllowedMethods:      []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:      connectcors.AllowedHeaders(),
+		AllowPrivateNetwork: true,
 	}
 
 	c := cors.New(opts)
@@ -113,8 +108,7 @@ func main() {
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 
-	configCors := []string{"*"} // FIXME - after refactoring config pkg
-	gRPCHandler := newRouterCORS(config.CurrentEnv, configCors, gRPCRouter)
+	gRPCHandler := newRouterCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(gRPCHandler, &http2.Server{}),

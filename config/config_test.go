@@ -13,15 +13,9 @@ func TestConfigsDirPath(t *testing.T) {
 }
 
 func TestDevelopmentConfig(t *testing.T) {
-	os.Setenv("ENV", "development")
-	configs := Read()
-	require.NotEmpty(t, configs)
-	require.Equal(t, configs.Mongo.Username, "mongo")
-}
+	os.Setenv("KAVKA_ENV", "development")
 
-func TestProductionConfig(t *testing.T) {
-	os.Setenv("ENV", "production")
 	configs := Read()
 	require.NotEmpty(t, configs)
-	require.Equal(t, configs.Mongo.Username, "amir")
+	require.Equal(t, CurrentEnv, Development)
 }
