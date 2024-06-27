@@ -50,10 +50,9 @@ message CreateGroupResponse {
 }
 
 message CreateChannelRequest {
-  string user_id = 1;
-  string title = 2;
-  string username = 3;
-  string description = 4;
+  string title = 1;
+  string username = 2;
+  string description = 3;
 }
 
 message CreateChannelResponse {

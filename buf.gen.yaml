@@ -5,16 +5,24 @@ managed:
     - file_option: go_package_prefix
       value: github.com/kavkaco/Kavka-Core/protobuf/gen/go
 plugins:
-  # Generate for GoLang
-  - remote: buf.build/protocolbuffers/go:v1.34.2
+  # Generate GoLang
+  - local: protoc-gen-go
     out: protobuf/gen/go
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/go
+  - local: protoc-gen-connect-go
     out: protobuf/gen/go
     opt: paths=source_relative
-  # Generate for ES
-  - remote: buf.build/bufbuild/es:v1.10.0
+  # Generate TypeScript
+  - local: protoc-gen-es
     out: protobuf/gen/es
-  - remote: buf.build/connectrpc/es:v1.4.0
+    opt:
+      - target=ts
+      - import_extension=.ts
+      - js_import_style=module
+  - local: protoc-gen-connect-es
     out: protobuf/gen/es
-
+    opt:
+      - target=ts
+      - import_extension=.ts
+      - js_import_style=module
+  

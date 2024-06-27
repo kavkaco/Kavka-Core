@@ -18,8 +18,8 @@ type AuthTestSuite struct {
 	suite.Suite
 	client authv1connect.AuthServiceClient
 
-	name, lastName, username, email, password   string
-	verifyEmailToken, accessToken, refreshToken string //nolint
+	name, lastName, username, email, password                       string
+	verifyEmailToken, resetPasswordToken, accessToken, refreshToken string //nolint
 }
 
 func (s *AuthTestSuite) SetupSuite() {
@@ -168,7 +168,7 @@ func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
 
 	require.NoError(s.T(), err)
 
-	s.verifyEmailToken = resp.Msg.VerifyEmailToken
+	s.resetPasswordToken = resp.Msg.ResetPasswordToken
 }
 
 func (s *AuthTestSuite) TestH_SubmitResetPassword() {
@@ -178,8 +178,8 @@ func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 	newPassword := "new-password2"
 	_, err := s.client.SubmitResetPassword(ctx, &connect.Request[authv1.SubmitResetPasswordRequest]{
 		Msg: &authv1.SubmitResetPasswordRequest{
-			Token:       s.verifyEmailToken,
-			NewPassword: newPassword,
+			ResetPasswordToken: s.resetPasswordToken,
+			NewPassword:        newPassword,
 		},
 	})
 	require.NoError(s.T(), err)
