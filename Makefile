@@ -50,5 +50,4 @@ build:
 	go build -o ./build/server cmd/server/server.go
 
 gen_protobuf:
-	rm -rdf ./protobuf/gen
 	buf generate --path ./protobuf
