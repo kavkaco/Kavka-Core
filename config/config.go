@@ -2,12 +2,15 @@ package config
 
 import (
 	"errors"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
 )
 
 var ProjectRootPath = ConfigsDirPath() + "/../"
@@ -20,47 +23,56 @@ const (
 	Test
 )
 
-var CurrentEnv Env = Development
+var (
+	CurrentEnv Env = Development
+	filename   string
+)
 
 type (
 	Config struct {
-		AppName string `yaml:"app_name"`
-		Mongo   Mongo  `yaml:"mongo"`
-		Redis   Redis  `yaml:"redis"`
-		Email   Email  `yaml:"email"`
-		MinIO   MinIO  `yaml:"minio"`
-		HTTP    HTTP   `yaml:"http"`
-		Auth    Auth   `yaml:"auth"`
+		AppName string `koanf:"app_name"`
+		Mongo   Mongo  `koanf:"mongo"`
+		Redis   Redis  `koanf:"redis"`
+		Email   Email  `koanf:"email"`
+		MinIO   MinIO  `koanf:"minio"`
+		HTTP    HTTP   `koanf:"http"`
+		Auth    Auth   `koanf:"auth"`
 	}
+
 	Auth struct {
-		SecretKey string `yaml:"secret"`
+		SecretKey string `koanf:"secret"`
 	}
+
 	HTTP struct {
-		Host string `yaml:"host"`
-		Port int    `yaml:"port"`
-		Cors Cors   `yaml:"cors"`
+		Host string `koanf:"host"`
+		Port int    `koanf:"port"`
+		Cors Cors   `koanf:"cors"`
 	}
+
 	Cors struct {
-		AllowOrigins string `yaml:"allow_origins"`
+		AllowOrigins string `koanf:"allow_origins"`
 	}
+
 	Redis struct {
-		Host     string `yaml:"host"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		Port     int    `yaml:"port"`
-		DB       int    `yaml:"db"`
+		Host     string `koanf:"host"`
+		Username string `koanf:"username"`
+		Password string `koanf:"password"`
+		Port     int    `koanf:"port"`
+		DB       int    `koanf:"db"`
 	}
+
 	Mongo struct {
-		Host     string `yaml:"host"`
-		Username string `yaml:"username"`
-		Password string `yaml:"password"`
-		Port     int    `yaml:"port"`
-		DBName   string `yaml:"db_name"`
+		Host     string `koanf:"host"`
+		Username string `koanf:"username"`
+		Password string `koanf:"password"`
+		Port     int    `koanf:"port"`
+		DBName   string `koanf:"db_name"`
 	}
+
 	MinIO struct {
-		Endpoint  string `yaml:"endpoint"`
-		AccessKey string `yaml:"access_key"`
-		SecretKey string `yaml:"secret_key"`
+		Endpoint  string `koanf:"endpoint"`
+		AccessKey string `koanf:"access_key"`
+		SecretKey string `koanf:"secret_key"`
 	}
 	Email struct{}
 )
@@ -75,38 +87,37 @@ func ConfigsDirPath() string {
 }
 
 func Read() *Config {
-	// Load ENV
 	env := strings.ToLower(os.Getenv("ENV"))
 	if len(strings.TrimSpace(env)) == 0 || env == "development" {
 		CurrentEnv = Development
+		filename = "config-development.yml"
 	} else if env == "production" {
 		CurrentEnv = Production
+		filename = "config-production.yml"
 	} else if env == "test" {
 		CurrentEnv = Test
+		filename = "config-test.yml"
 	} else {
 		panic(errors.New("Invalid ENV: " + env))
 	}
 
 	// Load YAML configs
-	var cfg *Config
-
-	data, readErr := os.ReadFile(ConfigsDirPath() + "/config.yml")
-	if readErr != nil {
-		panic(readErr)
+	path := ConfigsDirPath()
+	k := koanf.New(path)
+	if err := k.Load(file.Provider(path+"/"+filename), yaml.Parser()); err != nil {
+		log.Fatalf("error loading config: %v", err)
 	}
-
-	parseErr := yaml.Unmarshal(data, &cfg)
-	if parseErr != nil {
-		panic(parseErr)
+	config := &Config{}
+	if err := k.Unmarshal("", config); err != nil {
+		log.Fatalf("error unmarshaling config: %v", err)
 	}
-
 	// Load JwtSecret keys
 	secretData, secretErr := os.ReadFile(ConfigsDirPath() + "/jwt_secret.pem")
 	if secretErr != nil {
 		panic(secretErr)
 	}
 
-	cfg.Auth.SecretKey = strings.TrimSpace(string(secretData))
+	config.Auth.SecretKey = strings.TrimSpace(string(secretData))
 
-	return cfg
+	return config
 }
