@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	connectcors "connectrpc.com/cors"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
@@ -18,6 +19,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
+	"github.com/rs/cors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -26,6 +28,19 @@ func handleError(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func newRouterCORS(allowedOrigins []string, h http.Handler) http.Handler {
+	opts := cors.Options{
+		AllowedOrigins:      allowedOrigins,
+		AllowedMethods:      []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:      connectcors.AllowedHeaders(),
+		AllowPrivateNetwork: true,
+	}
+
+	c := cors.New(opts)
+
+	return c.Handler(h)
 }
 
 func main() {
@@ -79,7 +94,7 @@ func main() {
 
 	// Init grpc server
 	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
-	router := http.NewServeMux()
+	gRPCRouter := http.NewServeMux()
 
 	authInterceptor := interceptor.NewAuthInterceptor(authService)
 	interceptors := connect.WithInterceptors(authInterceptor)
@@ -90,14 +105,13 @@ func main() {
 	chatGrpcHandler := grpc_service.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
-	router.Handle(authGrpcRoute, authGrpcRouter)
-	router.Handle(chatGrpcRoute, chatGrpcRouter)
+	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
+	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 
-	log.Println(authGrpcRoute)
-
+	gRPCHandler := newRouterCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{
 		Addr:         grpcListenAddr,
-		Handler:      h2c.NewHandler(router, &http2.Server{}),
+		Handler:      h2c.NewHandler(gRPCHandler, &http2.Server{}),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 7 * time.Second,
 	}

@@ -1,4 +1,4 @@
-# Install development tools (golangci-lint, gofumpt)
+# Install development tools
 devtools:
 	@echo "Installing devtools"
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.57.1
@@ -34,21 +34,19 @@ buf_linter:
 
 # Run on development
 dev:
-	# enable gRPC log tools
-	export GRPC_GO_LOG_VERBOSITY_LEVEL=99
-	export GRPC_GO_LOG_SEVERITY_LEVEL=info
+	# set env
+	export KAVKA_ENV=development
 
 	# run server
 	go run cmd/server/server.go
 
 # Build for production
 build:
-	export GIN_MODE=release
-	export ENV=production
-	go mod tidy
-	go clean -cache
+	# set env
+	export KAVKA_ENV=production
+
+	# build
 	go build -o ./build/server cmd/server/server.go
 
 gen_protobuf:
-	rm -rdf ./protobuf/gen
 	buf generate --path ./protobuf

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -50,7 +51,7 @@ type (
 	}
 
 	Cors struct {
-		AllowOrigins string `koanf:"allow_origins"`
+		AllowOrigins []string `koanf:"allow_origins"`
 	}
 
 	Redis struct {
@@ -87,31 +88,30 @@ func ConfigsDirPath() string {
 }
 
 func Read() *Config {
-	env := strings.ToLower(os.Getenv("ENV"))
+	// Load KAVKA ENV
+	env := strings.ToLower(os.Getenv("KAVKA_ENV"))
+
 	if len(strings.TrimSpace(env)) == 0 || env == "development" {
 		CurrentEnv = Development
-		filename = "config-development.yml"
+		filename = "config.development.yml"
 	} else if env == "production" {
 		CurrentEnv = Production
-		filename = "config-production.yml"
-	} else if env == "test" {
-		CurrentEnv = Test
-		filename = "config-test.yml"
+		filename = "config.production.yml"
 	} else {
-		panic(errors.New("Invalid ENV: " + env))
+		panic(errors.New("Invalid env value set for variable KAVKA_ENV: " + env))
 	}
 
 	// Load YAML configs
-	path := ConfigsDirPath()
-	k := koanf.New(path)
-	if err := k.Load(file.Provider(path+"/"+filename), yaml.Parser()); err != nil {
+	k := koanf.New(ConfigsDirPath())
+	if err := k.Load(file.Provider(fmt.Sprintf("%s/%s", ConfigsDirPath(), filename)), yaml.Parser()); err != nil {
 		log.Fatalf("error loading config: %v", err)
 	}
 	config := &Config{}
 	if err := k.Unmarshal("", config); err != nil {
 		log.Fatalf("error unmarshaling config: %v", err)
 	}
-	// Load JwtSecret keys
+
+	// Load Jwt Secret Keys
 	secretData, secretErr := os.ReadFile(ConfigsDirPath() + "/jwt_secret.pem")
 	if secretErr != nil {
 		panic(secretErr)
