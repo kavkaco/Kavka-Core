@@ -75,9 +75,9 @@ type (
 		AccessKey string `koanf:"access_key"`
 		SecretKey string `koanf:"secret_key"`
 	}
-	Email struct{
-		SenderEmail string `koanf:"sender_email"` 
-		Password string `koanf:"password"`
+	Email struct {
+		SenderEmail string `koanf:"sender_email"`
+		Password    string `koanf:"password"`
 		Host        string `koanf:"host"`
 		Port        string `koanf:"port"`
 	}

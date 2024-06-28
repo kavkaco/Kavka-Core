@@ -7,11 +7,10 @@ import (
 
 	"github.com/flosch/pongo2"
 	"github.com/kavkaco/Kavka-Core/config"
-	"go.uber.org/zap"
 )
 
 type EmailManager interface {
-	sendEmail(template string, receiver []string, args interface{}) error
+	sendEmail(msg *emailMessage) error
 	readTemplate(template string) *pongo2.Template
 	SendWelcomeEmail(recipientEmail, name string) error
 	SendResetPasswordEmail(recipientEmail, url, name, exp string) error
@@ -21,56 +20,98 @@ type EmailManager interface {
 const TemplateFormat = "html"
 
 type EmailOtp struct {
-	Logger        *zap.Logger
 	Configs       *config.Email
 	TemplatesPath string
 }
-
-func NewEmailService(logger *zap.Logger, Configs *config.Email, templatesPath string) EmailManager {
-	return &EmailOtp{logger, Configs, templatesPath}
+type emailMessage struct {
+	template string
+	receiver []string
+	args     map[string]interface{}
+	subject  string
 }
+
+func NewEmailService(Configs *config.Email, templatesPath string) EmailManager {
+	return &EmailOtp{Configs, templatesPath}
+}
+
+func newEmailMessage(template, subject string, args map[string]interface{}, reciver []string) *emailMessage {
+	return &emailMessage{
+		template: template,
+		subject:  subject,
+		args:     args,
+		receiver: reciver,
+	}
+}
+
 func (s *EmailOtp) readTemplate(template string) *pongo2.Template {
-	tpl := pongo2.Must(pongo2.FromFile(s.TemplatesPath + "/" + template))
+	templateFile := s.TemplatesPath + "/" + template
+	tpl := pongo2.Must(pongo2.FromFile(templateFile))
 	return tpl
 }
-func (s *EmailOtp) sendEmail(template string, receiver []string, args interface{}) error {
+
+func (s *EmailOtp) sendEmail(msg *emailMessage) error {
 	if config.CurrentEnv == config.Development {
 		log.Println("Email sent")
-		log.Println(args)
+		log.Println(msg)
 		return nil
 	}
-	pongoTemplate := s.readTemplate(template)
-
-	body, err := pongoTemplate.Execute(args.(pongo2.Context))
+	pongoTemplate := s.readTemplate(msg.template)
+	ctx := make(pongo2.Context)
+	for key, value := range msg.args {
+		ctx[key] = value
+	}
+	body, err := pongoTemplate.Execute(ctx)
 	if err != nil {
 		return err
 	}
-	message := []byte(fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Verification Code\r\n\r\n%s", "Kafka", receiver, body))
+	emailMessage := fmt.Sprintf("Subject: %s\r\n"+
+		"Content-Type: text/html; charset=UTF-8\r\n"+
+		"\r\n"+body, msg.subject)
 	auth := smtp.PlainAuth("", s.Configs.SenderEmail, s.Configs.Password, s.Configs.Host)
-	err = smtp.SendMail(s.Configs.Host+":"+s.Configs.Port, auth, s.Configs.SenderEmail, receiver, message)
+	err = smtp.SendMail(s.Configs.Host+":"+s.Configs.Port, auth, s.Configs.SenderEmail, msg.receiver, []byte(emailMessage))
 	if err != nil {
 		return err
 	}
 	log.Println("Verification code email sent successfully!")
 	return nil
+}
 
-}
 func (s *EmailOtp) SendWelcomeEmail(recipientEmail, name string) error {
-	err := s.sendEmail("verification_code.html", []string{recipientEmail}, struct{ Name string }{Name: name})
+	msg := newEmailMessage(
+		"welcome_message.html",
+		"Welcome",
+		map[string]interface{}{"name": name},
+		[]string{recipientEmail},
+	)
+	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 func (s *EmailOtp) SendVerificationEmail(recipientEmail, otp string) error {
-	err := s.sendEmail("verification_code.html", []string{recipientEmail}, struct{ code string }{code: otp})
+	msg := newEmailMessage(
+		"verification_code.html",
+		"Verify Account",
+		map[string]interface{}{"code": otp},
+		[]string{recipientEmail},
+	)
+	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 func (s *EmailOtp) SendResetPasswordEmail(recipientEmail, url, name, exp string) error {
-	err := s.sendEmail("submit_reset_password.html", []string{recipientEmail}, struct{ name, url, exp string }{name: name, url: url, exp: exp})
+	msg := newEmailMessage(
+		"submit_reset_password.html",
+		"Reset Password",
+		map[string]interface{}{"name": name, "reset_url": url, "expiry": exp},
+		[]string{recipientEmail},
+	)
+	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}
