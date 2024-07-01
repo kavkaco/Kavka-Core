@@ -11,19 +11,17 @@ import (
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 	v1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 )
 
-type handler struct {
+type ChatGrpcServer struct {
 	chatService chat.ChatService
 }
 
-func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceHandler {
-	return handler{chatService}
+func NewChatGrpcHandler(chatService chat.ChatService) *ChatGrpcServer {
+	return &ChatGrpcServer{chatService}
 }
 
-func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
+func (h *ChatGrpcServer) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
 	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
 
 	chat, err := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
@@ -43,7 +41,7 @@ func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.
 	return res, nil
 }
 
-func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
+func (h *ChatGrpcServer) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
 	chat, err := h.chatService.CreateDirect(ctx, req.Msg.UserId, req.Msg.RecipientUserId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -58,7 +56,7 @@ func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.C
 	return res, nil
 }
 
-func (h handler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {
+func (h *ChatGrpcServer) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {
 	chat, err := h.chatService.CreateGroup(ctx, req.Msg.UserId, req.Msg.Title, req.Msg.Title, req.Msg.Description)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -73,7 +71,7 @@ func (h handler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.Cr
 	return res, nil
 }
 
-func (h handler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
+func (h *ChatGrpcServer) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
 	chatID, err := primitive.ObjectIDFromHex(req.Msg.ChatId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -92,7 +90,7 @@ func (h handler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetCha
 	return res, nil
 }
 
-func (h handler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
+func (h *ChatGrpcServer) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
 	chats, err := h.chatService.GetUserChats(ctx, req.Msg.UserId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)

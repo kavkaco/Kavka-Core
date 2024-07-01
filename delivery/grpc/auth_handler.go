@@ -14,11 +14,11 @@ type AuthGrpcServer struct {
 	authService auth.AuthService
 }
 
-func NewAuthGrpcHandler(authService auth.AuthService) AuthGrpcServer {
-	return AuthGrpcServer{authService}
+func NewAuthGrpcHandler(authService auth.AuthService) *AuthGrpcServer {
+	return &AuthGrpcServer{authService}
 }
 
-func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.LoginRequest]) (*connect.Response[authv1.LoginResponse], error) {
+func (a *AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.LoginRequest]) (*connect.Response[authv1.LoginResponse], error) {
 	user, accessToken, refreshToken, err := a.authService.Login(ctx, req.Msg.Email, req.Msg.Password)
 	if err != nil {
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
@@ -33,7 +33,7 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 	return res, nil
 }
 
-func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
+func (a *AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
 	user, verifyEmailToken, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -47,7 +47,7 @@ func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv
 	return res, nil
 }
 
-func (a AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[authv1.AuthenticateRequest]) (*connect.Response[authv1.AuthenticateResponse], error) {
+func (a *AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[authv1.AuthenticateRequest]) (*connect.Response[authv1.AuthenticateResponse], error) {
 	user, err := a.authService.Authenticate(ctx, req.Msg.AccessToken)
 	if err != nil {
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
@@ -60,7 +60,7 @@ func (a AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[a
 	return res, nil
 }
 
-func (a AuthGrpcServer) ChangePassword(ctx context.Context, req *connect.Request[authv1.ChangePasswordRequest]) (*connect.Response[authv1.ChangePasswordResponse], error) {
+func (a *AuthGrpcServer) ChangePassword(ctx context.Context, req *connect.Request[authv1.ChangePasswordRequest]) (*connect.Response[authv1.ChangePasswordResponse], error) {
 	err := a.authService.ChangePassword(ctx, req.Msg.AccessToken, req.Msg.OldPassword, req.Msg.NewPassword)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -70,7 +70,7 @@ func (a AuthGrpcServer) ChangePassword(ctx context.Context, req *connect.Request
 	return res, nil
 }
 
-func (a AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[authv1.RefreshTokenRequest]) (*connect.Response[authv1.RefreshTokenResponse], error) {
+func (a *AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[authv1.RefreshTokenRequest]) (*connect.Response[authv1.RefreshTokenResponse], error) {
 	newAccessToken, err := a.authService.RefreshToken(ctx, req.Msg.RefreshToken, req.Msg.AccessToken)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -83,7 +83,7 @@ func (a AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[a
 	return res, nil
 }
 
-func (a AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *connect.Request[authv1.SendResetPasswordVerificationRequest]) (*connect.Response[authv1.SendResetPasswordVerificationResponse], error) {
+func (a *AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *connect.Request[authv1.SendResetPasswordVerificationRequest]) (*connect.Response[authv1.SendResetPasswordVerificationResponse], error) {
 	resetPasswordToken, timeout, err := a.authService.SendResetPasswordVerification(ctx, req.Msg.Email)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -98,7 +98,7 @@ func (a AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *
 	return res, nil
 }
 
-func (a AuthGrpcServer) SubmitResetPassword(ctx context.Context, req *connect.Request[authv1.SubmitResetPasswordRequest]) (*connect.Response[authv1.SubmitResetPasswordResponse], error) {
+func (a *AuthGrpcServer) SubmitResetPassword(ctx context.Context, req *connect.Request[authv1.SubmitResetPasswordRequest]) (*connect.Response[authv1.SubmitResetPasswordResponse], error) {
 	err := a.authService.SubmitResetPassword(ctx, req.Msg.ResetPasswordToken, req.Msg.NewPassword)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
@@ -108,7 +108,7 @@ func (a AuthGrpcServer) SubmitResetPassword(ctx context.Context, req *connect.Re
 	return res, nil
 }
 
-func (a AuthGrpcServer) VerifyEmail(ctx context.Context, req *connect.Request[authv1.VerifyEmailRequest]) (*connect.Response[authv1.VerifyEmailResponse], error) {
+func (a *AuthGrpcServer) VerifyEmail(ctx context.Context, req *connect.Request[authv1.VerifyEmailRequest]) (*connect.Response[authv1.VerifyEmailResponse], error) {
 	err := a.authService.VerifyEmail(ctx, req.Msg.VerifyEmailToken)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
