@@ -5,9 +5,11 @@ import (
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
+	"github.com/kavkaco/Kavka-Core/config"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
+	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -26,6 +28,8 @@ type AuthTestSuite struct {
 }
 
 func (s *AuthTestSuite) SetupSuite() {
+	emailConfig := config.Read().Email
+
 	s.lem = lorem.New()
 
 	authRepo := repository_mongo.NewAuthMongoRepository(db)
@@ -34,7 +38,8 @@ func (s *AuthTestSuite) SetupSuite() {
 		PrivateKey: "private-key",
 	})
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
-	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
+	emailServcie := email.NewEmailService(&emailConfig,"email/templates")
+	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager,emailServcie)
 }
 
 func (s *AuthTestSuite) TestA_Register() {
