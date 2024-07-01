@@ -90,7 +90,7 @@ func (s *emailOtp) SendWelcomeEmail(recipientEmail, name string) error {
 	return nil
 }
 
-func (s *emailOtp) SendVerificationEmail(recipientEmail,url string) error {
+func (s *emailOtp) SendVerificationEmail(recipientEmail, url string) error {
 	msg := newEmailMessage(
 		"verification_email.html",
 		"Verify Account",

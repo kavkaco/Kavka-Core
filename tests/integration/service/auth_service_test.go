@@ -38,8 +38,8 @@ func (s *AuthTestSuite) SetupSuite() {
 		PrivateKey: "private-key",
 	})
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
-	emailServcie := email.NewEmailService(&emailConfig,"email/templates")
-	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager,emailServcie)
+	emailServcie := email.NewEmailService(&emailConfig, "email/templates")
+	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager, emailServcie)
 }
 
 func (s *AuthTestSuite) TestA_Register() {

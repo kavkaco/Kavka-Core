@@ -37,17 +37,17 @@ type AuthService interface {
 }
 
 type AuthManager struct {
-	authRepo    repository.AuthRepository
-	userRepo    repository.UserRepository
-	authManager auth_manager.AuthManager
-	validator   *validator.Validate
-	hashManager *hash.HashManager
+	authRepo     repository.AuthRepository
+	userRepo     repository.UserRepository
+	authManager  auth_manager.AuthManager
+	validator    *validator.Validate
+	hashManager  *hash.HashManager
 	emailService email.EmailManager
 }
 
-func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager,emailServic email.EmailManager) AuthService {
+func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailServic email.EmailManager) AuthService {
 	validator := validator.New()
-	return &AuthManager{authRepo, userRepo, authManager, validator, hashManager,emailServic}
+	return &AuthManager{authRepo, userRepo, authManager, validator, hashManager, emailServic}
 }
 
 func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string) (user *model.User, verifyEmailToken string, err error) {
@@ -83,9 +83,9 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 	if err != nil {
 		return nil, "", ErrCreateEmailToken
 	}
-	err = a.emailService.SendVerificationEmail(email,"example.com")
+	err = a.emailService.SendVerificationEmail(email, "example.com")
 	if err != nil {
-		return nil,"",ErrEmailWasNotSent
+		return nil, "", ErrEmailWasNotSent
 	}
 	return savedUser, verifyEmailToken, nil
 }
@@ -218,9 +218,9 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", ErrClearFailedLoginAttempts
 	}
 
-	err = a.emailService.SendWelcomeEmail(email,user.Name)
-	if err != nil{
-		return nil,"","",ErrEmailWasNotSent
+	err = a.emailService.SendWelcomeEmail(email, user.Name)
+	if err != nil {
+		return nil, "", "", ErrEmailWasNotSent
 	}
 	return user, accessToken, refreshToken, nil
 }
@@ -327,9 +327,9 @@ func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email s
 	if err != nil {
 		return "", 0, ErrGenerateToken
 	}
-	err = a.emailService.SendResetPasswordEmail(email,"example.com",user.Name,"10")
+	err = a.emailService.SendResetPasswordEmail(email, "example.com", user.Name, "10")
 	if err != nil {
-		return "",0,ErrEmailWasNotSent
+		return "", 0, ErrEmailWasNotSent
 	}
 	return resetPasswordToken, ResetPasswordTokenExpr, nil
 }

@@ -85,9 +85,9 @@ func main() {
 	// userService := user.NewUserService(userRepo)
 
 	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
-	
-	emailService := email.NewEmailService(&configs.Email,"email/templates")
-	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager,emailService)
+
+	emailService := email.NewEmailService(&configs.Email, "email/templates")
+	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
 	chatService := chat.NewChatService(chatRepo, userRepo)
