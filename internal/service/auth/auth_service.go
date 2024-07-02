@@ -220,10 +220,6 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", ErrClearFailedLoginAttempts
 	}
 
-	err = a.emailService.SendWelcomeEmail(email, user.Name)
-	if err != nil {
-		return nil, "", "", ErrEmailWasNotSent
-	}
 	return user, accessToken, refreshToken, nil
 }
 
