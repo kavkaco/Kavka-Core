@@ -42,10 +42,10 @@ type AuthManager struct {
 	authManager  auth_manager.AuthManager
 	validator    *validator.Validate
 	hashManager  *hash.HashManager
-	emailService email.EmailManager
+	emailService email.EmailService
 }
 
-func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailServic email.EmailManager) AuthService {
+func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailServic email.EmailService) AuthService {
 	validator := validator.New()
 	return &AuthManager{authRepo, userRepo, authManager, validator, hashManager, emailServic}
 }

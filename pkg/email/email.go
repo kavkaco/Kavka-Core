@@ -2,17 +2,14 @@ package email
 
 import (
 	"fmt"
-	"log"
 	"net/smtp"
 
 	"github.com/flosch/pongo2"
 	"github.com/kavkaco/Kavka-Core/config"
 )
 
-type EmailManager interface {
-	sendEmail(msg *emailMessage) error
-	readTemplate(template string) *pongo2.Template
-	SendResetPasswordEmail(recipientEmail, url, name, exp string) error
+type EmailService interface {
+	SendResetPasswordEmail(recipientEmail, url, name, expiry string) error
 	SendVerificationEmail(recipientEmail, url string) error
 }
 
@@ -29,7 +26,7 @@ type emailMessage struct {
 	subject  string
 }
 
-func NewEmailService(configs *config.Email, templatesPath string) EmailManager {
+func NewEmailService(configs *config.Email, templatesPath string) EmailService {
 	return &emailOtp{configs, templatesPath}
 }
 
@@ -48,14 +45,6 @@ func (s *emailOtp) readTemplate(template string) *pongo2.Template {
 }
 
 func (s *emailOtp) sendEmail(msg *emailMessage) error {
-	if config.CurrentEnv == config.Development {
-		log.Println("====== EMAIL SENT ====== ")
-		log.Println(msg)
-		log.Println()
-
-		return nil
-	}
-
 	pongoTemplate := s.readTemplate(msg.template)
 	ctx := make(pongo2.Context)
 	for key, value := range msg.args {
@@ -96,11 +85,11 @@ func (s *emailOtp) SendVerificationEmail(recipientEmail, url string) error {
 	return nil
 }
 
-func (s *emailOtp) SendResetPasswordEmail(recipientEmail, url, name, exp string) error {
+func (s *emailOtp) SendResetPasswordEmail(recipientEmail, url, name, expiry string) error {
 	msg := newEmailMessage(
-		"submit_reset_password.html",
+		"reset_password.html",
 		"Reset Password",
-		map[string]interface{}{"name": name, "url": url, "expiry": exp},
+		map[string]interface{}{"name": name, "url": url, "expiry": expiry},
 		[]string{recipientEmail},
 	)
 	err := s.sendEmail(msg)

@@ -8,6 +8,7 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
+	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -36,11 +37,13 @@ func (s *AuthTestSuite) SetupSuite() {
 		PrivateKey: "private-key",
 	})
 
+	emailService := email.NewEmailDevelopmentService()
+
 	s.verifyEmailRedirectUrl = "example.com"
 	s.resetPasswordRedirectUrl = "example.com"
 
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
-	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
+	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 }
 
 func (s *AuthTestSuite) TestA_Register() {
