@@ -26,9 +26,9 @@ const (
 
 type AuthService interface {
 	Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, _ error)
-	Register(ctx context.Context, name string, lastName string, username string, email string, password string) (user *model.User, verifyEmailToken string, err error)
+	Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (user *model.User, verifyEmailToken string, err error)
 	VerifyEmail(ctx context.Context, verifyEmailToken string) error
-	SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, _ error)
+	SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, _ error)
 	SubmitResetPassword(ctx context.Context, token string, newPassword string) error
 	ChangePassword(ctx context.Context, accessToken string, oldPassword string, newPassword string) error
 	Authenticate(ctx context.Context, accessToken string) (*model.User, error)
@@ -42,15 +42,15 @@ type AuthManager struct {
 	authManager  auth_manager.AuthManager
 	validator    *validator.Validate
 	hashManager  *hash.HashManager
-	emailService email.EmailManager
+	emailService email.EmailService
 }
 
-func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailServic email.EmailManager) AuthService {
+func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailServic email.EmailService) AuthService {
 	validator := validator.New()
 	return &AuthManager{authRepo, userRepo, authManager, validator, hashManager, emailServic}
 }
 
-func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string) (user *model.User, verifyEmailToken string, err error) {
+func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (user *model.User, verifyEmailToken string, err error) {
 	err = a.validator.Struct(RegisterValidation{name, lastName, username, email, password})
 	if err != nil {
 		return nil, "", fmt.Errorf("%w: %v", ErrInvalidValidation, err)
@@ -83,10 +83,12 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 	if err != nil {
 		return nil, "", ErrCreateEmailToken
 	}
-	err = a.emailService.SendVerificationEmail(email, "example.com")
+
+	err = a.emailService.SendVerificationEmail(email, verifyEmailRedirectUrl)
 	if err != nil {
 		return nil, "", ErrEmailWasNotSent
 	}
+
 	return savedUser, verifyEmailToken, nil
 }
 
@@ -298,9 +300,8 @@ func (a *AuthManager) RefreshToken(ctx context.Context, refreshToken string, acc
 	return newAccessToken, nil
 }
 
-// email should be verified and not be locked to enter to reset password process
-func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email string) (token string, timeout time.Duration, _ error) {
-	err := a.validator.Struct(SendResetPasswordVerificationValidation{email})
+func (a *AuthManager) SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, _ error) {
+	err := a.validator.Struct(SendResetPasswordValidation{email})
 	if err != nil {
 		return "", 0, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
 	}
@@ -327,7 +328,8 @@ func (a *AuthManager) SendResetPasswordVerification(ctx context.Context, email s
 	if err != nil {
 		return "", 0, ErrGenerateToken
 	}
-	err = a.emailService.SendResetPasswordEmail(email, "example.com", user.Name, "10")
+
+	err = a.emailService.SendResetPasswordEmail(email, resetPasswordRedirectUrl, user.Name, "10")
 	if err != nil {
 		return "", 0, ErrEmailWasNotSent
 	}

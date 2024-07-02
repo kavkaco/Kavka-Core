@@ -77,16 +77,18 @@ func main() {
 
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 
-	// Define paths
-	// templatesPath := config.ProjectRootPath + "/app/views/mail/"
-	// emailService := email.NewEmailService(logger, &configs.Email, templatesPath)
-
 	userRepo := repository_mongo.NewUserMongoRepository(mongoDB)
 	// userService := user.NewUserService(userRepo)
 
 	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
 
-	emailService := email.NewEmailService(&configs.Email, "email/templates")
+	var emailService email.EmailService
+	if config.CurrentEnv == config.Production {
+		emailService = email.NewEmailService(&configs.Email, "email/templates")
+	} else {
+		emailService = email.NewEmailDevelopmentService()
+	}
+
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
