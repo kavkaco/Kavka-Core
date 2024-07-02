@@ -18,11 +18,13 @@ type AuthTestSuite struct {
 	service service.AuthService
 	lem     *lorem.Lorem
 
-	verifyEmailToken   string
-	email, password    string
-	accessToken        string
-	refreshToken       string
-	resetPasswordToken string
+	verifyEmailToken         string
+	email, password          string
+	accessToken              string
+	refreshToken             string
+	resetPasswordToken       string
+	verifyEmailRedirectUrl   string
+	resetPasswordRedirectUrl string
 }
 
 func (s *AuthTestSuite) SetupSuite() {
@@ -33,6 +35,10 @@ func (s *AuthTestSuite) SetupSuite() {
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
 		PrivateKey: "private-key",
 	})
+
+	s.verifyEmailRedirectUrl = "example.com"
+	s.resetPasswordRedirectUrl = "example.com"
+
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager)
 }
@@ -46,7 +52,7 @@ func (s *AuthTestSuite) TestA_Register() {
 	email := s.lem.Email()
 	password := "strong-password"
 
-	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password)
+	user, verifyEmailToken, err := s.service.Register(ctx, name, lastName, username, email, password, s.verifyEmailRedirectUrl)
 	require.NoError(s.T(), err)
 
 	require.NotEmpty(s.T(), verifyEmailToken)
@@ -119,10 +125,10 @@ func (s *AuthTestSuite) TestF_RefreshToken() {
 	require.NotEqual(s.T(), newAccessToken, s.accessToken)
 }
 
-func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
+func (s *AuthTestSuite) TestG_SendResetPassword() {
 	ctx := context.TODO()
 
-	resetPasswordToken, timeout, err := s.service.SendResetPasswordVerification(ctx, s.email)
+	resetPasswordToken, timeout, err := s.service.SendResetPassword(ctx, s.email, s.resetPasswordRedirectUrl)
 	require.NoError(s.T(), err)
 
 	require.NotEmpty(s.T(), timeout)

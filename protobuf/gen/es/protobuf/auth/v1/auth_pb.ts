@@ -128,6 +128,11 @@ export class RegisterRequest extends Message<RegisterRequest> {
    */
   password = "";
 
+  /**
+   * @generated from field: string verify_email_redirect_url = 6;
+   */
+  verifyEmailRedirectUrl = "";
+
   constructor(data?: PartialMessage<RegisterRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -141,6 +146,7 @@ export class RegisterRequest extends Message<RegisterRequest> {
     { no: 3, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "password", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "verify_email_redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RegisterRequest {
@@ -272,46 +278,52 @@ export class VerifyEmailResponse extends Message<VerifyEmailResponse> {
 }
 
 /**
- * @generated from message protobuf.auth.v1.SendResetPasswordVerificationRequest
+ * @generated from message protobuf.auth.v1.SendResetPasswordRequest
  */
-export class SendResetPasswordVerificationRequest extends Message<SendResetPasswordVerificationRequest> {
+export class SendResetPasswordRequest extends Message<SendResetPasswordRequest> {
   /**
    * @generated from field: string email = 1;
    */
   email = "";
 
-  constructor(data?: PartialMessage<SendResetPasswordVerificationRequest>) {
+  /**
+   * @generated from field: string reset_password_redirect_url = 2;
+   */
+  resetPasswordRedirectUrl = "";
+
+  constructor(data?: PartialMessage<SendResetPasswordRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.auth.v1.SendResetPasswordVerificationRequest";
+  static readonly typeName = "protobuf.auth.v1.SendResetPasswordRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "reset_password_redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendResetPasswordVerificationRequest {
-    return new SendResetPasswordVerificationRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendResetPasswordRequest {
+    return new SendResetPasswordRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendResetPasswordVerificationRequest {
-    return new SendResetPasswordVerificationRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendResetPasswordRequest {
+    return new SendResetPasswordRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendResetPasswordVerificationRequest {
-    return new SendResetPasswordVerificationRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendResetPasswordRequest {
+    return new SendResetPasswordRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SendResetPasswordVerificationRequest | PlainMessage<SendResetPasswordVerificationRequest> | undefined, b: SendResetPasswordVerificationRequest | PlainMessage<SendResetPasswordVerificationRequest> | undefined): boolean {
-    return proto3.util.equals(SendResetPasswordVerificationRequest, a, b);
+  static equals(a: SendResetPasswordRequest | PlainMessage<SendResetPasswordRequest> | undefined, b: SendResetPasswordRequest | PlainMessage<SendResetPasswordRequest> | undefined): boolean {
+    return proto3.util.equals(SendResetPasswordRequest, a, b);
   }
 }
 
 /**
- * @generated from message protobuf.auth.v1.SendResetPasswordVerificationResponse
+ * @generated from message protobuf.auth.v1.SendResetPasswordResponse
  */
-export class SendResetPasswordVerificationResponse extends Message<SendResetPasswordVerificationResponse> {
+export class SendResetPasswordResponse extends Message<SendResetPasswordResponse> {
   /**
    * @generated from field: string reset_password_token = 1;
    */
@@ -322,32 +334,32 @@ export class SendResetPasswordVerificationResponse extends Message<SendResetPass
    */
   timeout?: Duration;
 
-  constructor(data?: PartialMessage<SendResetPasswordVerificationResponse>) {
+  constructor(data?: PartialMessage<SendResetPasswordResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.auth.v1.SendResetPasswordVerificationResponse";
+  static readonly typeName = "protobuf.auth.v1.SendResetPasswordResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "reset_password_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "timeout", kind: "message", T: Duration },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendResetPasswordVerificationResponse {
-    return new SendResetPasswordVerificationResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendResetPasswordResponse {
+    return new SendResetPasswordResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendResetPasswordVerificationResponse {
-    return new SendResetPasswordVerificationResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendResetPasswordResponse {
+    return new SendResetPasswordResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendResetPasswordVerificationResponse {
-    return new SendResetPasswordVerificationResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendResetPasswordResponse {
+    return new SendResetPasswordResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: SendResetPasswordVerificationResponse | PlainMessage<SendResetPasswordVerificationResponse> | undefined, b: SendResetPasswordVerificationResponse | PlainMessage<SendResetPasswordVerificationResponse> | undefined): boolean {
-    return proto3.util.equals(SendResetPasswordVerificationResponse, a, b);
+  static equals(a: SendResetPasswordResponse | PlainMessage<SendResetPasswordResponse> | undefined, b: SendResetPasswordResponse | PlainMessage<SendResetPasswordResponse> | undefined): boolean {
+    return proto3.util.equals(SendResetPasswordResponse, a, b);
   }
 }
 

@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AuthenticateRequest, AuthenticateResponse, ChangePasswordRequest, ChangePasswordResponse, LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, RegisterRequest, RegisterResponse, SendResetPasswordVerificationRequest, SendResetPasswordVerificationResponse, SubmitResetPasswordRequest, SubmitResetPasswordResponse, VerifyEmailRequest, VerifyEmailResponse } from "./auth_pb.ts";
+import { AuthenticateRequest, AuthenticateResponse, ChangePasswordRequest, ChangePasswordResponse, LoginRequest, LoginResponse, RefreshTokenRequest, RefreshTokenResponse, RegisterRequest, RegisterResponse, SendResetPasswordRequest, SendResetPasswordResponse, SubmitResetPasswordRequest, SubmitResetPasswordResponse, VerifyEmailRequest, VerifyEmailResponse } from "./auth_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -40,12 +40,12 @@ export const AuthService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc protobuf.auth.v1.AuthService.SendResetPasswordVerification
+     * @generated from rpc protobuf.auth.v1.AuthService.SendResetPassword
      */
-    sendResetPasswordVerification: {
-      name: "SendResetPasswordVerification",
-      I: SendResetPasswordVerificationRequest,
-      O: SendResetPasswordVerificationResponse,
+    sendResetPassword: {
+      name: "SendResetPassword",
+      I: SendResetPasswordRequest,
+      O: SendResetPasswordResponse,
       kind: MethodKind.Unary,
     },
     /**

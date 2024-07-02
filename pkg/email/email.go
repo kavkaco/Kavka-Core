@@ -12,7 +12,6 @@ import (
 type EmailManager interface {
 	sendEmail(msg *emailMessage) error
 	readTemplate(template string) *pongo2.Template
-	SendWelcomeEmail(recipientEmail, name string) error
 	SendResetPasswordEmail(recipientEmail, url, name, exp string) error
 	SendVerificationEmail(recipientEmail, url string) error
 }
@@ -74,22 +73,6 @@ func (s *emailOtp) sendEmail(msg *emailMessage) error {
 
 	auth := smtp.PlainAuth("", s.configs.SenderEmail, s.configs.Password, s.configs.Host)
 	err = smtp.SendMail(s.configs.Host+":"+s.configs.Port, auth, s.configs.SenderEmail, msg.receiver, []byte(emailMessage))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *emailOtp) SendWelcomeEmail(recipientEmail, name string) error {
-	msg := newEmailMessage(
-		"welcome_message.html",
-		"Welcome",
-		map[string]interface{}{"name": name},
-		[]string{recipientEmail},
-	)
-
-	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}

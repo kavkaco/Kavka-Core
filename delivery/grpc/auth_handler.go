@@ -34,7 +34,7 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 }
 
 func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
-	user, verifyEmailToken, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password)
+	user, verifyEmailToken, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password, req.Msg.VerifyEmailRedirectUrl)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
@@ -83,14 +83,14 @@ func (a AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[a
 	return res, nil
 }
 
-func (a AuthGrpcServer) SendResetPasswordVerification(ctx context.Context, req *connect.Request[authv1.SendResetPasswordVerificationRequest]) (*connect.Response[authv1.SendResetPasswordVerificationResponse], error) {
-	resetPasswordToken, timeout, err := a.authService.SendResetPasswordVerification(ctx, req.Msg.Email)
+func (a AuthGrpcServer) SendResetPassword(ctx context.Context, req *connect.Request[authv1.SendResetPasswordRequest]) (*connect.Response[authv1.SendResetPasswordResponse], error) {
+	resetPasswordToken, timeout, err := a.authService.SendResetPassword(ctx, req.Msg.Email, req.Msg.ResetPasswordRedirectUrl)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	timeoutProto := durationpb.New(timeout)
-	res := connect.NewResponse(&authv1.SendResetPasswordVerificationResponse{
+	res := connect.NewResponse(&authv1.SendResetPasswordResponse{
 		ResetPasswordToken: resetPasswordToken,
 		Timeout:            timeoutProto,
 	})
