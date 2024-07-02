@@ -20,8 +20,8 @@ type EmailManager interface {
 const TemplateFormat = "html"
 
 type emailOtp struct {
-	Configs       *config.Email
-	TemplatesPath string
+	configs       *config.Email
+	templatesPath string
 }
 type emailMessage struct {
 	template string
@@ -30,49 +30,54 @@ type emailMessage struct {
 	subject  string
 }
 
-func NewEmailService(Configs *config.Email, templatesPath string) EmailManager {
-	return &emailOtp{Configs, templatesPath}
+func NewEmailService(configs *config.Email, templatesPath string) EmailManager {
+	return &emailOtp{configs, templatesPath}
 }
 
-func newEmailMessage(template, subject string, args map[string]interface{}, reciver []string) *emailMessage {
+func newEmailMessage(template, subject string, args map[string]interface{}, receiver []string) *emailMessage {
 	return &emailMessage{
 		template: template,
 		subject:  subject,
 		args:     args,
-		receiver: reciver,
+		receiver: receiver,
 	}
 }
 
 func (s *emailOtp) readTemplate(template string) *pongo2.Template {
-	templateFile := s.TemplatesPath + "/" + template
-	tpl := pongo2.Must(pongo2.FromFile(templateFile))
-	return tpl
+	templateFile := s.templatesPath + "/" + template
+	return pongo2.Must(pongo2.FromFile(templateFile))
 }
 
 func (s *emailOtp) sendEmail(msg *emailMessage) error {
 	if config.CurrentEnv == config.Development {
-		log.Println("Email sent")
+		log.Println("====== EMAIL SENT ====== ")
 		log.Println(msg)
+		log.Println()
+
 		return nil
 	}
+
 	pongoTemplate := s.readTemplate(msg.template)
 	ctx := make(pongo2.Context)
 	for key, value := range msg.args {
 		ctx[key] = value
 	}
+
 	body, err := pongoTemplate.Execute(ctx)
 	if err != nil {
 		return err
 	}
+
 	emailMessage := fmt.Sprintf("Subject: %s\r\n"+
 		"Content-Type: text/html; charset=UTF-8\r\n"+
 		"\r\n"+body, msg.subject)
-	auth := smtp.PlainAuth("", s.Configs.SenderEmail, s.Configs.Password, s.Configs.Host)
-	err = smtp.SendMail(s.Configs.Host+":"+s.Configs.Port, auth, s.Configs.SenderEmail, msg.receiver, []byte(emailMessage))
+
+	auth := smtp.PlainAuth("", s.configs.SenderEmail, s.configs.Password, s.configs.Host)
+	err = smtp.SendMail(s.configs.Host+":"+s.configs.Port, auth, s.configs.SenderEmail, msg.receiver, []byte(emailMessage))
 	if err != nil {
 		return err
 	}
-	log.Println("Verification code email sent successfully!")
+
 	return nil
 }
 
@@ -83,24 +88,28 @@ func (s *emailOtp) SendWelcomeEmail(recipientEmail, name string) error {
 		map[string]interface{}{"name": name},
 		[]string{recipientEmail},
 	)
+
 	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (s *emailOtp) SendVerificationEmail(recipientEmail,url string) error {
+func (s *emailOtp) SendVerificationEmail(recipientEmail, url string) error {
 	msg := newEmailMessage(
 		"verification_email.html",
 		"Verify Account",
 		map[string]interface{}{"url": url},
 		[]string{recipientEmail},
 	)
+
 	err := s.sendEmail(msg)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
