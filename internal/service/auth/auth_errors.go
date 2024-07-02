@@ -24,5 +24,5 @@ var (
 	ErrUnlockAccount            = errors.New("failed to unlock account")
 	ErrLockAccount              = errors.New("failed to lock account")
 	ErrDeleteUser               = errors.New("failed to delete user")
-	ErrEmailWasNotSent = errors.New("email wasn't sent")
+	ErrEmailWasNotSent          = errors.New("email wasn't sent")
 )
