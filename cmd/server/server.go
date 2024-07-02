@@ -16,6 +16,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
+	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
@@ -84,7 +85,9 @@ func main() {
 	// userService := user.NewUserService(userRepo)
 
 	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
-	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager)
+	
+	emailService := email.NewEmailService(&configs.Email,"email/templates")
+	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager,emailService)
 
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
 	chatService := chat.NewChatService(chatRepo, userRepo)
