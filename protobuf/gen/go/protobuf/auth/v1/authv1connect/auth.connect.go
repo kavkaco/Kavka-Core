@@ -39,9 +39,9 @@ const (
 	AuthServiceRegisterProcedure = "/protobuf.auth.v1.AuthService/Register"
 	// AuthServiceVerifyEmailProcedure is the fully-qualified name of the AuthService's VerifyEmail RPC.
 	AuthServiceVerifyEmailProcedure = "/protobuf.auth.v1.AuthService/VerifyEmail"
-	// AuthServiceSendResetPasswordVerificationProcedure is the fully-qualified name of the
-	// AuthService's SendResetPasswordVerification RPC.
-	AuthServiceSendResetPasswordVerificationProcedure = "/protobuf.auth.v1.AuthService/SendResetPasswordVerification"
+	// AuthServiceSendResetPasswordProcedure is the fully-qualified name of the AuthService's
+	// SendResetPassword RPC.
+	AuthServiceSendResetPasswordProcedure = "/protobuf.auth.v1.AuthService/SendResetPassword"
 	// AuthServiceSubmitResetPasswordProcedure is the fully-qualified name of the AuthService's
 	// SubmitResetPassword RPC.
 	AuthServiceSubmitResetPasswordProcedure = "/protobuf.auth.v1.AuthService/SubmitResetPassword"
@@ -58,15 +58,15 @@ const (
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	authServiceServiceDescriptor                             = v1.File_protobuf_auth_v1_auth_proto.Services().ByName("AuthService")
-	authServiceLoginMethodDescriptor                         = authServiceServiceDescriptor.Methods().ByName("Login")
-	authServiceRegisterMethodDescriptor                      = authServiceServiceDescriptor.Methods().ByName("Register")
-	authServiceVerifyEmailMethodDescriptor                   = authServiceServiceDescriptor.Methods().ByName("VerifyEmail")
-	authServiceSendResetPasswordVerificationMethodDescriptor = authServiceServiceDescriptor.Methods().ByName("SendResetPasswordVerification")
-	authServiceSubmitResetPasswordMethodDescriptor           = authServiceServiceDescriptor.Methods().ByName("SubmitResetPassword")
-	authServiceChangePasswordMethodDescriptor                = authServiceServiceDescriptor.Methods().ByName("ChangePassword")
-	authServiceAuthenticateMethodDescriptor                  = authServiceServiceDescriptor.Methods().ByName("Authenticate")
-	authServiceRefreshTokenMethodDescriptor                  = authServiceServiceDescriptor.Methods().ByName("RefreshToken")
+	authServiceServiceDescriptor                   = v1.File_protobuf_auth_v1_auth_proto.Services().ByName("AuthService")
+	authServiceLoginMethodDescriptor               = authServiceServiceDescriptor.Methods().ByName("Login")
+	authServiceRegisterMethodDescriptor            = authServiceServiceDescriptor.Methods().ByName("Register")
+	authServiceVerifyEmailMethodDescriptor         = authServiceServiceDescriptor.Methods().ByName("VerifyEmail")
+	authServiceSendResetPasswordMethodDescriptor   = authServiceServiceDescriptor.Methods().ByName("SendResetPassword")
+	authServiceSubmitResetPasswordMethodDescriptor = authServiceServiceDescriptor.Methods().ByName("SubmitResetPassword")
+	authServiceChangePasswordMethodDescriptor      = authServiceServiceDescriptor.Methods().ByName("ChangePassword")
+	authServiceAuthenticateMethodDescriptor        = authServiceServiceDescriptor.Methods().ByName("Authenticate")
+	authServiceRefreshTokenMethodDescriptor        = authServiceServiceDescriptor.Methods().ByName("RefreshToken")
 )
 
 // AuthServiceClient is a client for the protobuf.auth.v1.AuthService service.
@@ -74,7 +74,7 @@ type AuthServiceClient interface {
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	VerifyEmail(context.Context, *connect.Request[v1.VerifyEmailRequest]) (*connect.Response[v1.VerifyEmailResponse], error)
-	SendResetPasswordVerification(context.Context, *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error)
+	SendResetPassword(context.Context, *connect.Request[v1.SendResetPasswordRequest]) (*connect.Response[v1.SendResetPasswordResponse], error)
 	SubmitResetPassword(context.Context, *connect.Request[v1.SubmitResetPasswordRequest]) (*connect.Response[v1.SubmitResetPasswordResponse], error)
 	ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error)
 	Authenticate(context.Context, *connect.Request[v1.AuthenticateRequest]) (*connect.Response[v1.AuthenticateResponse], error)
@@ -109,10 +109,10 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceVerifyEmailMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		sendResetPasswordVerification: connect.NewClient[v1.SendResetPasswordVerificationRequest, v1.SendResetPasswordVerificationResponse](
+		sendResetPassword: connect.NewClient[v1.SendResetPasswordRequest, v1.SendResetPasswordResponse](
 			httpClient,
-			baseURL+AuthServiceSendResetPasswordVerificationProcedure,
-			connect.WithSchema(authServiceSendResetPasswordVerificationMethodDescriptor),
+			baseURL+AuthServiceSendResetPasswordProcedure,
+			connect.WithSchema(authServiceSendResetPasswordMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		submitResetPassword: connect.NewClient[v1.SubmitResetPasswordRequest, v1.SubmitResetPasswordResponse](
@@ -144,14 +144,14 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // authServiceClient implements AuthServiceClient.
 type authServiceClient struct {
-	login                         *connect.Client[v1.LoginRequest, v1.LoginResponse]
-	register                      *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
-	verifyEmail                   *connect.Client[v1.VerifyEmailRequest, v1.VerifyEmailResponse]
-	sendResetPasswordVerification *connect.Client[v1.SendResetPasswordVerificationRequest, v1.SendResetPasswordVerificationResponse]
-	submitResetPassword           *connect.Client[v1.SubmitResetPasswordRequest, v1.SubmitResetPasswordResponse]
-	changePassword                *connect.Client[v1.ChangePasswordRequest, v1.ChangePasswordResponse]
-	authenticate                  *connect.Client[v1.AuthenticateRequest, v1.AuthenticateResponse]
-	refreshToken                  *connect.Client[v1.RefreshTokenRequest, v1.RefreshTokenResponse]
+	login               *connect.Client[v1.LoginRequest, v1.LoginResponse]
+	register            *connect.Client[v1.RegisterRequest, v1.RegisterResponse]
+	verifyEmail         *connect.Client[v1.VerifyEmailRequest, v1.VerifyEmailResponse]
+	sendResetPassword   *connect.Client[v1.SendResetPasswordRequest, v1.SendResetPasswordResponse]
+	submitResetPassword *connect.Client[v1.SubmitResetPasswordRequest, v1.SubmitResetPasswordResponse]
+	changePassword      *connect.Client[v1.ChangePasswordRequest, v1.ChangePasswordResponse]
+	authenticate        *connect.Client[v1.AuthenticateRequest, v1.AuthenticateResponse]
+	refreshToken        *connect.Client[v1.RefreshTokenRequest, v1.RefreshTokenResponse]
 }
 
 // Login calls protobuf.auth.v1.AuthService.Login.
@@ -169,9 +169,9 @@ func (c *authServiceClient) VerifyEmail(ctx context.Context, req *connect.Reques
 	return c.verifyEmail.CallUnary(ctx, req)
 }
 
-// SendResetPasswordVerification calls protobuf.auth.v1.AuthService.SendResetPasswordVerification.
-func (c *authServiceClient) SendResetPasswordVerification(ctx context.Context, req *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error) {
-	return c.sendResetPasswordVerification.CallUnary(ctx, req)
+// SendResetPassword calls protobuf.auth.v1.AuthService.SendResetPassword.
+func (c *authServiceClient) SendResetPassword(ctx context.Context, req *connect.Request[v1.SendResetPasswordRequest]) (*connect.Response[v1.SendResetPasswordResponse], error) {
+	return c.sendResetPassword.CallUnary(ctx, req)
 }
 
 // SubmitResetPassword calls protobuf.auth.v1.AuthService.SubmitResetPassword.
@@ -199,7 +199,7 @@ type AuthServiceHandler interface {
 	Login(context.Context, *connect.Request[v1.LoginRequest]) (*connect.Response[v1.LoginResponse], error)
 	Register(context.Context, *connect.Request[v1.RegisterRequest]) (*connect.Response[v1.RegisterResponse], error)
 	VerifyEmail(context.Context, *connect.Request[v1.VerifyEmailRequest]) (*connect.Response[v1.VerifyEmailResponse], error)
-	SendResetPasswordVerification(context.Context, *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error)
+	SendResetPassword(context.Context, *connect.Request[v1.SendResetPasswordRequest]) (*connect.Response[v1.SendResetPasswordResponse], error)
 	SubmitResetPassword(context.Context, *connect.Request[v1.SubmitResetPasswordRequest]) (*connect.Response[v1.SubmitResetPasswordResponse], error)
 	ChangePassword(context.Context, *connect.Request[v1.ChangePasswordRequest]) (*connect.Response[v1.ChangePasswordResponse], error)
 	Authenticate(context.Context, *connect.Request[v1.AuthenticateRequest]) (*connect.Response[v1.AuthenticateResponse], error)
@@ -230,10 +230,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceVerifyEmailMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	authServiceSendResetPasswordVerificationHandler := connect.NewUnaryHandler(
-		AuthServiceSendResetPasswordVerificationProcedure,
-		svc.SendResetPasswordVerification,
-		connect.WithSchema(authServiceSendResetPasswordVerificationMethodDescriptor),
+	authServiceSendResetPasswordHandler := connect.NewUnaryHandler(
+		AuthServiceSendResetPasswordProcedure,
+		svc.SendResetPassword,
+		connect.WithSchema(authServiceSendResetPasswordMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	authServiceSubmitResetPasswordHandler := connect.NewUnaryHandler(
@@ -268,8 +268,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceRegisterHandler.ServeHTTP(w, r)
 		case AuthServiceVerifyEmailProcedure:
 			authServiceVerifyEmailHandler.ServeHTTP(w, r)
-		case AuthServiceSendResetPasswordVerificationProcedure:
-			authServiceSendResetPasswordVerificationHandler.ServeHTTP(w, r)
+		case AuthServiceSendResetPasswordProcedure:
+			authServiceSendResetPasswordHandler.ServeHTTP(w, r)
 		case AuthServiceSubmitResetPasswordProcedure:
 			authServiceSubmitResetPasswordHandler.ServeHTTP(w, r)
 		case AuthServiceChangePasswordProcedure:
@@ -299,8 +299,8 @@ func (UnimplementedAuthServiceHandler) VerifyEmail(context.Context, *connect.Req
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.VerifyEmail is not implemented"))
 }
 
-func (UnimplementedAuthServiceHandler) SendResetPasswordVerification(context.Context, *connect.Request[v1.SendResetPasswordVerificationRequest]) (*connect.Response[v1.SendResetPasswordVerificationResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.SendResetPasswordVerification is not implemented"))
+func (UnimplementedAuthServiceHandler) SendResetPassword(context.Context, *connect.Request[v1.SendResetPasswordRequest]) (*connect.Response[v1.SendResetPasswordResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.auth.v1.AuthService.SendResetPassword is not implemented"))
 }
 
 func (UnimplementedAuthServiceHandler) SubmitResetPassword(context.Context, *connect.Request[v1.SubmitResetPasswordRequest]) (*connect.Response[v1.SubmitResetPasswordResponse], error) {

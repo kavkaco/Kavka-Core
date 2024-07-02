@@ -10,7 +10,7 @@ service AuthService {
   rpc Login(LoginRequest) returns (LoginResponse);
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse);
-  rpc SendResetPasswordVerification(SendResetPasswordVerificationRequest) returns (SendResetPasswordVerificationResponse);
+  rpc SendResetPassword(SendResetPasswordRequest) returns (SendResetPasswordResponse);
   rpc SubmitResetPassword(SubmitResetPasswordRequest) returns (SubmitResetPasswordResponse);
   rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
@@ -34,6 +34,7 @@ message RegisterRequest {
   string username = 3;
   string email = 4;
   string password = 5;
+  string verify_email_redirect_url = 6;
 }
 
 message RegisterResponse {
@@ -47,11 +48,12 @@ message VerifyEmailRequest {
 
 message VerifyEmailResponse {}
 
-message SendResetPasswordVerificationRequest {
+message SendResetPasswordRequest {
   string email = 1;
+  string reset_password_redirect_url = 2;
 }
 
-message SendResetPasswordVerificationResponse {
+message SendResetPasswordResponse {
   string reset_password_token = 1;
   google.protobuf.Duration timeout = 2;
 }

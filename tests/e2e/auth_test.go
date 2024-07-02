@@ -20,6 +20,8 @@ type AuthTestSuite struct {
 
 	name, lastName, username, email, password                       string
 	verifyEmailToken, resetPasswordToken, accessToken, refreshToken string //nolint
+	verifyEmailRedirectUrl                                          string
+	resetPasswordRedirectUrl                                        string
 }
 
 func (s *AuthTestSuite) SetupSuite() {
@@ -31,6 +33,9 @@ func (s *AuthTestSuite) SetupSuite() {
 	s.email = l.Email()
 	s.password = l.Word(10, 30)
 
+	s.verifyEmailRedirectUrl = "example.com"
+	s.resetPasswordRedirectUrl = "example.com"
+
 	s.client = authv1connect.NewAuthServiceClient(http.DefaultClient, BaseUrl)
 }
 
@@ -40,11 +45,12 @@ func (s *AuthTestSuite) TestA_Register() {
 
 	resp, err := s.client.Register(ctx, &connect.Request[authv1.RegisterRequest]{
 		Msg: &authv1.RegisterRequest{
-			Name:     s.name,
-			LastName: s.lastName,
-			Username: s.username,
-			Email:    s.email,
-			Password: s.password,
+			Name:                   s.name,
+			LastName:               s.lastName,
+			Username:               s.username,
+			Email:                  s.email,
+			Password:               s.password,
+			VerifyEmailRedirectUrl: s.verifyEmailRedirectUrl,
 		},
 	})
 	require.NoError(s.T(), err)
@@ -156,13 +162,14 @@ func (s *AuthTestSuite) TestF_RefreshToken() {
 	s.accessToken = resp.Msg.AccessToken
 }
 
-func (s *AuthTestSuite) TestG_SendResetPasswordVerification() {
+func (s *AuthTestSuite) TestG_SendResetPassword() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
 
-	resp, err := s.client.SendResetPasswordVerification(ctx, &connect.Request[authv1.SendResetPasswordVerificationRequest]{
-		Msg: &authv1.SendResetPasswordVerificationRequest{
-			Email: s.email,
+	resp, err := s.client.SendResetPassword(ctx, &connect.Request[authv1.SendResetPasswordRequest]{
+		Msg: &authv1.SendResetPasswordRequest{
+			Email:                    s.email,
+			ResetPasswordRedirectUrl: s.resetPasswordRedirectUrl,
 		},
 	})
 

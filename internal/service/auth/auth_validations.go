@@ -32,7 +32,7 @@ type RefreshTokenValidation struct {
 	AccessToken  string `validate:"required"`
 }
 
-type SendResetPasswordVerificationValidation struct {
+type SendResetPasswordValidation struct {
 	Email string `validate:"required,email"`
 }
 
