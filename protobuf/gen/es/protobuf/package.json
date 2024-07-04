@@ -1,9 +1,19 @@
 {
   "name": "kavka-core",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "main": "index.js",
-  "keywords": ["kavka", "buf.build", "proto3"],
+  "keywords": [
+    "kavka",
+    "buf.build",
+    "proto3"
+  ],
   "author": "kavkaco",
   "repository.url": "https://github.com/kavkaco/Kavka-Core",
-  "description": "kavka grpc connector with connectrpc.com"
+  "description": "kavka grpc connector with connectrpc.com",
+  "dependencies": {
+    "@bufbuild/protobuf": "^1.10.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.4.5"
+  }
 }

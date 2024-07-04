@@ -1,28 +1,25 @@
 version: v2
 managed:
-  enabled: true
-  override:
-    - file_option: go_package_prefix
-      value: github.com/kavkaco/Kavka-Core/protobuf/gen/go
+    enabled: true
+    override:
+        - file_option: go_package_prefix
+          value: github.com/kavkaco/Kavka-Core/protobuf/gen/go
 plugins:
-  # Generate GoLang
-  - local: protoc-gen-go
-    out: protobuf/gen/go
-    opt: paths=source_relative
-  - local: protoc-gen-connect-go
-    out: protobuf/gen/go
-    opt: paths=source_relative
-  # Generate TypeScript
-  - local: protoc-gen-es
-    out: protobuf/gen/es
-    opt:
-      - target=ts
-      - import_extension=.ts
-      - js_import_style=module
-  - local: protoc-gen-connect-es
-    out: protobuf/gen/es
-    opt:
-      - target=ts
-      - import_extension=.ts
-      - js_import_style=module
-  
+    # Generate GoLang
+    - local: protoc-gen-go
+      out: protobuf/gen/go
+      opt: paths=source_relative
+    - local: protoc-gen-connect-go
+      out: protobuf/gen/go
+      opt: paths=source_relative
+    # Generate TypeScript
+    - local: protoc-gen-es
+      out: protobuf/gen/es
+      opt:
+          - target=ts
+          - import_extension=.js
+    - local: protoc-gen-connect-es
+      out: protobuf/gen/es
+      opt:
+          - target=ts
+          - import_extension=.js
