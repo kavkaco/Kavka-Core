@@ -16,12 +16,10 @@ plugins:
     - local: protoc-gen-es
       out: protobuf/gen/es
       opt:
-          - target=js
+          - target=ts
           - import_extension=.js
-          - js_import_style=module
     - local: protoc-gen-connect-es
       out: protobuf/gen/es
       opt:
           - target=ts
           - import_extension=.js
-          - js_import_style=module
