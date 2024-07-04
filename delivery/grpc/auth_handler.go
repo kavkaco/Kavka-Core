@@ -2,7 +2,6 @@ package grpc_service
 
 import (
 	"context"
-	"log"
 
 	"connectrpc.com/connect"
 	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
@@ -20,9 +19,6 @@ func NewAuthGrpcHandler(authService auth.AuthService) AuthGrpcServer {
 }
 
 func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.LoginRequest]) (*connect.Response[authv1.LoginResponse], error) {
-	log.Println(req.Msg.Email)
-	log.Println(req.Msg.Password)
-
 	user, accessToken, refreshToken, err := a.authService.Login(ctx, req.Msg.Email, req.Msg.Password)
 	if err != nil {
 		return nil, connect.NewError(connect.CodePermissionDenied, err)
