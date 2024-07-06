@@ -38,6 +38,7 @@ type (
 		MinIO   MinIO  `koanf:"minio"`
 		HTTP    HTTP   `koanf:"http"`
 		Auth    Auth   `koanf:"auth"`
+		Logger  Logger `koanf:"logger"`
 	}
 
 	Auth struct {
@@ -75,11 +76,21 @@ type (
 		AccessKey string `koanf:"access_key"`
 		SecretKey string `koanf:"secret_key"`
 	}
+
 	Email struct {
 		SenderEmail string `koanf:"sender_email"`
 		Password    string `koanf:"password"`
 		Host        string `koanf:"host"`
 		Port        string `koanf:"port"`
+	}
+
+	Logger struct {
+		Filename   string   `koanf:"filename"`
+		LogLevel   string   `koanf:"level"`
+		Targets    []string `koanf:"targets"`
+		MaxSize    int      `koanf:"max_size"`
+		MaxBackups int      `koanf:"max_backups"`
+		Compress   bool     `koanf:"compress"`
 	}
 )
 
