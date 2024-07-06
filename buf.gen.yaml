@@ -22,4 +22,4 @@ plugins:
       out: protobuf/gen/es
       opt:
           - target=ts
-          - import_extension=.js
+          - import_extension=none
