@@ -17,9 +17,9 @@ plugins:
       out: protobuf/gen/es
       opt:
           - target=ts
-          - import_extension=.js
+          - import_extension=.ts
     - local: protoc-gen-connect-es
       out: protobuf/gen/es
       opt:
           - target=ts
-          - import_extension=.js
+          - import_extension=.ts

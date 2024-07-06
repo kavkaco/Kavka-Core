@@ -43,7 +43,7 @@ func (s *AuthTestSuite) TestA_Register() {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	defer cancel()
 
-	resp, err := s.client.Register(ctx, &connect.Request[authv1.RegisterRequest]{
+	_, err := s.client.Register(ctx, &connect.Request[authv1.RegisterRequest]{
 		Msg: &authv1.RegisterRequest{
 			Name:                   s.name,
 			LastName:               s.lastName,
@@ -53,15 +53,8 @@ func (s *AuthTestSuite) TestA_Register() {
 			VerifyEmailRedirectUrl: s.verifyEmailRedirectUrl,
 		},
 	})
+
 	require.NoError(s.T(), err)
-
-	require.Equal(s.T(), resp.Msg.User.Name, s.name)
-	require.Equal(s.T(), resp.Msg.User.LastName, s.lastName)
-	require.Equal(s.T(), resp.Msg.User.Username, s.username)
-	require.Equal(s.T(), resp.Msg.User.Email, s.email)
-	require.NotEmpty(s.T(), resp.Msg.VerifyEmailToken)
-
-	s.verifyEmailToken = resp.Msg.VerifyEmailToken
 }
 
 func (s *AuthTestSuite) TestB_VerifyEmail() {

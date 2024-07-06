@@ -231,9 +231,6 @@ type RegisterResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	User             *v1.User `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
-	VerifyEmailToken string   `protobuf:"bytes,2,opt,name=verify_email_token,json=verifyEmailToken,proto3" json:"verify_email_token,omitempty"`
 }
 
 func (x *RegisterResponse) Reset() {
@@ -266,20 +263,6 @@ func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
 func (*RegisterResponse) Descriptor() ([]byte, []int) {
 	return file_protobuf_auth_v1_auth_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *RegisterResponse) GetUser() *v1.User {
-	if x != nil {
-		return x.User
-	}
-	return nil
-}
-
-func (x *RegisterResponse) GetVerifyEmailToken() string {
-	if x != nil {
-		return x.VerifyEmailToken
-	}
-	return ""
 }
 
 type VerifyEmailRequest struct {
@@ -902,15 +885,9 @@ var file_protobuf_auth_v1_auth_proto_rawDesc = []byte{
 	0x6f, 0x72, 0x64, 0x12, 0x39, 0x0a, 0x19, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x5f, 0x65, 0x6d,
 	0x61, 0x69, 0x6c, 0x5f, 0x72, 0x65, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x5f, 0x75, 0x72, 0x6c,
 	0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x16, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d,
-	0x61, 0x69, 0x6c, 0x52, 0x65, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x55, 0x72, 0x6c, 0x22, 0x72,
+	0x61, 0x69, 0x6c, 0x52, 0x65, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x55, 0x72, 0x6c, 0x22, 0x12,
 	0x0a, 0x10, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x30, 0x0a, 0x04, 0x75, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x1c, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x6d, 0x6f, 0x64, 0x65,
-	0x6c, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x04,
-	0x75, 0x73, 0x65, 0x72, 0x12, 0x2c, 0x0a, 0x12, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x5f, 0x65,
-	0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x10, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x54, 0x6f, 0x6b,
-	0x65, 0x6e, 0x22, 0x42, 0x0a, 0x12, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d, 0x61, 0x69,
+	0x73, 0x65, 0x22, 0x42, 0x0a, 0x12, 0x56, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d, 0x61, 0x69,
 	0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2c, 0x0a, 0x12, 0x76, 0x65, 0x72, 0x69,
 	0x66, 0x79, 0x5f, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x5f, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x76, 0x65, 0x72, 0x69, 0x66, 0x79, 0x45, 0x6d, 0x61, 0x69,
@@ -1068,30 +1045,29 @@ var file_protobuf_auth_v1_auth_proto_goTypes = []any{
 }
 var file_protobuf_auth_v1_auth_proto_depIdxs = []int32{
 	16, // 0: protobuf.auth.v1.LoginResponse.user:type_name -> protobuf.model.user.v1.User
-	16, // 1: protobuf.auth.v1.RegisterResponse.user:type_name -> protobuf.model.user.v1.User
-	17, // 2: protobuf.auth.v1.SendResetPasswordResponse.timeout:type_name -> google.protobuf.Duration
-	16, // 3: protobuf.auth.v1.AuthenticateResponse.user:type_name -> protobuf.model.user.v1.User
-	0,  // 4: protobuf.auth.v1.AuthService.Login:input_type -> protobuf.auth.v1.LoginRequest
-	2,  // 5: protobuf.auth.v1.AuthService.Register:input_type -> protobuf.auth.v1.RegisterRequest
-	4,  // 6: protobuf.auth.v1.AuthService.VerifyEmail:input_type -> protobuf.auth.v1.VerifyEmailRequest
-	6,  // 7: protobuf.auth.v1.AuthService.SendResetPassword:input_type -> protobuf.auth.v1.SendResetPasswordRequest
-	8,  // 8: protobuf.auth.v1.AuthService.SubmitResetPassword:input_type -> protobuf.auth.v1.SubmitResetPasswordRequest
-	10, // 9: protobuf.auth.v1.AuthService.ChangePassword:input_type -> protobuf.auth.v1.ChangePasswordRequest
-	12, // 10: protobuf.auth.v1.AuthService.Authenticate:input_type -> protobuf.auth.v1.AuthenticateRequest
-	14, // 11: protobuf.auth.v1.AuthService.RefreshToken:input_type -> protobuf.auth.v1.RefreshTokenRequest
-	1,  // 12: protobuf.auth.v1.AuthService.Login:output_type -> protobuf.auth.v1.LoginResponse
-	3,  // 13: protobuf.auth.v1.AuthService.Register:output_type -> protobuf.auth.v1.RegisterResponse
-	5,  // 14: protobuf.auth.v1.AuthService.VerifyEmail:output_type -> protobuf.auth.v1.VerifyEmailResponse
-	7,  // 15: protobuf.auth.v1.AuthService.SendResetPassword:output_type -> protobuf.auth.v1.SendResetPasswordResponse
-	9,  // 16: protobuf.auth.v1.AuthService.SubmitResetPassword:output_type -> protobuf.auth.v1.SubmitResetPasswordResponse
-	11, // 17: protobuf.auth.v1.AuthService.ChangePassword:output_type -> protobuf.auth.v1.ChangePasswordResponse
-	13, // 18: protobuf.auth.v1.AuthService.Authenticate:output_type -> protobuf.auth.v1.AuthenticateResponse
-	15, // 19: protobuf.auth.v1.AuthService.RefreshToken:output_type -> protobuf.auth.v1.RefreshTokenResponse
-	12, // [12:20] is the sub-list for method output_type
-	4,  // [4:12] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	17, // 1: protobuf.auth.v1.SendResetPasswordResponse.timeout:type_name -> google.protobuf.Duration
+	16, // 2: protobuf.auth.v1.AuthenticateResponse.user:type_name -> protobuf.model.user.v1.User
+	0,  // 3: protobuf.auth.v1.AuthService.Login:input_type -> protobuf.auth.v1.LoginRequest
+	2,  // 4: protobuf.auth.v1.AuthService.Register:input_type -> protobuf.auth.v1.RegisterRequest
+	4,  // 5: protobuf.auth.v1.AuthService.VerifyEmail:input_type -> protobuf.auth.v1.VerifyEmailRequest
+	6,  // 6: protobuf.auth.v1.AuthService.SendResetPassword:input_type -> protobuf.auth.v1.SendResetPasswordRequest
+	8,  // 7: protobuf.auth.v1.AuthService.SubmitResetPassword:input_type -> protobuf.auth.v1.SubmitResetPasswordRequest
+	10, // 8: protobuf.auth.v1.AuthService.ChangePassword:input_type -> protobuf.auth.v1.ChangePasswordRequest
+	12, // 9: protobuf.auth.v1.AuthService.Authenticate:input_type -> protobuf.auth.v1.AuthenticateRequest
+	14, // 10: protobuf.auth.v1.AuthService.RefreshToken:input_type -> protobuf.auth.v1.RefreshTokenRequest
+	1,  // 11: protobuf.auth.v1.AuthService.Login:output_type -> protobuf.auth.v1.LoginResponse
+	3,  // 12: protobuf.auth.v1.AuthService.Register:output_type -> protobuf.auth.v1.RegisterResponse
+	5,  // 13: protobuf.auth.v1.AuthService.VerifyEmail:output_type -> protobuf.auth.v1.VerifyEmailResponse
+	7,  // 14: protobuf.auth.v1.AuthService.SendResetPassword:output_type -> protobuf.auth.v1.SendResetPasswordResponse
+	9,  // 15: protobuf.auth.v1.AuthService.SubmitResetPassword:output_type -> protobuf.auth.v1.SubmitResetPasswordResponse
+	11, // 16: protobuf.auth.v1.AuthService.ChangePassword:output_type -> protobuf.auth.v1.ChangePasswordResponse
+	13, // 17: protobuf.auth.v1.AuthService.Authenticate:output_type -> protobuf.auth.v1.AuthenticateResponse
+	15, // 18: protobuf.auth.v1.AuthService.RefreshToken:output_type -> protobuf.auth.v1.RefreshTokenResponse
+	11, // [11:19] is the sub-list for method output_type
+	3,  // [3:11] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_protobuf_auth_v1_auth_proto_init() }
