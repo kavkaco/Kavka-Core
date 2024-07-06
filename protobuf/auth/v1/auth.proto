@@ -37,10 +37,7 @@ message RegisterRequest {
   string verify_email_redirect_url = 6;
 }
 
-message RegisterResponse {
-  model.user.v1.User user = 1;
-  string verify_email_token = 2;
-}
+message RegisterResponse {}
 
 message VerifyEmailRequest {
   string verify_email_token = 1;

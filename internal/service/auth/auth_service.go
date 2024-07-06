@@ -53,7 +53,7 @@ func NewAuthService(authRepo repository.AuthRepository, userRepo repository.User
 func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (user *model.User, verifyEmailToken string, err error) {
 	err = a.validator.Struct(RegisterValidation{name, lastName, username, email, password})
 	if err != nil {
-		return nil, "", fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+		return nil, "", ErrInvalidValidation
 	}
 
 	userModel := model.NewUser(name, lastName, email, username)
@@ -84,7 +84,7 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 		return nil, "", ErrCreateEmailToken
 	}
 
-	err = a.emailService.SendVerificationEmail(email, verifyEmailRedirectUrl)
+	err = a.emailService.SendVerificationEmail(email, verifyEmailRedirectUrl, verifyEmailToken)
 	if err != nil {
 		return nil, "", ErrEmailWasNotSent
 	}

@@ -34,15 +34,12 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 }
 
 func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
-	user, verifyEmailToken, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password, req.Msg.VerifyEmailRedirectUrl)
+	_, _, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password, req.Msg.VerifyEmailRedirectUrl)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	res := connect.NewResponse(&authv1.RegisterResponse{
-		User:             grpc_model.TransformUserToGrpcModel(user),
-		VerifyEmailToken: verifyEmailToken,
-	})
+	res := connect.NewResponse(&authv1.RegisterResponse{})
 
 	return res, nil
 }

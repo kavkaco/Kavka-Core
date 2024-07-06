@@ -20,10 +20,11 @@ func (e *emailDevelopmentManager) SendResetPasswordEmail(recipientEmail string, 
 	return nil
 }
 
-func (e *emailDevelopmentManager) SendVerificationEmail(recipientEmail string, url string) error {
+func (e *emailDevelopmentManager) SendVerificationEmail(recipientEmail string, url string, token string) error {
 	fmt.Println("====== EMAIL SENT ====== ")
 	fmt.Printf("=== Recipient Email: %s\n", recipientEmail)
 	fmt.Printf("=== Redirect Url: %s\n", url)
+	fmt.Printf("=== Token: %s\n", token)
 
 	return nil
 }
