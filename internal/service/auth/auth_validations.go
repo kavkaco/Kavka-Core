@@ -3,7 +3,7 @@ package auth
 type RegisterValidation struct {
 	Name     string `validate:"required,min=3,max=40"`
 	LastName string `validate:"required,min=3,max=40"`
-	Username string `validate:"required,min=6,max=20"`
+	Username string `validate:"required,min=4,max=20"`
 	Email    string `validate:"required,email"` // Email format validation
 	Password string `validate:"required,min=8"`
 }
@@ -22,7 +22,6 @@ type LoginValidation struct {
 }
 
 type ChangePasswordValidation struct {
-	AccessToken string `validate:"required"`
 	OldPassword string `validate:"required"`
 	NewPassword string `validate:"required,min=8"`
 }

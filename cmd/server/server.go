@@ -11,7 +11,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
-	grpc_service "github.com/kavkaco/Kavka-Core/delivery/grpc"
+	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
@@ -104,10 +104,10 @@ func main() {
 	authInterceptor := interceptor.NewAuthInterceptor(authService)
 	interceptors := connect.WithInterceptors(authInterceptor)
 
-	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
+	authGrpcHandler := grpc_handlers.NewAuthGrpcHandler(authService)
 	authGrpcRoute, authGrpcRouter := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	chatGrpcHandler := grpc_service.NewChatGrpcHandler(chatService)
+	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
