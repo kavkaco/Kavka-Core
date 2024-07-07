@@ -13,6 +13,7 @@ import (
 	auth_manager "github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
+	"github.com/kavkaco/Kavka-Core/utils/validate"
 )
 
 const (
@@ -50,10 +51,23 @@ func NewAuthService(authRepo repository.AuthRepository, userRepo repository.User
 	return &AuthManager{authRepo, userRepo, authManager, validator, hashManager, emailServic}
 }
 
-func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (user *model.User, verifyEmailToken string, err error) {
-	err = a.validator.Struct(RegisterValidation{name, lastName, username, email, password})
-	if err != nil {
-		return nil, "", ErrInvalidValidation
+type DetailedValidation struct {
+	error
+	Detail []string
+}
+
+// func DetailedValidationError(detail []string) error {
+// 	return &DetailedValidation{Detail: detail}
+// }
+
+// func (e *DetailedValidation) Error() string {
+// 	return strings.Join(e.Detail, "\n")
+// }
+
+func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (*model.User, string, error) {
+	errorsList := validate.Validate(RegisterValidation{name, lastName, username, email, password})
+	if len(errorsList) > 0 {
+		return nil, "", validate.NewWrappedValidationError(errorsList)
 	}
 
 	userModel := model.NewUser(name, lastName, email, username)
@@ -75,7 +89,7 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 		return nil, "", ErrCreateAuthStore
 	}
 
-	verifyEmailToken, err = a.authManager.GenerateToken(
+	verifyEmailToken, err := a.authManager.GenerateToken(
 		ctx, auth_manager.VerifyEmail,
 		auth_manager.NewTokenClaims(savedUser.UserID, auth_manager.VerifyEmail),
 		VerifyEmailTokenExpr,

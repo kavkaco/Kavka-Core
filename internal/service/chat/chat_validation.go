@@ -17,13 +17,13 @@ type CreateDirectValidation struct {
 
 type CreateChannelValidation struct {
 	UserID      model.UserID `validate:"required"`
-	Title       string       `validate:"required"`
-	Username    string       `validate:"required"`
-	Description string       `validate:"required"`
+	Title       string       `validate:"required,min=8"`
+	Username    string       `validate:"required,min=6"`
+	Description string
 }
 type CreateGroupValidation struct {
 	UserID      model.UserID `validate:"required"`
-	Title       string       `validate:"required"`
-	Username    string       `validate:"required"`
-	Description string       `validate:"required"`
+	Title       string       `validate:"required,min=8"`
+	Username    string       `validate:"required,min=6"`
+	Description string
 }

@@ -2,11 +2,13 @@ package grpc_service
 
 import (
 	"context"
+	"fmt"
 
 	"connectrpc.com/connect"
 	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	authv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -36,7 +38,25 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 func (a AuthGrpcServer) Register(ctx context.Context, req *connect.Request[authv1.RegisterRequest]) (*connect.Response[authv1.RegisterResponse], error) {
 	_, _, err := a.authService.Register(ctx, req.Msg.Name, req.Msg.LastName, req.Msg.Username, req.Msg.Email, req.Msg.Password, req.Msg.VerifyEmailRedirectUrl)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+		errDetail := errdetails.BadRequest{
+			FieldViolations: []*errdetails.BadRequest_FieldViolation{
+				{
+					Field:       "Name",
+					Description: "hello world",
+				},
+			},
+		}
+
+		connectErr := connect.NewError(connect.CodeInvalidArgument, err)
+
+		if detail, detailErr := connect.NewErrorDetail(&errDetail); detailErr == nil {
+			connectErr.AddDetail(detail)
+		}
+
+		fmt.Println("here")
+
+		return nil, connectErr
+		// return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	res := connect.NewResponse(&authv1.RegisterResponse{})
