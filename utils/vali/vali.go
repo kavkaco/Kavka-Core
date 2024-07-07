@@ -11,9 +11,11 @@ import (
 
 var vi = validator.New()
 
-var locale_EN = en.New()
-var uni = ut.New(locale_EN, locale_EN)
-var ValiTranslator, _ = uni.GetTranslator("en")
+var (
+	locale_EN         = en.New()
+	uni               = ut.New(locale_EN, locale_EN)
+	ValiTranslator, _ = uni.GetTranslator("en")
+)
 
 var (
 	valiLock     = &sync.Mutex{}
