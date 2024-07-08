@@ -47,5 +47,5 @@ func (*Vali) Validate(s interface{}) validator.ValidationErrors {
 }
 
 func (*Vali) translateOverride() {
-	en_translations.RegisterDefaultTranslations(vi, ValiTranslator)
+	en_translations.RegisterDefaultTranslations(vi, ValiTranslator) // nolint
 }

@@ -28,9 +28,7 @@ func NewAuthInterceptor(authService auth.AuthService) connect.UnaryInterceptorFu
 
 			ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
 
-			next(ctx, req)
-
-			return nil, nil
+			return next(ctx, req)
 		})
 	}
 
