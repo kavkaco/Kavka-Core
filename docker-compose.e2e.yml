@@ -1,0 +1,52 @@
+version: "3.9"
+services:
+  redis:
+    networks:
+      - default_network
+    container_name: "test_redis_db"
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    restart: always
+  mongo:
+    networks:
+      - default_network
+    container_name: "test_mongo_db"
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: test
+      MONGO_INITDB_DATABASE: test
+  minio:
+    networks:
+      - default_network
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minio_admin
+      MINIO_ROOT_PASSWORD: minio_password
+  app:
+    network_mode: host
+    container_name: "test_server"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - redis
+      - mongo
+      - minio
+    ports:
+      - "3000:3000"
+      
+networks:
+  default_network:
+    driver: "bridge"
+    name: "test_default_network"

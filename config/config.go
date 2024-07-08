@@ -102,6 +102,9 @@ func Read() *Config {
 	} else if env == "production" {
 		CurrentEnv = Production
 		filename = "config.production.yml"
+	} else if env == "test" {
+		CurrentEnv = Test
+		filename = "config.test.yml"
 	} else {
 		panic(errors.New("Invalid env value set for variable KAVKA_ENV: " + env))
 	}
