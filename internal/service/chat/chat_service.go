@@ -46,7 +46,6 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	validationErrors := s.validator.Validate(GetUserChatsValidation{userID})
 	if len(validationErrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: validationErrors}
-
 	}
 
 	user, err := s.userRepo.FindByUserID(ctx, userID)

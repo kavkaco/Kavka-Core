@@ -28,12 +28,9 @@ func NewAuthInterceptor(authService auth.AuthService) connect.UnaryInterceptorFu
 
 			ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
 
-			resp, varror := next(ctx, req)
-			if err != nil {
-				return nil, errors.New(varror.Error())
-			}
+			next(ctx, req)
 
-			return resp, nil
+			return nil, nil
 		})
 	}
 
