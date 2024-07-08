@@ -1,12 +1,9 @@
-package grpc_service
+package grpc_handlers
 
 import (
 	"context"
 
 	"connectrpc.com/connect"
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
-	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
-	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 
@@ -21,24 +18,26 @@ func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceH
 	return handler{chatService}
 }
 
+// FIXME
 func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
-	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
+	return nil, nil
+	// userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
 
-	chat, err := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	}
+	// chat, err := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
+	// if err != nil {
+	// 	return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	// }
 
-	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chat)
-	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
-	}
+	// chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chat)
+	// if err != nil {
+	// 	return nil, connect.NewError(connect.CodeInternal, err)
+	// }
 
-	res := connect.NewResponse(&chatv1.CreateChannelResponse{
-		Chat: chatGrpcModel,
-	})
+	// res := connect.NewResponse(&chatv1.CreateChannelResponse{
+	// 	Chat: chatGrpcModel,
+	// })
 
-	return res, nil
+	// return res, nil
 }
 
 func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -20,7 +19,6 @@ type ChatTestSuite struct {
 	suite.Suite
 	userRepo repository.UserRepository
 	service  service.ChatService
-	lem      *lorem.Lorem
 
 	userID               model.UserID
 	createdChannelChatID model.ChatID
@@ -30,8 +28,6 @@ type ChatTestSuite struct {
 }
 
 func (s *ChatTestSuite) SetupSuite() {
-	s.lem = lorem.New()
-
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	userRepo := repository_mongo.NewUserMongoRepository(db)
 
@@ -45,15 +41,15 @@ func (s *ChatTestSuite) SetupSuite() {
 func (s *ChatTestSuite) TestCreateChannel() {
 	ctx := context.TODO()
 
-	title := s.lem.Word(3, 6)
-	username := s.lem.LastName()
-	description := s.lem.Paragraph(1, 4)
+	title := "Channel 1"
+	username := "kavka_channel_1"
+	description := "This channel is created from integration tests."
 	members := []model.UserID{s.userID}
 	admins := []model.UserID{s.userID}
 	owner := s.userID
 
-	saved, err := s.service.CreateChannel(ctx, s.userID, title, username, description)
-	require.NoError(s.T(), err)
+	saved, varror := s.service.CreateChannel(ctx, s.userID, title, username, description)
+	require.Nil(s.T(), varror)
 
 	chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](saved.ChatDetail)
 	require.NoError(s.T(), err)
@@ -72,15 +68,15 @@ func (s *ChatTestSuite) TestCreateChannel() {
 func (s *ChatTestSuite) TestCreateGroup() {
 	ctx := context.TODO()
 
-	title := s.lem.Word(3, 6)
-	username := s.lem.LastName()
-	description := s.lem.Paragraph(1, 4)
+	title := "Group 1"
+	username := "kavka_group_1"
+	description := "This group is created from integration tests."
 	members := []model.UserID{s.userID}
 	admins := []model.UserID{s.userID}
 	owner := s.userID
 
-	saved, err := s.service.CreateGroup(ctx, s.userID, title, username, description)
-	require.NoError(s.T(), err)
+	saved, varror := s.service.CreateGroup(ctx, s.userID, title, username, description)
+	require.Nil(s.T(), varror)
 
 	chatDetail, err := utils.TypeConverter[model.GroupChatDetail](saved.ChatDetail)
 	require.NoError(s.T(), err)
@@ -99,8 +95,8 @@ func (s *ChatTestSuite) TestCreateGroup() {
 func (s *ChatTestSuite) TestCreateDirect() {
 	ctx := context.TODO()
 
-	saved, err := s.service.CreateDirect(ctx, s.userID, s.recipientUserID)
-	require.NoError(s.T(), err)
+	saved, varror := s.service.CreateDirect(ctx, s.userID, s.recipientUserID)
+	require.Nil(s.T(), varror)
 
 	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](saved.ChatDetail)
 	require.NoError(s.T(), err)
@@ -114,8 +110,8 @@ func (s *ChatTestSuite) TestCreateDirect() {
 func (s *ChatTestSuite) TestGetChat() {
 	ctx := context.TODO()
 
-	chat, err := s.service.GetChat(ctx, s.createdChannelChatID)
-	require.NoError(s.T(), err)
+	chat, varror := s.service.GetChat(ctx, s.createdChannelChatID)
+	require.Nil(s.T(), varror)
 
 	require.NotEmpty(s.T(), chat)
 	require.Equal(s.T(), chat.ChatID, s.createdChannelChatID)
@@ -125,7 +121,9 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	ctx := context.TODO()
 
 	// Create a real user to test GetUserChats
-	userModel := model.NewUser(s.lem.FirstName(1), s.lem.LastName(), s.lem.Email(), s.lem.Word(1, 10))
+	userModel := model.NewUser(
+		"Margaret", "Vega", "margaret_vega@kavka.org", "margaret_vega",
+	)
 	userModel.ChatsListIDs = []model.ChatID{
 		s.createdChannelChatID,
 		s.createdGroupChatID,
@@ -134,8 +132,8 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	user, err := s.userRepo.Create(ctx, userModel)
 	require.NoError(s.T(), err)
 
-	userChatsList, err := s.service.GetUserChats(ctx, user.UserID)
-	require.NoError(s.T(), err)
+	userChatsList, varror := s.service.GetUserChats(ctx, user.UserID)
+	require.Nil(s.T(), varror)
 
 	for _, v := range userChatsList {
 		switch v.ChatType {

@@ -1,11 +1,11 @@
 package auth
 
 type RegisterValidation struct {
-	Name     string `validate:"required"`
-	LastName string `validate:"required"`
-	Username string `validate:"required"`
+	Name     string `validate:"required,min=1,max=40"`
+	LastName string `validate:"required,min=1,max=40"`
+	Username string `validate:"required,min=3,max=25"`
 	Email    string `validate:"required,email"` // Email format validation
-	Password string `validate:"required"`
+	Password string `validate:"required,min=8"`
 }
 
 type AuthenticateValidation struct {
@@ -22,9 +22,8 @@ type LoginValidation struct {
 }
 
 type ChangePasswordValidation struct {
-	AccessToken string `validate:"required"`
 	OldPassword string `validate:"required"`
-	NewPassword string `validate:"required"`
+	NewPassword string `validate:"required,min=8"`
 }
 
 type RefreshTokenValidation struct {
@@ -38,5 +37,5 @@ type SendResetPasswordValidation struct {
 
 type SubmitResetPasswordValidation struct {
 	ResetPasswordToken string `validate:"required"`
-	NewPassword        string `validate:"required"`
+	NewPassword        string `validate:"required,min=8"`
 }
