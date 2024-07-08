@@ -2,8 +2,9 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -60,11 +61,24 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 		return "", &vali.Varror{ValidationErrors: validationErrors}
 	}
 
+	// Check uniqueness of indexes
+	log.Println(email, username)
+	isUnique, unUniqueFields := a.userRepo.IsIndexesUnique(ctx, email, username)
+	if !isUnique {
+		if slices.Contains(unUniqueFields, "email") {
+			return "", &vali.Varror{Error: ErrEmailAlreadyExist}
+		}
+
+		if slices.Contains(unUniqueFields, "username") {
+			return "", &vali.Varror{Error: ErrUsernameAlreadyExist}
+		}
+
+		return "", &vali.Varror{Error: repository.ErrUniqueConstraint}
+	}
+
 	userModel := model.NewUser(name, lastName, email, username)
 	savedUser, err := a.userRepo.Create(ctx, userModel)
-	if errors.Is(err, repository.ErrUniqueConstraint) {
-		return "", &vali.Varror{Error: repository.ErrUniqueConstraint}
-	} else if err != nil {
+	if err != nil {
 		return "", &vali.Varror{Error: ErrCreateUser}
 	}
 

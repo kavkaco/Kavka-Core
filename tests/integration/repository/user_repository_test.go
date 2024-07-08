@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"slices"
 	"testing"
 
 	lorem "github.com/bozaro/golorem"
@@ -112,7 +113,21 @@ func (s *UserTestSuite) TestE_Update() {
 	require.Equal(s.T(), user.Biography, biography)
 }
 
-func (s *UserTestSuite) TestF_Delete() {
+func (s *UserTestSuite) TestF_IsIndexesUnique() {
+	ctx := context.TODO()
+
+	isUnique, unUniqueFields := s.repo.IsIndexesUnique(ctx, s.savedUser.Email, s.savedUser.Username)
+	require.False(s.T(), isUnique)
+	require.True(s.T(), slices.Contains(unUniqueFields, "email"))
+	require.True(s.T(), slices.Contains(unUniqueFields, "username"))
+
+	isUnique, unUniqueFields = s.repo.IsIndexesUnique(ctx, "random-email@kavka.org", "random-username")
+	require.True(s.T(), isUnique)
+	require.False(s.T(), slices.Contains(unUniqueFields, "email"))
+	require.False(s.T(), slices.Contains(unUniqueFields, "username"))
+}
+
+func (s *UserTestSuite) TestG_Delete() {
 	ctx := context.TODO()
 
 	err := s.repo.DeleteByID(ctx, s.savedUser.UserID)

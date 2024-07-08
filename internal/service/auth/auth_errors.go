@@ -25,4 +25,6 @@ var (
 	ErrLockAccount              = errors.New("failed to lock account")
 	ErrDeleteUser               = errors.New("failed to delete user")
 	ErrEmailWasNotSent          = errors.New("email wasn't sent")
+	ErrEmailAlreadyExist        = errors.New("email already exists")
+	ErrUsernameAlreadyExist     = errors.New("username already exists")
 )
