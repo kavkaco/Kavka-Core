@@ -31,7 +31,7 @@ func (s *AuthTestSuite) SetupSuite() {
 	s.repo = repository_mongo.NewAuthMongoRepository(db)
 
 	// Set plain password to generate hash in auth creation
-	s.plainPassword = "kavkaco"
+	s.plainPassword = "12345678"
 }
 
 func (s *AuthTestSuite) TestA_Create() {
@@ -84,7 +84,7 @@ func (s *AuthTestSuite) TestD_VerifyEmail() {
 func (s *AuthTestSuite) TestE_ChangePassword() {
 	ctx := context.TODO()
 
-	newPlainPassword := "kavkaco-new" // nolint
+	newPlainPassword := "87654321" // nolint
 	newPasswordHash, err := s.hashManager.HashPassword(newPlainPassword)
 	require.NoError(s.T(), err)
 

@@ -51,11 +51,11 @@ func (s *AuthTestSuite) SetupSuite() {
 func (s *AuthTestSuite) TestA_Register() {
 	ctx := context.TODO()
 
-	name := s.lem.FirstName(0)
-	lastName := s.lem.LastName()
-	username := s.lem.Word(3, 10)
-	email := s.lem.Email()
-	password := "strong-password"
+	name := "John"
+	lastName := "Doe"
+	username := "john_doe"
+	email := "john_doe@kavka.org"
+	password := "12345678"
 
 	verifyEmailToken, varror := s.service.Register(ctx, name, lastName, username, email, password, s.verifyEmailRedirectUrl)
 	require.Nil(s.T(), varror)
@@ -91,7 +91,7 @@ func (s *AuthTestSuite) TestC_Login() {
 func (s *AuthTestSuite) TestD_ChangePassword() {
 	ctx := context.TODO()
 
-	newPassword := "password-changed"
+	newPassword := "12341234"
 
 	varror := s.service.ChangePassword(ctx, s.userID, s.password, newPassword)
 	require.Nil(s.T(), varror)
@@ -141,7 +141,7 @@ func (s *AuthTestSuite) TestG_SendResetPassword() {
 func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 	ctx := context.TODO()
 
-	newPassword := "reset-password"
+	newPassword := "98769876"
 
 	varror := s.service.SubmitResetPassword(ctx, s.resetPasswordToken, newPassword)
 	require.Nil(s.T(), varror)

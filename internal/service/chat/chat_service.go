@@ -2,73 +2,72 @@ package chat
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
 
 type ChatService interface {
-	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
-	GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, error)
-	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error)
-	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error)
-	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error)
+	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror)
+	GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, *vali.Varror)
+	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, *vali.Varror)
+	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, *vali.Varror)
+	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, *vali.Varror)
 }
 
 type ChatManager struct {
 	chatRepo  repository.ChatRepository
 	userRepo  repository.UserRepository
-	validator *validator.Validate
+	validator *vali.Vali
 }
 
 func NewChatService(chatRepo repository.ChatRepository, userRepo repository.UserRepository) ChatService {
-	validator := validator.New()
-	return &ChatManager{chatRepo, userRepo, validator}
+	return &ChatManager{chatRepo, userRepo, vali.Validator()}
 }
 
 // find single chat with chat id
-func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, error) {
-	err := s.validator.Struct(GetChatValidation{chatID})
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror) {
+	validationErrors := s.validator.Validate(GetChatValidation{chatID})
+	if len(validationErrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
 	chat, err := s.chatRepo.FindByID(ctx, chatID)
 	if err != nil {
-		return nil, err
+		return nil, &vali.Varror{Error: ErrNotFound}
 	}
 
 	return chat, nil
 }
 
 // get the chats that belongs to user
-func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, error) {
-	err := s.validator.Struct(GetUserChatsValidation{userID})
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.Chat, *vali.Varror) {
+	validationErrors := s.validator.Validate(GetUserChatsValidation{userID})
+	if len(validationErrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: validationErrors}
+
 	}
 
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return nil, ErrNotFound
+		return nil, &vali.Varror{Error: ErrNotFound}
 	}
 
 	userChatsListIDs := user.ChatsListIDs
 
 	userChats, err := s.chatRepo.FindManyByChatID(ctx, userChatsListIDs)
 	if err != nil {
-		return nil, ErrGetUserChats
+		return nil, &vali.Varror{Error: ErrGetUserChats}
 	}
 
 	return userChats, nil
 }
 
-func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error) {
-	err := s.validator.Struct(CreateDirectValidation{userID, recipientUserID})
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, *vali.Varror) {
+	validationErrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
+	if len(validationErrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
 	sides := [2]model.UserID{userID, recipientUserID}
@@ -76,7 +75,7 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 	// Check to do not be duplicated!
 	dup, _ := s.chatRepo.FindBySides(ctx, sides)
 	if dup != nil {
-		return nil, repository.ErrUniqueConstraint
+		return nil, &vali.Varror{Error: ErrChatAlreadyExists}
 	}
 
 	chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
@@ -85,16 +84,16 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
-		return nil, ErrCreateChat
+		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
 
 	return saved, nil
 }
 
-func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error) {
-	err := s.validator.Struct(CreateGroupValidation{userID, title, username, description})
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, *vali.Varror) {
+	validationErrors := s.validator.Validate(CreateGroupValidation{userID, title, username, description})
+	if len(validationErrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
 	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
@@ -108,16 +107,16 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
-		return nil, ErrCreateChat
+		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
 
 	return saved, nil
 }
 
-func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, error) {
-	err := s.validator.Struct(CreateChannelValidation{userID, title, username, description})
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrInvalidValidation, err)
+func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.Chat, *vali.Varror) {
+	validationErrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
+	if len(validationErrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
 	chatModel := model.NewChat(model.TypeChannel, &model.ChannelChatDetail{
@@ -131,7 +130,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
-		return nil, ErrCreateChat
+		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
 
 	return saved, nil

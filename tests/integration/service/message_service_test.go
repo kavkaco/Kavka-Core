@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	service "github.com/kavkaco/Kavka-Core/internal/service/message"
@@ -18,7 +17,6 @@ import (
 type MessageTestSuite struct {
 	suite.Suite
 	service service.MessageService
-	lem     *lorem.Lorem
 
 	chatID          model.ChatID
 	userID          model.UserID
@@ -28,8 +26,6 @@ type MessageTestSuite struct {
 
 func (s *MessageTestSuite) SetupSuite() {
 	ctx := context.TODO()
-
-	s.lem = lorem.New()
 
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	messageRepo := repository_mongo.NewMessageMongoRepository(db)
@@ -57,9 +53,9 @@ func (s *MessageTestSuite) SetupSuite() {
 func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	ctx := context.TODO()
 
-	messageContent := s.lem.Paragraph(1, 20)
-	message, err := s.service.InsertTextMessage(ctx, s.chatID, s.userID, messageContent)
-	require.NoError(s.T(), err)
+	messageContent := "Hello from kavka's integration tests"
+	message, varror := s.service.InsertTextMessage(ctx, s.chatID, s.userID, messageContent)
+	require.Nil(s.T(), varror)
 
 	savedMessageContent, err := utils.TypeConverter[model.TextMessage](message.Content)
 	require.NoError(s.T(), err)
@@ -73,8 +69,8 @@ func (s *MessageTestSuite) TestA_InsertTextMessage() {
 func (s *MessageTestSuite) TestB_DeleteMessage() {
 	ctx := context.TODO()
 
-	err := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
-	require.NoError(s.T(), err)
+	varror := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
+	require.Nil(s.T(), varror)
 }
 
 func TestMessageSuite(t *testing.T) {
