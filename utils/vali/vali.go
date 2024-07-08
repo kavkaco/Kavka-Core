@@ -48,12 +48,4 @@ func (*Vali) Validate(s interface{}) validator.ValidationErrors {
 
 func (*Vali) translateOverride() {
 	en_translations.RegisterDefaultTranslations(vi, ValiTranslator)
-
-	vi.RegisterTranslation("required", ValiTranslator, func(ut ut.Translator) error {
-		return ut.Add("required", "{0} must have a value by taha", true)
-	}, func(ut ut.Translator, fe validator.FieldError) string {
-		t, _ := ut.T("required", fe.Field())
-
-		return t
-	})
 }

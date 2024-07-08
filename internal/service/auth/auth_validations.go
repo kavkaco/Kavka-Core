@@ -1,9 +1,9 @@
 package auth
 
 type RegisterValidation struct {
-	Name     string `validate:"required,min=3,max=40"`
-	LastName string `validate:"required,min=3,max=40"`
-	Username string `validate:"required,min=4,max=20"`
+	Name     string `validate:"required,min=1,max=40"`
+	LastName string `validate:"required,min=1,max=40"`
+	Username string `validate:"required,min=3,max=25"`
 	Email    string `validate:"required,email"` // Email format validation
 	Password string `validate:"required,min=8"`
 }
