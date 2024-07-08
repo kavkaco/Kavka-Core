@@ -48,7 +48,11 @@ func (repo *userRepository) IsIndexesUnique(ctx context.Context, email string, u
 		unUniqueFields = append(unUniqueFields, "username")
 	}
 
-	return user == nil, unUniqueFields
+	if user != nil {
+		return false, unUniqueFields
+	}
+
+	return true, []string{}
 }
 
 func (repo *userRepository) Update(ctx context.Context, userID string, name, lastName, username, biography string) error {

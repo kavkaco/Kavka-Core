@@ -5,7 +5,6 @@ import (
 	"slices"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -17,12 +16,10 @@ import (
 type UserTestSuite struct {
 	suite.Suite
 	repo      repository.UserRepository
-	lem       *lorem.Lorem
 	savedUser *model.User
 }
 
 func (s *UserTestSuite) SetupSuite() {
-	s.lem = lorem.New()
 	s.repo = repository_mongo.NewUserMongoRepository(db)
 }
 
@@ -36,10 +33,10 @@ func (s *UserTestSuite) TestA_Create() {
 		primitive.NewObjectID(),
 	}
 
-	name := s.lem.FirstName(2)
-	lastName := s.lem.LastName()
-	email := s.lem.Email()
-	username := s.lem.Word(1, 1)
+	name := "John"
+	lastName := "Doe"
+	email := "john_doe@kavka.org"
+	username := "john_doe"
 	userModel := model.NewUser(name, lastName, email, username)
 	userModel.ChatsListIDs = chatsListIDs
 
@@ -95,10 +92,10 @@ func (s *UserTestSuite) TestD_AddToUserChats() {
 func (s *UserTestSuite) TestE_Update() {
 	ctx := context.TODO()
 
-	name := s.lem.FirstName(2)
-	lastName := s.lem.LastName()
-	username := s.lem.Word(1, 1)
-	biography := s.lem.Sentence(1, 3)
+	name := "Jane"
+	lastName := "Bee"
+	username := "jane_bee"
+	biography := "This biography updated from kavka's integration tests."
 
 	err := s.repo.Update(ctx, s.savedUser.UserID, name, lastName, username, biography)
 	require.NoError(s.T(), err)
@@ -111,6 +108,8 @@ func (s *UserTestSuite) TestE_Update() {
 	require.Equal(s.T(), user.LastName, lastName)
 	require.Equal(s.T(), user.Username, username)
 	require.Equal(s.T(), user.Biography, biography)
+
+	s.savedUser = user
 }
 
 func (s *UserTestSuite) TestF_IsIndexesUnique() {
