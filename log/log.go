@@ -1,4 +1,4 @@
-package logs
+package log
 
 import (
 	"encoding/hex"
@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	globalInst *logger
-	logLevel   zerolog.Level
+	instance *logger
+	logLevel zerolog.Level
 )
 
 type logger struct {
@@ -31,11 +31,11 @@ type SubLogger struct {
 }
 
 func InitGlobalLogger(config config.Logger) {
-	if globalInst == nil {
+	if instance == nil {
 		writers := []io.Writer{}
 
 		if slices.Contains(config.Targets, "file") {
-			// File writer.
+			// File writer
 			fw := &lumberjack.Logger{
 				Filename:   config.Filename,
 				MaxSize:    config.MaxSize,
@@ -50,7 +50,7 @@ func InitGlobalLogger(config config.Logger) {
 			writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 		}
 
-		globalInst = &logger{
+		instance = &logger{
 			subs:   make(map[string]*SubLogger),
 			writer: io.MultiWriter(writers...),
 		}
@@ -61,7 +61,7 @@ func InitGlobalLogger(config config.Logger) {
 		}
 		zerolog.SetGlobalLevel(level)
 
-		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
+		log.Logger = zerolog.New(instance.writer).With().Timestamp().Logger()
 	}
 }
 
@@ -71,15 +71,15 @@ func NewLoggerLevel(level zerolog.Level) {
 }
 
 func getLoggersInst() *logger {
-	if globalInst == nil {
-		globalInst = &logger{
+	if instance == nil {
+		instance = &logger{
 			subs:   make(map[string]*SubLogger),
 			writer: zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
 		}
-		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
+		log.Logger = zerolog.New(instance.writer).With().Timestamp().Logger()
 	}
 
-	return globalInst
+	return instance
 }
 
 // function to set logger level based on env.
@@ -88,6 +88,7 @@ func SetLoggerLevel(level string) {
 	if err != nil {
 		parsedLevel = zerolog.InfoLevel // Default to info level if parsing fails
 	}
+
 	logLevel = parsedLevel
 }
 
@@ -105,7 +106,7 @@ func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
 		if !ok {
 			key = "!INVALID-KEY!"
 		}
-		///
+
 		value := keyvals[i+1]
 		switch v := value.(type) {
 		case fmt.Stringer:
