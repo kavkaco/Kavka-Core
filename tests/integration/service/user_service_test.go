@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -18,14 +17,12 @@ type UserTestSuite struct {
 	suite.Suite
 	service  service.UserService
 	userRepo repository.UserRepository
-	lem      *lorem.Lorem
 
 	userID model.UserID
 	email  string
 }
 
 func (s *UserTestSuite) SetupSuite() {
-	s.lem = lorem.New()
 	s.userRepo = repository_mongo.NewUserMongoRepository(db)
 	s.service = service.NewUserService(s.userRepo)
 }
