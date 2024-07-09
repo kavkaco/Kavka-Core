@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"time"
@@ -62,7 +61,6 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 	}
 
 	// Check uniqueness of indexes
-	log.Println(email, username)
 	isUnique, unUniqueFields := a.userRepo.IsIndexesUnique(ctx, email, username)
 	if !isUnique {
 		if slices.Contains(unUniqueFields, "email") {
