@@ -31,17 +31,13 @@ func handleError(err error) {
 	}
 }
 
-func newRouterCORS(allowedOrigins []string, h http.Handler) http.Handler {
-	opts := cors.Options{
+func handleCORS(allowedOrigins []string, h http.Handler) http.Handler {
+	return cors.New(cors.Options{
 		AllowedOrigins:      allowedOrigins,
-		AllowedMethods:      []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders:      connectcors.AllowedHeaders(),
+		AllowedMethods:      []string{"POST"},
+		AllowedHeaders:      append(connectcors.AllowedHeaders(), []string{"X-Access-Token"}...),
 		AllowPrivateNetwork: true,
-	}
-
-	c := cors.New(opts)
-
-	return c.Handler(h)
+	}).Handler(h)
 }
 
 func main() {
@@ -113,10 +109,10 @@ func main() {
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 
-	gRPCHandler := newRouterCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
+	handler := handleCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{
 		Addr:         grpcListenAddr,
-		Handler:      h2c.NewHandler(gRPCHandler, &http2.Server{}),
+		Handler:      h2c.NewHandler(handler, &http2.Server{}),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 7 * time.Second,
 	}
