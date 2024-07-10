@@ -3,10 +3,13 @@
         "target": "ES2020",
         "module": "commonjs",
         "esModuleInterop": true,
+        "declaration": true,
+        "rootDir": ".",
         "forceConsistentCasingInFileNames": true,
-        "strict": true,
+        "strict": false,
+        "sourceMap": true,
         "skipLibCheck": true,
-        "preserveSymlinks": true
+        "allowJs": true
     },
-    "include": ["."]
+    "include": ["**/*.ts"]
 }
