@@ -72,7 +72,7 @@ func (a AuthGrpcServer) ChangePassword(ctx context.Context, req *connect.Request
 }
 
 func (a AuthGrpcServer) RefreshToken(ctx context.Context, req *connect.Request[authv1.RefreshTokenRequest]) (*connect.Response[authv1.RefreshTokenResponse], error) {
-	newAccessToken, varror := a.authService.RefreshToken(ctx, req.Msg.RefreshToken, req.Msg.AccessToken)
+	newAccessToken, varror := a.authService.RefreshToken(ctx, req.Msg.UserId, req.Msg.RefreshToken)
 	if varror != nil {
 		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
 	}

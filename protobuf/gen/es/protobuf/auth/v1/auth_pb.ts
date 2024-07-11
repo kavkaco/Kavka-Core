@@ -589,9 +589,9 @@ export class RefreshTokenRequest extends Message<RefreshTokenRequest> {
   refreshToken = "";
 
   /**
-   * @generated from field: string access_token = 2;
+   * @generated from field: string user_id = 2;
    */
-  accessToken = "";
+  userId = "";
 
   constructor(data?: PartialMessage<RefreshTokenRequest>) {
     super();
@@ -602,7 +602,7 @@ export class RefreshTokenRequest extends Message<RefreshTokenRequest> {
   static readonly typeName = "protobuf.auth.v1.RefreshTokenRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "refresh_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "access_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RefreshTokenRequest {
