@@ -1,15 +1,13 @@
 module github.com/kavkaco/Kavka-Core
 
-go 1.22.3
-
-toolchain go1.22.4
+go 1.22.4
 
 require (
 	connectrpc.com/connect v1.16.2
 	connectrpc.com/cors v0.1.0
 	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b
 	github.com/go-playground/validator/v10 v10.22.0
-	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/knadh/koanf v1.5.0
 	github.com/minio/minio-go/v7 v7.0.69
 	github.com/ory/dockertest/v3 v3.10.0
@@ -26,6 +24,7 @@ require (
 require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/tahadostifam/go-auth-manager v0.0.0-20240711140556-596daab3eb60 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 )
 
@@ -35,7 +34,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

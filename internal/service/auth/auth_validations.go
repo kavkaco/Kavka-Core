@@ -28,7 +28,6 @@ type ChangePasswordValidation struct {
 
 type RefreshTokenValidation struct {
 	RefreshToken string `validate:"required"`
-	AccessToken  string `validate:"required"`
 }
 
 type SendResetPasswordValidation struct {
