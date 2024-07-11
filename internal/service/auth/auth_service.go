@@ -3,22 +3,23 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	auth_manager "github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
+	auth_manager "github.com/tahadostifam/go-auth-manager"
 )
 
 const (
-	ResetPasswordTokenExpr     = time.Minute * 10    // 10 minutes
 	VerifyEmailTokenExpr       = time.Minute * 5     // 5 minutes
-	AccessTokenExpr            = time.Hour * 24 * 2  // 2 days
+	ResetPasswordTokenExpr     = time.Minute * 10    // 10 minutes
+	AccessTokenExpr            = time.Minute * 10    // 10 minutes
 	RefreshTokenExpr           = time.Hour * 24 * 14 // 2 weeks
 	LockAccountDuration        = time.Second * 5
 	MaximumFailedLoginAttempts = 5
@@ -30,7 +31,7 @@ type AuthService interface {
 	VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror
 	Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror)
 	ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror
-	RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, *vali.Varror)
+	RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror)
 	SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror)
 	SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror
 	DeleteAccount(ctx context.Context, userID model.UserID, password string) *vali.Varror
@@ -93,7 +94,11 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 
 	verifyEmailToken, err = a.authManager.GenerateToken(
 		ctx, auth_manager.VerifyEmail,
-		auth_manager.NewTokenClaims(savedUser.UserID, auth_manager.VerifyEmail),
+		&auth_manager.TokenPayload{
+			UUID:      savedUser.UserID,
+			TokenType: auth_manager.VerifyEmail,
+			CreatedAt: time.Now(),
+		},
 		VerifyEmailTokenExpr,
 	)
 	if err != nil {
@@ -114,16 +119,16 @@ func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*mo
 		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
-	tokenClaims, err := a.authManager.DecodeToken(ctx, accessToken, auth_manager.AccessToken)
+	tokenClaims, err := a.authManager.DecodeAccessToken(ctx, accessToken)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
 	}
 
-	if len(strings.TrimSpace(tokenClaims.UserID)) == 0 {
+	if len(strings.TrimSpace(tokenClaims.Payload.UUID)) == 0 {
 		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
 	}
 
-	user, err := a.userRepo.FindByUserID(ctx, tokenClaims.UserID)
+	user, err := a.userRepo.FindByUserID(ctx, tokenClaims.Payload.UUID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
 	}
@@ -142,12 +147,12 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 		return &vali.Varror{Error: ErrAccessDenied}
 	}
 
-	err = a.authRepo.VerifyEmail(ctx, tokenClaims.UserID)
+	err = a.authRepo.VerifyEmail(ctx, tokenClaims.UUID)
 	if err != nil {
 		return &vali.Varror{Error: ErrVerifyEmail}
 	}
 
-	err = a.authManager.Destroy(ctx, verifyEmailToken)
+	err = a.authManager.DestroyToken(ctx, verifyEmailToken)
 	if err != nil {
 		return &vali.Varror{Error: ErrDestroyToken}
 	}
@@ -221,13 +226,18 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 	}
 
 	// Generate refresh token and access token
-	accessToken, err := a.authManager.GenerateToken(ctx, auth_manager.AccessToken, auth_manager.NewTokenClaims(user.UserID, auth_manager.AccessToken), AccessTokenExpr)
+	accessToken, err := a.authManager.GenerateAccessToken(ctx, user.UserID, AccessTokenExpr)
 	if err != nil {
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
-	refreshToken, err := a.authManager.GenerateToken(ctx, auth_manager.RefreshToken, auth_manager.NewTokenClaims(user.UserID, auth_manager.RefreshToken), RefreshTokenExpr)
+	refreshToken, err := a.authManager.GenerateRefreshToken(ctx, user.UserID, &auth_manager.RefreshTokenPayload{
+		IPAddress:  "not implemented yet",
+		UserAgent:  "not implemented yet",
+		LoggedInAt: time.Duration(time.Now().UnixMilli()),
+	}, RefreshTokenExpr)
 	if err != nil {
+		log.Println(err)
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
@@ -269,39 +279,28 @@ func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, o
 	return nil
 }
 
-func (a *AuthManager) RefreshToken(ctx context.Context, refreshToken string, accessToken string) (string, *vali.Varror) {
-	validationErrors := a.validator.Validate(RefreshTokenValidation{refreshToken, accessToken})
+func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
+	validationErrors := a.validator.Validate(RefreshTokenValidation{refreshToken})
 	if len(validationErrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: validationErrors}
 	}
 
 	// Let's check that tokens not be invalid or expired
-	rftClaims, err := a.authManager.DecodeToken(ctx, refreshToken, auth_manager.RefreshToken)
-	if err != nil {
-		return "", &vali.Varror{Error: ErrAccessDenied}
-	}
-
-	_, err = a.authManager.DecodeToken(ctx, accessToken, auth_manager.AccessToken)
+	_, err := a.authManager.DecodeRefreshToken(ctx, userID, refreshToken)
 	if err != nil {
 		return "", &vali.Varror{Error: ErrAccessDenied}
 	}
 
 	// Find auth with user_id
-	_, err = a.authRepo.GetUserAuth(ctx, rftClaims.UserID)
+	_, err = a.authRepo.GetUserAuth(ctx, userID)
 	if err != nil {
 		return "", &vali.Varror{Error: ErrAccessDenied}
 	}
 
 	// Generate new access token
-	newAccessToken, err := a.authManager.GenerateToken(ctx, auth_manager.AccessToken, auth_manager.NewTokenClaims(rftClaims.UserID, auth_manager.AccessToken), AccessTokenExpr)
+	newAccessToken, err := a.authManager.GenerateAccessToken(ctx, userID, AccessTokenExpr)
 	if err != nil {
 		return "", &vali.Varror{Error: ErrGenerateToken}
-	}
-
-	// Expire old access token
-	err = a.authManager.Destroy(ctx, accessToken)
-	if err != nil {
-		return "", &vali.Varror{Error: ErrDestroyToken}
 	}
 
 	return newAccessToken, nil
@@ -331,7 +330,11 @@ func (a *AuthManager) SendResetPassword(ctx context.Context, email string, reset
 		return "", 0, &vali.Varror{Error: fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil)}
 	}
 
-	resetPasswordToken, err := a.authManager.GenerateToken(ctx, auth_manager.ResetPassword, auth_manager.NewTokenClaims(auth.UserID, auth_manager.ResetPassword), ResetPasswordTokenExpr)
+	resetPasswordToken, err := a.authManager.GenerateToken(ctx, auth_manager.ResetPassword, &auth_manager.TokenPayload{
+		UUID:      auth.UserID,
+		TokenType: auth_manager.ResetPassword,
+		CreatedAt: time.Now(),
+	}, ResetPasswordTokenExpr)
 	if err != nil {
 		return "", 0, &vali.Varror{Error: ErrGenerateToken}
 	}
@@ -354,7 +357,7 @@ func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, new
 		return &vali.Varror{Error: ErrAccessDenied}
 	}
 
-	auth, err := a.authRepo.GetUserAuth(ctx, tokenClaims.UserID)
+	auth, err := a.authRepo.GetUserAuth(ctx, tokenClaims.UUID)
 	if err != nil {
 		return &vali.Varror{Error: ErrAccessDenied}
 	}

@@ -18,6 +18,7 @@ type AuthTestSuite struct {
 	suite.Suite
 	client authv1connect.AuthServiceClient
 
+	userID                                                          string
 	name, lastName, username, email, password                       string
 	verifyEmailToken, resetPasswordToken, accessToken, refreshToken string //nolint
 	verifyEmailRedirectUrl                                          string
@@ -89,6 +90,7 @@ func (s *AuthTestSuite) TestC_Login() {
 
 	s.accessToken = resp.Msg.AccessToken
 	s.refreshToken = resp.Msg.RefreshToken
+	s.userID = resp.Msg.User.UserId
 }
 
 func (s *AuthTestSuite) TestD_ChangePassword() {
@@ -146,7 +148,7 @@ func (s *AuthTestSuite) TestF_RefreshToken() {
 
 	resp, err := s.client.RefreshToken(ctx, &connect.Request[authv1.RefreshTokenRequest]{
 		Msg: &authv1.RefreshTokenRequest{
-			AccessToken:  s.accessToken,
+			UserId:       s.userID,
 			RefreshToken: s.refreshToken,
 		},
 	})

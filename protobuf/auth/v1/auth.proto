@@ -80,7 +80,7 @@ message AuthenticateResponse {
 
 message RefreshTokenRequest {
   string refresh_token = 1;
-  string access_token = 2;
+  string user_id = 2;
 }
 
 message RefreshTokenResponse {

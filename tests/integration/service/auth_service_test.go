@@ -8,11 +8,11 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
-	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	auth_manager "github.com/tahadostifam/go-auth-manager"
 )
 
 type AuthTestSuite struct {
@@ -119,11 +119,13 @@ func (s *AuthTestSuite) TestE_Authenticate() {
 func (s *AuthTestSuite) TestF_RefreshToken() {
 	ctx := context.TODO()
 
-	newAccessToken, varror := s.service.RefreshToken(ctx, s.refreshToken, s.accessToken)
+	accessToken, varror := s.service.RefreshToken(ctx, s.userID, s.refreshToken)
 	require.Nil(s.T(), varror)
 
-	require.NotEmpty(s.T(), newAccessToken)
-	require.NotEqual(s.T(), newAccessToken, s.accessToken)
+	require.NotEmpty(s.T(), accessToken)
+	require.NotEqual(s.T(), accessToken, s.accessToken)
+
+	s.accessToken = accessToken
 }
 
 func (s *AuthTestSuite) TestG_SendResetPassword() {
