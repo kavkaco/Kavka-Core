@@ -27,6 +27,7 @@ type ChangePasswordValidation struct {
 }
 
 type RefreshTokenValidation struct {
+	UserID       string `validate:"required"`
 	RefreshToken string `validate:"required"`
 }
 

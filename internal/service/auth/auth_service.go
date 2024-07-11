@@ -280,7 +280,7 @@ func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, o
 }
 
 func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
-	validationErrors := a.validator.Validate(RefreshTokenValidation{refreshToken})
+	validationErrors := a.validator.Validate(RefreshTokenValidation{userID, refreshToken})
 	if len(validationErrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: validationErrors}
 	}
