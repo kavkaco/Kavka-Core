@@ -12,9 +12,6 @@ unit_test:
 integration_test:
 	go test ./tests/integration/*
 
-e2e_test:
-	go test ./tests/e2e/*
-
 test:
 	make unit_test
 	make integration_test
