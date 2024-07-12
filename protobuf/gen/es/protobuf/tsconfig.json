@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ES2022",
+        "esModuleInterop": true,
+        "declaration": true,
+        "rootDir": ".",
+        "forceConsistentCasingInFileNames": true,
+        "strict": false,
+        "sourceMap": true,
+        "skipLibCheck": true,
+        "allowJs": true,
+        "moduleResolution": "Bundler",
+        "moduleDetection": "force"
+    },
+    "include": ["**/*.ts"]
+}

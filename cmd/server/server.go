@@ -11,16 +11,16 @@ import (
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
-	grpc_service "github.com/kavkaco/Kavka-Core/delivery/grpc"
+	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
-	"github.com/kavkaco/Kavka-Core/pkg/auth_manager"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/rs/cors"
+	auth_manager "github.com/tahadostifam/go-auth-manager"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -31,17 +31,13 @@ func handleError(err error) {
 	}
 }
 
-func newRouterCORS(allowedOrigins []string, h http.Handler) http.Handler {
-	opts := cors.Options{
+func handleCORS(allowedOrigins []string, h http.Handler) http.Handler {
+	return cors.New(cors.Options{
 		AllowedOrigins:      allowedOrigins,
-		AllowedMethods:      []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders:      connectcors.AllowedHeaders(),
+		AllowedMethods:      []string{"POST"},
+		AllowedHeaders:      append(connectcors.AllowedHeaders(), []string{"X-Access-Token"}...),
 		AllowPrivateNetwork: true,
-	}
-
-	c := cors.New(opts)
-
-	return c.Handler(h)
+	}).Handler(h)
 }
 
 func main() {
@@ -104,19 +100,19 @@ func main() {
 	authInterceptor := interceptor.NewAuthInterceptor(authService)
 	interceptors := connect.WithInterceptors(authInterceptor)
 
-	authGrpcHandler := grpc_service.NewAuthGrpcHandler(authService)
+	authGrpcHandler := grpc_handlers.NewAuthGrpcHandler(authService)
 	authGrpcRoute, authGrpcRouter := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	chatGrpcHandler := grpc_service.NewChatGrpcHandler(chatService)
+	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 
-	gRPCHandler := newRouterCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
+	handler := handleCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{
 		Addr:         grpcListenAddr,
-		Handler:      h2c.NewHandler(gRPCHandler, &http2.Server{}),
+		Handler:      h2c.NewHandler(handler, &http2.Server{}),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 7 * time.Second,
 	}

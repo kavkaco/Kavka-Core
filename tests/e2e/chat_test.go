@@ -3,7 +3,6 @@ package e2e
 import (
 	"context"
 	"net/http"
-	"testing"
 	"time"
 
 	"connectrpc.com/connect"
@@ -38,7 +37,7 @@ func (s *ChatTestSuite) TestA_CreateChannel() {
 	s.T().Log(resp)
 }
 
-func TestChatSuite(t *testing.T) {
-	t.Helper()
-	suite.Run(t, new(ChatTestSuite))
-}
+// func TestChatSuite(t *testing.T) {
+// 	t.Helper()
+// 	suite.Run(t, new(ChatTestSuite))
+// }

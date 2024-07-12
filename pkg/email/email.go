@@ -10,7 +10,7 @@ import (
 
 type EmailService interface {
 	SendResetPasswordEmail(recipientEmail, url, name, expiry string) error
-	SendVerificationEmail(recipientEmail, url string) error
+	SendVerificationEmail(recipientEmail, url string, token string) error
 }
 
 const TemplateFormat = "html"
@@ -68,11 +68,11 @@ func (s *emailOtp) sendEmail(msg *emailMessage) error {
 	return nil
 }
 
-func (s *emailOtp) SendVerificationEmail(recipientEmail, url string) error {
+func (s *emailOtp) SendVerificationEmail(recipientEmail, url string, token string) error {
 	msg := newEmailMessage(
 		"verification_email.html",
 		"Verify Account",
-		map[string]interface{}{"url": url},
+		map[string]interface{}{"url": url, "token": token},
 		[]string{recipientEmail},
 	)
 	err := s.sendEmail(msg)

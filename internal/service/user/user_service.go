@@ -1,34 +1,33 @@
-package message
+package user
 
 import (
 	"context"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
-	"github.com/kavkaco/Kavka-Core/utils/hash"
+	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
 
 type UserService interface {
-	UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) error
-	DeleteAccount(ctx context.Context, userId model.UserID, password string) error
+	UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror
 }
 
 type UserManager struct {
-	userRepo    repository.UserRepository
-	authRepo    repository.AuthRepository
-	hashManager *hash.HashManager
+	userRepo  repository.UserRepository
+	validator *vali.Vali
 }
 
 func NewUserService(userRepo repository.UserRepository) UserService {
 	return &UserManager{
-		userRepo: userRepo,
+		userRepo:  userRepo,
+		validator: vali.Validator(),
 	}
 }
 
-func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) error {
+func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror {
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return ErrNotFound
+		return &vali.Varror{Error: ErrNotFound}
 	}
 
 	if name != user.Name {
@@ -47,29 +46,15 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 		user.Biography = biography
 	}
 
+	validationErrors := s.validator.Validate(UpdateProfileValidation{name, lastName, username})
+	if len(validationErrors) > 0 {
+		return &vali.Varror{ValidationErrors: validationErrors}
+	}
+
 	err = s.userRepo.Update(ctx, userID, user.Name, user.LastName, user.Username, user.Biography)
 	if err != nil {
-		return ErrUpdateUser
+		return &vali.Varror{Error: ErrUpdateUser}
 	}
 
-	return nil
-}
-
-func (s *UserManager) DeleteAccount(ctx context.Context, userId model.UserID, password string) error {
-	auth, err := s.authRepo.GetUserAuth(ctx, userId)
-	if err != nil {
-		return ErrNotFound
-	}
-	if !auth.EmailVerified {
-		return ErrDeleteUser
-	}
-	validPassword := s.hashManager.CheckPasswordHash(password, auth.PasswordHash)
-	if !validPassword {
-		return ErrDeleteUser
-	}
-	err = s.userRepo.DeleteByID(ctx, userId)
-	if err != nil {
-		return ErrDeleteUser
-	}
 	return nil
 }

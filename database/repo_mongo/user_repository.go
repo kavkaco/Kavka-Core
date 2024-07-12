@@ -3,6 +3,7 @@ package repository_mongo
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 
@@ -18,6 +19,40 @@ type userRepository struct {
 
 func NewUserMongoRepository(db *mongo.Database) repository.UserRepository {
 	return &userRepository{db.Collection(database.UsersCollection)}
+}
+
+func (repo *userRepository) IsIndexesUnique(ctx context.Context, email string, username string) (isUnique bool, unUniqueFields []string) {
+	filter := bson.M{
+		"$or": []bson.M{
+			{"email": email},
+			{"username": username},
+		},
+	}
+
+	result := repo.usersCollection.FindOne(ctx, filter)
+	if result.Err() != nil {
+		return true, nil
+	}
+
+	var user *model.User
+	err := result.Decode(&user)
+	if err != nil {
+		return true, nil
+	}
+
+	if user.Email == strings.TrimSpace(email) {
+		unUniqueFields = append(unUniqueFields, "email")
+	}
+
+	if user.Username == strings.TrimSpace(username) {
+		unUniqueFields = append(unUniqueFields, "username")
+	}
+
+	if user != nil {
+		return false, unUniqueFields
+	}
+
+	return true, []string{}
 }
 
 func (repo *userRepository) Update(ctx context.Context, userID string, name, lastName, username, biography string) error {

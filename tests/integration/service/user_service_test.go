@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -18,19 +17,16 @@ type UserTestSuite struct {
 	suite.Suite
 	service  service.UserService
 	userRepo repository.UserRepository
-	lem      *lorem.Lorem
 
 	userID model.UserID
 	email  string
 }
 
 func (s *UserTestSuite) SetupSuite() {
-	s.lem = lorem.New()
 	s.userRepo = repository_mongo.NewUserMongoRepository(db)
 	s.service = service.NewUserService(s.userRepo)
 }
 
-// Check here
 func (s *UserTestSuite) TestA_CreateUser() {
 	ctx := context.TODO()
 
@@ -41,10 +37,10 @@ func (s *UserTestSuite) TestA_CreateUser() {
 		primitive.NewObjectID(),
 	}
 
-	name := s.lem.FirstName(2)
-	lastName := s.lem.LastName()
-	email := s.lem.Email()
-	username := s.lem.Word(1, 1)
+	name := "Vivian"
+	lastName := "Russel"
+	email := "vivian_russel@kavka.org"
+	username := "vivian_russel"
 	userModel := model.NewUser(name, lastName, email, username)
 	userModel.ChatsListIDs = chatsListIDs
 
@@ -63,19 +59,19 @@ func (s *UserTestSuite) TestA_CreateUser() {
 
 func (s *UserTestSuite) TestB_UpdateProfile() {
 	ctx := context.TODO()
-	name := s.lem.FirstName(0)
-	lastName := s.lem.LastName()
-	username := s.lem.Word(1, 10)
-	biography := s.lem.Word(1, 30)
 
-	err := s.service.UpdateProfile(ctx, s.userID, name, lastName, username, biography)
-	require.NoError(s.T(), err)
+	name := "I'm Vivian"
+	lastName := "D Russel"
+	username := "vivian_russel111"
+	biography := "Biography updated from integration tests"
+
+	varror := s.service.UpdateProfile(ctx, s.userID, name, lastName, username, biography)
+	require.Nil(s.T(), varror)
 
 	// Find user again to be sure that his profile changed!
 	user, err := s.userRepo.FindByUserID(ctx, s.userID)
 	require.NoError(s.T(), err)
 
-	require.NoError(s.T(), err)
 	require.Equal(s.T(), user.UserID, s.userID)
 	require.Equal(s.T(), user.Email, s.email)
 	require.Equal(s.T(), user.Username, username)
