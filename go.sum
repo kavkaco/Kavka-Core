@@ -367,6 +367,8 @@ github.com/tahadostifam/go-auth-manager v0.0.0-20240711140556-596daab3eb60 h1:sj
 github.com/tahadostifam/go-auth-manager v0.0.0-20240711140556-596daab3eb60/go.mod h1:CyAqTpDYZwgo5UiMaLxtS+Zd8VdYxH5RogkAMGSInLQ=
 github.com/tahadostifam/go-auth-manager v1.0.2 h1:/9NwWSZBIu6JFDJDLvQ4FGgplbV1ebau/PO9I6yvoY0=
 github.com/tahadostifam/go-auth-manager v1.0.2/go.mod h1:QajM39ZUjIDKFX6Ab2xjrwbrtz7Sd3yrqilmvvQNJrI=
+github.com/tahadostifam/go-auth-manager v1.0.3 h1:jMSClwpiboOFD//FH85e/MDRg0lrlIq8bpq180yJjAU=
+github.com/tahadostifam/go-auth-manager v1.0.3/go.mod h1:QajM39ZUjIDKFX6Ab2xjrwbrtz7Sd3yrqilmvvQNJrI=
 github.com/xdg-go/pbkdf2 v1.0.0 h1:Su7DPu48wXMwC3bs7MCNG+z4FhcyEuz5dlvchbq0B0c=
 github.com/xdg-go/pbkdf2 v1.0.0/go.mod h1:jrpuAogTd400dnrH08LKmI/xc1MbPOebTwRqcT5RDeI=
 github.com/xdg-go/scram v1.1.2 h1:FHX5I5B4i4hKRVRBCFRxq1iQRej7WO3hhBuJf+UUySY=
