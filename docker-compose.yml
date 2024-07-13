@@ -45,7 +45,18 @@ services:
       - minio
     ports:
       - "8000:8000"
-      
+  e2e_test:
+    network_mode: host
+    container_name: "kavka_e2e_test"
+    build:
+      context: ./
+      dockerfile: e2e_test.Dockerfile
+    depends_on:
+      - redis
+      - mongo
+    ports:
+      - "8010:8010"
+
 networks:
   default_network:
     driver: "bridge"
