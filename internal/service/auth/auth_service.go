@@ -16,10 +16,9 @@ import (
 )
 
 const (
-	VerifyEmailTokenExpr   = time.Minute * 5  // 5 minutes
-	ResetPasswordTokenExpr = time.Minute * 10 // 10 minutes
-	// AccessTokenExpr        = time.Minute * 10 // 10 minutes
-	AccessTokenExpr            = time.Minute * 1     // 10 minutes
+	VerifyEmailTokenExpr       = time.Minute * 5     // 5 minutes
+	ResetPasswordTokenExpr     = time.Minute * 10    // 10 minutes
+	AccessTokenExpr            = time.Minute * 10    // 10 minutes
 	RefreshTokenExpr           = time.Hour * 24 * 14 // 2 weeks
 	LockAccountDuration        = time.Second * 5
 	MaximumFailedLoginAttempts = 5
