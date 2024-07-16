@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"strconv"
 )
 
-const OtpLength = 6
+const (
+	OTPLength    = 6
+	UserIDLength = 8
+)
 
 func generateRandomNumber(length int) int {
 	min := int64(math.Pow(10, float64(length)-1))
@@ -22,15 +24,15 @@ func generateRandomNumber(length int) int {
 
 	number := int(randomNumber.Int64()) + int(min)
 
-	if len(strconv.Itoa(number)) != length {
-		number = GenerateOTP()
+	for lenInt(number) != length {
+		number = generateRandomNumber(length)
 	}
 
 	return number
 }
 
 func GenerateOTP() int {
-	return generateRandomNumber(OtpLength)
+	return generateRandomNumber(OTPLength)
 }
 
 func GenerateUserID() int {
@@ -48,4 +50,18 @@ func GenerateRandomFileName(n int) string {
 	}
 
 	return hex.EncodeToString(bytes)
+}
+
+func lenInt(n int) int {
+	if n == 0 {
+		return 1
+	}
+
+	count := 0
+	for n != 0 {
+		n /= 10
+		count++
+	}
+
+	return count
 }

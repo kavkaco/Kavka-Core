@@ -27,9 +27,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/tahadostifam/go-auth-manager v1.0.4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
-)
-
-require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect

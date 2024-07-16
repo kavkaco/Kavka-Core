@@ -8,12 +8,14 @@ import (
 	"github.com/kavkaco/Kavka-Core/config"
 )
 
+const (
+	HTMLTemplateFormat = "html"
+)
+
 type EmailService interface {
 	SendResetPasswordEmail(recipientEmail, url, name, expiry string) error
 	SendVerificationEmail(recipientEmail, url string, token string) error
 }
-
-const TemplateFormat = "html"
 
 type emailOtp struct {
 	configs       *config.Email

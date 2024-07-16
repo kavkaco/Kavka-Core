@@ -3,24 +3,15 @@ package random
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateOTP(t *testing.T) {
 	otp := GenerateOTP()
-	require.NotZero(t, otp)
-
-	t.Log(otp)
-}
-
-func TestGenerateUsername(t *testing.T) {
-	username := GenerateUsername()
-
-	t.Log(username)
+	assert.Equal(t, OTPLength, lenInt(otp))
 }
 
 func TestGenerateUserID(t *testing.T) {
 	userID := GenerateUserID()
-
-	t.Log(userID)
+	assert.Equal(t, UserIDLength, lenInt(userID))
 }
