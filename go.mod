@@ -22,9 +22,12 @@ require (
 )
 
 require (
+	github.com/felixge/fgprof v0.9.4 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/google/pprof v0.0.0-20240711041743-f6c9dda6c6da // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/pkg/profile v1.7.0 // indirect
 	github.com/tahadostifam/go-auth-manager v1.0.4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240701130421-f6361c86f094 // indirect
 )
