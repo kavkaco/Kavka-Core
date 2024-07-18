@@ -45,17 +45,21 @@ services:
       - minio
     ports:
       - "8000:8000"
-  e2e_test:
-    network_mode: host
-    container_name: "kavka_e2e_test"
-    build:
-      context: ./
-      dockerfile: e2e_test.Dockerfile
-    depends_on:
-      - redis
-      - mongo
+  kafka:
+    networks:
+      - default_network
+    restart: always
+    image: apache/kafka:3.7.1
     ports:
-      - "8010:8010"
+      - "9092:9092"
+  kafka-ui:
+    network_mode: host
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - 8080:8080
+    environment:
+      DYNAMIC_CONFIG_ENABLED: 'true'
 
 networks:
   default_network:
