@@ -65,7 +65,6 @@ func (s *emailOtp) sendEmail(msg *emailMessage) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -76,7 +75,6 @@ func (s *emailOtp) SendVerificationEmail(recipientEmail, url string, token strin
 		map[string]interface{}{"url": url, "token": token},
 		[]string{recipientEmail},
 	)
-
 	err := s.sendEmail(msg)
 	if err != nil {
 		return err
