@@ -1,15 +1,19 @@
-package infra_producers_test
+package main
 
 import (
+	"fmt"
 	"log"
-	"testing"
+	"time"
 
+	"github.com/kavkaco/Kavka-Core/config"
 	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func TestChat(t *testing.T) {
+func main() {
+	kafkaConfig := config.Read().Kafka
+
 	// Create producer
 	chatProducer, err := stream_producers.NewChatStreamProducer(&kafkaConfig)
 	if err != nil {
@@ -25,4 +29,8 @@ func TestChat(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	time.Sleep(time.Second * 1)
+
+	fmt.Println("Message sent!")
 }
