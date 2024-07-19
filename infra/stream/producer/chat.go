@@ -1,14 +1,14 @@
-package stream_producer
+package stream_producers
 
 import (
+	"log"
+
 	"github.com/IBM/sarama"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-const topicName = "chats"
 
 type ChatProducer interface {
 	MessageSent(chatID model.ChatID, messageID model.MessageID, message model.Message) error
@@ -28,15 +28,14 @@ func NewChatStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
 	if err != nil {
 		return nil, err
 	}
-	// defer p.AsyncClose()
 
-	// go func() {
-	// 	errs := p.Errors()
+	go func() {
+		errs := p.Errors()
 
-	// 	for err := range errs {
-	// 		log.Fatalln(err)
-	// 	}
-	// }()
+		for err := range errs {
+			log.Fatalln(err)
+		}
+	}()
 
 	messageEncoder := stream.NewMessageJsonEncoder()
 
@@ -44,16 +43,19 @@ func NewChatStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
 }
 
 func (p *producer) ChatCreated(eventReceivers []string, chat model.Chat) error {
-	encodedModel, err := p.messageEncoder.Encode(chat)
+	eventName := "chatCreated"
+	encodedModel, err := p.messageEncoder.Encode(stream.MessagePayload{
+		Data: chat,
+	})
 	if err != nil {
 		return err
 	}
 
 	msg := sarama.ProducerMessage{
-		Topic:     topicName,
+		Topic:     stream.KafkaTopics().ChatTopic,
 		Partition: 0,
 		Offset:    0,
-		Key:       sarama.StringEncoder("chat_created"),
+		Key:       sarama.StringEncoder(eventName),
 		Value:     sarama.ByteEncoder(encodedModel),
 	}
 

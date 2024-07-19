@@ -1,7 +1,8 @@
-package infra
+package infra_producers_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/kavkaco/Kavka-Core/config"
 )
@@ -9,8 +10,9 @@ import (
 var kafkaConfig config.Kafka
 
 func TestMain(m *testing.M) {
-	config := config.Read()
-	kafkaConfig = config.Kafka
+	kafkaConfig = config.Read().Kafka
 
 	m.Run()
+
+	time.Sleep(2 * time.Second)
 }

@@ -149,6 +149,9 @@ func Read() *Config {
 	config.Kafka.Sarama = sarama.NewConfig()
 	config.Kafka.Sarama.Producer.Compression = sarama.CompressionLZ4
 	config.Kafka.Sarama.Producer.Retry.Backoff = time.Second * 1
+	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Enable = true
+	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Interval = 100 * time.Millisecond
+	config.Kafka.Sarama.Consumer.Offsets.Retention = 3 * time.Second
 
 	return config
 }
