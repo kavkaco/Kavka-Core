@@ -42,10 +42,11 @@ func NewChatStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
 	return &producer{kafkaConfig, p, messageEncoder}, nil
 }
 
-func (p *producer) ChatCreated(eventReceivers []string, chat model.Chat) error {
+func (p *producer) ChatCreated(receiversUUID []string, chat model.Chat) error {
 	eventName := "chatCreated"
 	encodedModel, err := p.messageEncoder.Encode(stream.MessagePayload{
-		Data: chat,
+		Data:          chat,
+		ReceiversUUID: receiversUUID,
 	})
 	if err != nil {
 		return err

@@ -2,42 +2,57 @@ package grpc_handlers
 
 import (
 	"context"
+	"errors"
+	"log"
 
 	"connectrpc.com/connect"
+	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
+	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
-
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
+	chatv1model "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
+)
+
+var (
+	ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
 )
 
 type handler struct {
 	chatService chat.ChatService
+	chatv1.CreateChannelRequest
 }
 
 func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceHandler {
-	return handler{chatService}
+	return handler{chatService: chatService}
 }
 
-// FIXME
 func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
-	return nil, nil
-	// userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
+	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, ErrEmptyUserID)
+	}
 
-	// chat, err := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
-	// if err != nil {
-	// 	return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	// }
+	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
+	if varror != nil {
+		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
+		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
+		connectErr.AddDetail(varrorDetail)
+		return nil, connectErr
+	}
 
-	// chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chat)
-	// if err != nil {
-	// 	return nil, connect.NewError(connect.CodeInternal, err)
-	// }
+	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chat)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
 
-	// res := connect.NewResponse(&chatv1.CreateChannelResponse{
-	// 	Chat: chatGrpcModel,
-	// })
+	res := connect.NewResponse(&chatv1.CreateChannelResponse{
+		Chat: chatGrpcModel,
+	})
 
-	// return res, nil
+	return res, nil
 }
 
 func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
@@ -55,6 +70,38 @@ func (h handler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetCha
 	panic("unimplemented")
 }
 
-func (h handler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
+// GetChatsEvents implements chatv1connect.ChatServiceHandler.
+func (h handler) GetChatsEvents(context.Context, *connect.Request[chatv1.ChatEventRequest], *connect.ServerStream[chatv1.ChatEventResponse]) error {
 	panic("unimplemented")
+}
+
+// GetUserChats implements chatv1connect.ChatServiceHandler.
+func (h handler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
+	userID := req.Msg.UserId
+
+	chats, varror := h.chatService.GetUserChats(ctx, userID)
+	if varror != nil {
+		return nil, varror.Error
+	}
+
+	var transformedChats []*chatv1model.Chat
+
+	for _, v := range chats {
+		c, err := grpc_model.TransformChatToGrpcModel(&v)
+		if err != nil {
+			// FIXME - Replace with real logger
+			log.Println(err)
+			continue
+		}
+
+		transformedChats = append(transformedChats, c)
+	}
+
+	res := connect.NewResponse(
+		&chatv1.GetUserChatsResponse{
+			Chats: transformedChats,
+		},
+	)
+
+	return res, nil
 }

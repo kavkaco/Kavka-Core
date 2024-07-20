@@ -3,6 +3,8 @@ package chat
 import (
 	"context"
 
+	"github.com/kavkaco/Kavka-Core/infra/stream"
+	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
@@ -17,13 +19,15 @@ type ChatService interface {
 }
 
 type ChatManager struct {
-	chatRepo  repository.ChatRepository
-	userRepo  repository.UserRepository
-	validator *vali.Vali
+	chatRepo          repository.ChatRepository
+	userRepo          repository.UserRepository
+	validator         *vali.Vali
+	chatInfraProducer stream_producers.ChatProducer
+	chatStreamEvents  chan map[string]interface{}
 }
 
-func NewChatService(chatRepo repository.ChatRepository, userRepo repository.UserRepository) ChatService {
-	return &ChatManager{chatRepo, userRepo, vali.Validator()}
+func NewChatService(chatRepo repository.ChatRepository, userRepo repository.UserRepository, chatInfraProducer stream_producers.ChatProducer, chatStreamEvents chan map[string]interface{}) ChatService {
+	return &ChatManager{chatRepo, userRepo, vali.Validator(), chatInfraProducer, chatStreamEvents}
 }
 
 // find single chat with chat id
@@ -130,6 +134,11 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrCreateChat}
+	}
+
+	err = s.chatInfraProducer.ChatCreated([]string{userID}, *chatModel)
+	if err != nil {
+		return nil, &vali.Varror{Error: stream.ErrProducer}
 	}
 
 	return saved, nil

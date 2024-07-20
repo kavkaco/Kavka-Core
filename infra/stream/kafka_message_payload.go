@@ -1,5 +1,6 @@
 package stream
 
 type MessagePayload struct {
-	Data interface{} `json:"data"`
+	Data          interface{} `json:"data"`
+	ReceiversUUID []string    `json:"receiversUUID"`
 }

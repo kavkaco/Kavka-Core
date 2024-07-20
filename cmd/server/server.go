@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,9 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
+	"github.com/kavkaco/Kavka-Core/infra/stream"
+	stream_consumers "github.com/kavkaco/Kavka-Core/infra/stream/consumers"
+	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
@@ -42,8 +46,7 @@ func handleCORS(allowedOrigins []string, h http.Handler) http.Handler {
 }
 
 func main() {
-	// ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel()
+	ctx := context.Background()
 
 	// Init Zap Logger
 	// logger := logs.InitZapLogger()
@@ -72,6 +75,14 @@ func main() {
 		PrivateKey: configs.Auth.SecretKey,
 	})
 
+	// Init Infra
+	chatStreamEvents := make(chan map[string]interface{})
+	chatProducer, err := stream_producers.NewChatStreamProducer(&configs.Kafka)
+	handleError(err)
+
+	streamMessageEncoder := stream.NewMessageJsonEncoder()
+	go stream_consumers.NewChatStreamConsumer(ctx, configs.Kafka, streamMessageEncoder, chatStreamEvents)
+
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 
 	userRepo := repository_mongo.NewUserMongoRepository(mongoDB)
@@ -89,7 +100,7 @@ func main() {
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
-	chatService := chat.NewChatService(chatRepo, userRepo)
+	chatService := chat.NewChatService(chatRepo, userRepo, chatProducer, chatStreamEvents)
 
 	// messageRepo := repository.NewMessageRepository(mongoDB)
 	// messageService := message.NewMessageService(messageRepo, chatRepo)
@@ -121,8 +132,9 @@ func main() {
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(handler, &http2.Server{}),
 		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 7 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  0,
 	}
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	handleError(err)
 }
