@@ -56,5 +56,5 @@ func (h handler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetCha
 }
 
 func (h handler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
-
+	panic("unimplemented")
 }
