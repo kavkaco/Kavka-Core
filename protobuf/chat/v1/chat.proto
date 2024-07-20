@@ -7,7 +7,7 @@ option go_package = "protobuf/chat/v1";
 
 service ChatService {
   rpc GetChat(GetChatRequest) returns (GetChatResponse) {}
-  rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse) {}
+  rpc GetUserChats(GetUserChatsRequest) returns (stream GetUserChatsResponse) {}
   rpc CreateDirect(CreateDirectRequest) returns (CreateDirectResponse) {}
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
   rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse) {}
