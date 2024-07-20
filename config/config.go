@@ -152,6 +152,7 @@ func Read() *Config {
 	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Enable = true
 	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Interval = 100 * time.Millisecond
 	config.Kafka.Sarama.Consumer.Offsets.Retention = 3 * time.Second
+	config.Kafka.Sarama.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRoundRobin()
 
 	return config
 }

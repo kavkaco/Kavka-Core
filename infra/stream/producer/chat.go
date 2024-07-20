@@ -52,11 +52,9 @@ func (p *producer) ChatCreated(eventReceivers []string, chat model.Chat) error {
 	}
 
 	msg := sarama.ProducerMessage{
-		Topic:     stream.KafkaTopics().ChatTopic,
-		Partition: 0,
-		Offset:    0,
-		Key:       sarama.StringEncoder(eventName),
-		Value:     sarama.ByteEncoder(encodedModel),
+		Topic: stream.KafkaTopics().ChatTopic,
+		Key:   sarama.StringEncoder(eventName),
+		Value: sarama.ByteEncoder(encodedModel),
 	}
 
 	p.producer.Input() <- &msg
