@@ -8,7 +8,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
@@ -39,6 +41,11 @@ type (
 		HTTP    HTTP   `koanf:"http"`
 		Auth    Auth   `koanf:"auth"`
 		Logger  Logger `koanf:"logger"`
+		Kafka   Kafka  `koanf:"kafka"`
+	}
+	Kafka struct {
+		Brokers []string `koanf:"brokers"`
+		Sarama  *sarama.Config
 	}
 
 	Auth struct {
@@ -137,6 +144,15 @@ func Read() *Config {
 	}
 
 	config.Auth.SecretKey = strings.TrimSpace(string(secretData))
+
+	// Load Kafka & Sarama Configs
+	config.Kafka.Sarama = sarama.NewConfig()
+	config.Kafka.Sarama.Producer.Compression = sarama.CompressionLZ4
+	config.Kafka.Sarama.Producer.Retry.Backoff = time.Second * 1
+	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Enable = true
+	config.Kafka.Sarama.Consumer.Offsets.AutoCommit.Interval = 100 * time.Millisecond
+	config.Kafka.Sarama.Consumer.Offsets.Retention = 3 * time.Second
+	config.Kafka.Sarama.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRoundRobin()
 
 	return config
 }

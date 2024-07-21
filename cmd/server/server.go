@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"time"
 
 	"connectrpc.com/connect"
@@ -108,6 +109,12 @@ func main() {
 
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
+
+	// PPROF Memory Profiling Tool
+	if config.CurrentEnv == config.Development {
+		gRPCRouter.HandleFunc("/debug/pprof/*", pprof.Index)
+		gRPCRouter.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	}
 
 	handler := handleCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{

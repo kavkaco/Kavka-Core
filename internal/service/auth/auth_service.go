@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"time"
@@ -19,7 +18,7 @@ import (
 const (
 	VerifyEmailTokenExpr       = time.Minute * 5     // 5 minutes
 	ResetPasswordTokenExpr     = time.Minute * 10    // 10 minutes
-	AccessTokenExpr            = time.Minute * 10    // 10 minutes
+	AccessTokenExpr            = time.Minute * 30    // 30 minutes
 	RefreshTokenExpr           = time.Hour * 24 * 14 // 2 weeks
 	LockAccountDuration        = time.Second * 5
 	MaximumFailedLoginAttempts = 5
@@ -121,7 +120,7 @@ func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*mo
 
 	tokenClaims, err := a.authManager.DecodeAccessToken(ctx, accessToken)
 	if err != nil {
-		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
+		return nil, &vali.Varror{Error: ErrAccessDenied}
 	}
 
 	if len(strings.TrimSpace(tokenClaims.Payload.UUID)) == 0 {
@@ -237,7 +236,6 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		LoggedInAt: time.Duration(time.Now().UnixMilli()),
 	}, RefreshTokenExpr)
 	if err != nil {
-		log.Println(err)
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
