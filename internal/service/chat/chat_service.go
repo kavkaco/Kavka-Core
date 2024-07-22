@@ -95,6 +95,15 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 		return nil, &vali.Varror{ValidationErrors: validationErrors}
 	}
 
+	isUsernameOccupied,err :=s.chatRepo.IsUsernameOccupied(ctx,username)
+	if err != nil{
+		return nil,&vali.Varror{Error: err}
+	}
+
+	if isUsernameOccupied{
+		return nil,&vali.Varror{Error: ErrUsernameUnAvailable}
+	}
+	
 	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
 		Title:       title,
 		Username:    username,
@@ -116,6 +125,15 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	validationErrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
 	if len(validationErrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: validationErrors}
+	}
+
+	isUsernameOccupied,err :=s.chatRepo.IsUsernameOccupied(ctx,username)
+	if err != nil{
+		return nil,&vali.Varror{Error: err}
+	}
+
+	if isUsernameOccupied{
+		return nil,&vali.Varror{Error: ErrUsernameUnAvailable}
 	}
 
 	chatModel := model.NewChat(model.TypeChannel, &model.ChannelChatDetail{

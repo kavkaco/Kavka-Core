@@ -51,10 +51,19 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 		return &vali.Varror{ValidationErrors: validationErrors}
 	}
 
+	isUsernameOccupied,err :=s.userRepo.IsUsernameOccupied(ctx,username)
+	if err != nil{
+		return &vali.Varror{Error: err}
+	}
+
+	if isUsernameOccupied{
+		return &vali.Varror{Error: ErrUsernameUnAvailable}
+	}
+
 	err = s.userRepo.Update(ctx, userID, user.Name, user.LastName, user.Username, user.Biography)
 	if err != nil {
 		return &vali.Varror{Error: ErrUpdateUser}
 	}
-
 	return nil
+
 }

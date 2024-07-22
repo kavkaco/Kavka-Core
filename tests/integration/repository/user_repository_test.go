@@ -126,13 +126,23 @@ func (s *UserTestSuite) TestF_IsIndexesUnique() {
 	require.False(s.T(), slices.Contains(unUniqueFields, "username"))
 }
 
-func (s *UserTestSuite) TestG_Delete() {
+func (s *UserTestSuite) TestG_IsUserOccupied() {
+	ctx := context.TODO()
+	
+	savedUser, err := s.repo.FindByUserID(ctx, s.savedUser.UserID)
+	require.NoError(s.T(), err)
+
+	isUsernameAvailable, err := s.repo.IsUsernameOccupied(ctx, savedUser.Username)
+	require.NoError(s.T(), err)
+	require.True(s.T(), isUsernameAvailable)
+}
+
+func (s *UserTestSuite) TestH_Delete() {
 	ctx := context.TODO()
 
 	err := s.repo.DeleteByID(ctx, s.savedUser.UserID)
 	require.NoError(s.T(), err)
 }
-
 func TestUserSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(UserTestSuite))

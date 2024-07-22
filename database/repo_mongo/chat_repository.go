@@ -8,6 +8,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type chatRepository struct {
@@ -117,4 +118,19 @@ func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]model.User
 	}
 
 	return repo.findOne(ctx, filter)
+}
+func (repo *chatRepository) IsUsernameOccupied(ctx context.Context, username string) (bool, error) {
+	filter := bson.M{"username": username}
+
+	chatCount, err := repo.chatsCollection.CountDocuments(ctx, filter, options.Count().SetLimit(1))
+	if err != nil {
+		return false, err
+	}
+
+	userCount, err := repo.usersCollection.CountDocuments(ctx, filter, options.Count().SetLimit(1))
+	if err != nil {
+		return false, err
+	}
+
+	return (userCount == 1 || chatCount == 1), nil
 }

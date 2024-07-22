@@ -98,6 +98,32 @@ func (s *ChatTestSuite) TestCreateGroup() {
 	s.createdGroupChatID = saved.ChatID
 }
 
+func (s *ChatTestSuite) TestIsUsernameOccupied() {
+	ctx := context.TODO()
+	
+	savedChannel, err := s.repo.FindByID(ctx, s.createdChannelChatID)
+	require.NoError(s.T(), err)
+
+
+	savedChannelDetail, err := utils.TypeConverter[model.ChannelChatDetail](savedChannel.ChatDetail)
+	require.NoError(s.T(), err)
+
+	isUsernameOccupied, err := s.repo.IsUsernameOccupied(ctx, savedChannelDetail.Username)
+	require.NoError(s.T(), err)
+	require.True(s.T(), isUsernameOccupied)
+
+	savedGroup, err := s.repo.FindByID(ctx, s.createdGroupChatID)
+	require.NoError(s.T(), err)
+
+
+	savedGroupDetail, err := utils.TypeConverter[model.GroupChatDetail](savedGroup.ChatDetail)
+	require.NoError(s.T(), err)
+
+	isUsernameOccupied, err = s.repo.IsUsernameOccupied(ctx, savedGroupDetail.Username)
+	require.NoError(s.T(), err)
+	require.True(s.T(), isUsernameOccupied)
+}
+
 func (s *ChatTestSuite) TestCreateDirect() {
 	ctx := context.TODO()
 

@@ -11,14 +11,16 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type userRepository struct {
 	usersCollection *mongo.Collection
+	chatsCollection *mongo.Collection
 }
 
 func NewUserMongoRepository(db *mongo.Database) repository.UserRepository {
-	return &userRepository{db.Collection(database.UsersCollection)}
+	return &userRepository{db.Collection(database.UsersCollection),db.Collection(database.ChatsCollection)}
 }
 
 func (repo *userRepository) IsIndexesUnique(ctx context.Context, email string, username string) (isUnique bool, unUniqueFields []string) {
@@ -158,4 +160,19 @@ func (repo *userRepository) DeleteByID(ctx context.Context, userID model.UserID)
 		return repository.ErrNotDeleted
 	}
 	return nil
+}
+func (repo *userRepository) IsUsernameOccupied(ctx context.Context, username string) (bool, error) {
+	filter := bson.M{"username": username}
+	
+	chatCount, err := repo.chatsCollection.CountDocuments(ctx, filter, options.Count().SetLimit(1))
+	if err != nil {
+		return false, err
+	}
+	
+	userCount, err := repo.usersCollection.CountDocuments(ctx, filter, options.Count().SetLimit(1))
+	if err != nil {
+		return false, err
+	}
+	
+	return (userCount == 1 || chatCount == 1), nil
 }

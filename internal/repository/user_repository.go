@@ -16,4 +16,5 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	DeleteByID(ctx context.Context, userID model.UserID) error
 	IsIndexesUnique(ctx context.Context, email string, username string) (isUnique bool, unUniqueFields []string)
+	IsUsernameOccupied(ctx context.Context,username string)(bool,error)
 }

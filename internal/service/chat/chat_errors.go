@@ -9,4 +9,5 @@ var (
 	ErrNotFound          = errors.New("not found")
 	ErrGetUserChats      = errors.New("failed to get user chats")
 	ErrChatAlreadyExists = errors.New("chat already exists")
+	ErrUsernameUnAvailable = errors.New("username unavailable")
 )
