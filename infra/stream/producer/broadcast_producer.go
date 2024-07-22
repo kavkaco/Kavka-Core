@@ -1,6 +1,7 @@
 package stream_producers
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/IBM/sarama"
@@ -13,7 +14,7 @@ import (
 type ChatProducer interface {
 	MessageSent(chatID model.ChatID, messageID model.MessageID, message model.Message) error
 	MessageDeleted(chatID model.ChatID, messageID model.MessageID) error
-	ChatCreated(eventReceivers []model.UserID, chat model.Chat) error
+	ChatCreated(userID model.UserID, chat model.Chat) error
 	ChatDeleted(eventReceivers []model.UserID, chatID model.ChatID) error
 }
 
@@ -23,7 +24,7 @@ type producer struct {
 	messageEncoder stream.MessageEncoder
 }
 
-func NewChatStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
+func NewBroadcastStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
 	p, err := sarama.NewAsyncProducer(kafkaConfig.Brokers, kafkaConfig.Sarama)
 	if err != nil {
 		return nil, err
@@ -42,11 +43,27 @@ func NewChatStreamProducer(kafkaConfig *config.Kafka) (ChatProducer, error) {
 	return &producer{kafkaConfig, p, messageEncoder}, nil
 }
 
-func (p *producer) ChatCreated(receiversUUID []string, chat model.Chat) error {
+func (p *producer) ChatCreated(userID model.UserID, chat model.Chat) error {
 	eventName := "chatCreated"
+
+	chatBytes, err := json.Marshal(chat)
+	if err != nil {
+		return err
+	}
+
+	var chatMap map[string]interface{}
+	err = json.Unmarshal(chatBytes, &chatMap)
+	if err != nil {
+		return err
+	}
+
 	encodedModel, err := p.messageEncoder.Encode(stream.MessagePayload{
-		Data:          chat,
-		ReceiversUUID: receiversUUID,
+		Data: chatMap,
+		Receivers: []stream.Receiver{
+			stream.Receiver{
+				UUID: userID,
+			},
+		},
 	})
 	if err != nil {
 		return err

@@ -12,25 +12,55 @@ const accessTokenHeader = "X-Access-Token"
 
 type UserIDKey struct{}
 
-func NewAuthInterceptor(authService auth.AuthService) connect.UnaryInterceptorFunc {
-	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
-		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			accessToken := req.Header().Get(accessTokenHeader)
+type authInterceptor struct {
+	authService auth.AuthService
+}
 
-			if len(accessToken) == 0 {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("no token provided"))
-			}
+func (i *authInterceptor) WrapStreamingClient(connect.StreamingClientFunc) connect.StreamingClientFunc {
+	panic("unimplemented")
+}
 
-			user, err := authService.Authenticate(ctx, accessToken)
-			if err != nil || user == nil {
-				return nil, connect.NewError(connect.CodeUnauthenticated, nil)
-			}
+func (i *authInterceptor) WrapStreamingHandler(next connect.StreamingHandlerFunc) connect.StreamingHandlerFunc {
+	return connect.StreamingHandlerFunc(func(ctx context.Context, shc connect.StreamingHandlerConn) error {
+		accessToken := shc.RequestHeader().Get(accessTokenHeader)
 
-			ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
+		ctx, err := i.authRequired(ctx, accessToken)
+		if err != nil {
+			return err
+		}
 
-			return next(ctx, req)
-		})
+		return next(ctx, shc)
+	})
+}
+
+func (i *authInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
+	return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+		accessToken := req.Header().Get(accessTokenHeader)
+
+		ctx, err := i.authRequired(ctx, accessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		return next(ctx, req)
+	}
+}
+
+func (i *authInterceptor) authRequired(ctx context.Context, accessToken string) (context.Context, error) {
+	if len(accessToken) == 0 {
+		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("no token provided"))
 	}
 
-	return connect.UnaryInterceptorFunc(interceptor)
+	user, err := i.authService.Authenticate(ctx, accessToken)
+	if err != nil || user == nil {
+		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
+	}
+
+	ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
+
+	return ctx, nil
+}
+
+func NewAuthInterceptor(authService auth.AuthService) connect.Interceptor {
+	return &authInterceptor{authService}
 }

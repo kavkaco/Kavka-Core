@@ -14,23 +14,30 @@ import (
 func main() {
 	kafkaConfig := config.Read().Kafka
 
-	messageEncoder := stream.NewMessageJsonEncoder()
+	const userID = "my-user1"
 
 	var wg sync.WaitGroup
-	eventCh := make(chan map[string]interface{})
+	eventsCh := make(chan stream.Event)
 
 	go func() {
 		defer wg.Done()
 
 		for {
-			event := <-eventCh
+			event := <-eventsCh
 
-			fmt.Println("Event", event)
+			fmt.Println("EventName", event.Name)
+			fmt.Println("Data", event.Data)
+			fmt.Println("")
 		}
 	}()
 	wg.Add(1)
 
-	err := stream_consumers.NewChatStreamConsumer(context.TODO(), kafkaConfig, messageEncoder, eventCh)
+	cons, err := stream_consumers.NewBroadcastConsumer(context.TODO(), kafkaConfig.Brokers, *kafkaConfig.Sarama)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = cons.SubscribeForUser(userID, eventsCh)
 	if err != nil {
 		log.Fatal(err)
 	}

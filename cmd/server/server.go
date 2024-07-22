@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/pprof"
-	"time"
 
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
@@ -15,7 +14,6 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
-	"github.com/kavkaco/Kavka-Core/infra/stream"
 	stream_consumers "github.com/kavkaco/Kavka-Core/infra/stream/consumers"
 	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
@@ -23,6 +21,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/rs/cors"
 	auth_manager "github.com/tahadostifam/go-auth-manager"
@@ -77,11 +76,11 @@ func main() {
 
 	// Init Infra
 	chatStreamEvents := make(chan map[string]interface{})
-	chatProducer, err := stream_producers.NewChatStreamProducer(&configs.Kafka)
+	chatProducer, err := stream_producers.NewBroadcastStreamProducer(&configs.Kafka)
 	handleError(err)
 
-	streamMessageEncoder := stream.NewMessageJsonEncoder()
-	go stream_consumers.NewChatStreamConsumer(ctx, configs.Kafka, streamMessageEncoder, chatStreamEvents)
+	broadcastConsumer, err := stream_consumers.NewBroadcastConsumer(ctx, configs.Kafka.Brokers, *configs.Kafka.Sarama)
+	handleError(err)
 
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 
@@ -118,8 +117,12 @@ func main() {
 	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
+	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(broadcastConsumer)
+	eventsGrpcRoute, eventsGrpcRouter := eventsv1connect.NewEventsServiceHandler(eventsGrpcHandler, interceptors)
+
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
+	gRPCRouter.Handle(eventsGrpcRoute, eventsGrpcRouter)
 
 	// PPROF Memory Profiling Tool
 	if config.CurrentEnv == config.Development {
@@ -131,8 +134,8 @@ func main() {
 	server := &http.Server{
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(handler, &http2.Server{}),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  0,
+		WriteTimeout: 0,
 		IdleTimeout:  0,
 	}
 	err = server.ListenAndServe()

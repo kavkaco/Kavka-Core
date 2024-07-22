@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Any, Message, proto3 } from "@bufbuild/protobuf";
+import { Message, proto3 } from "@bufbuild/protobuf";
 import { Chat } from "../../model/chat/v1/chat_pb.ts";
 
 /**
@@ -43,14 +43,9 @@ export class ChatEventRequest extends Message<ChatEventRequest> {
  */
 export class ChatEventResponse extends Message<ChatEventResponse> {
   /**
-   * @generated from field: string event_name = 1;
+   * @generated from field: bytes data = 2;
    */
-  eventName = "";
-
-  /**
-   * @generated from field: google.protobuf.Any data = 2;
-   */
-  data?: Any;
+  data = new Uint8Array(0);
 
   constructor(data?: PartialMessage<ChatEventResponse>) {
     super();
@@ -60,8 +55,7 @@ export class ChatEventResponse extends Message<ChatEventResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "protobuf.chat.v1.ChatEventResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "event_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "data", kind: "message", T: Any },
+    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ChatEventResponse {

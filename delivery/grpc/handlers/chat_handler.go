@@ -20,16 +20,16 @@ var (
 	ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
 )
 
-type handler struct {
+type chatHandler struct {
 	chatService chat.ChatService
 	chatv1.CreateChannelRequest
 }
 
 func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceHandler {
-	return handler{chatService: chatService}
+	return chatHandler{chatService: chatService}
 }
 
-func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
+func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
 	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
 	if userID == "" {
 		return nil, connect.NewError(connect.CodeDataLoss, ErrEmptyUserID)
@@ -55,28 +55,22 @@ func (h handler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.
 	return res, nil
 }
 
-func (h handler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
+func (h chatHandler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
 	res := connect.NewResponse(&chatv1.CreateDirectResponse{
 		Chat: nil,
 	})
 	return res, nil
 }
 
-func (h handler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {
+func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {
 	panic("unimplemented")
 }
 
-func (h handler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
+func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
 	panic("unimplemented")
 }
 
-// GetChatsEvents implements chatv1connect.ChatServiceHandler.
-func (h handler) GetChatsEvents(context.Context, *connect.Request[chatv1.ChatEventRequest], *connect.ServerStream[chatv1.ChatEventResponse]) error {
-	panic("unimplemented")
-}
-
-// GetUserChats implements chatv1connect.ChatServiceHandler.
-func (h handler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
+func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
 	userID := req.Msg.UserId
 
 	chats, varror := h.chatService.GetUserChats(ctx, userID)

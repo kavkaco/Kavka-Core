@@ -14,8 +14,10 @@ import (
 func main() {
 	kafkaConfig := config.Read().Kafka
 
+	const userID = "my-user1"
+
 	// Create producer
-	chatProducer, err := stream_producers.NewChatStreamProducer(&kafkaConfig)
+	prod, err := stream_producers.NewBroadcastStreamProducer(&kafkaConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,7 +27,7 @@ func main() {
 		ChatType: "channel",
 	}
 
-	err = chatProducer.ChatCreated(nil, chatModel)
+	err = prod.ChatCreated(userID, chatModel)
 	if err != nil {
 		log.Fatal(err)
 	}

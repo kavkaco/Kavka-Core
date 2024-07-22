@@ -1,0 +1,15 @@
+syntax = "proto3";
+package protobuf.events.v1;
+
+option go_package = "protobuf/events/v1";
+
+service EventsService {
+  rpc SubscribeEventsStream(EventStreamRequest) returns (stream EventStreamResponse) {}
+}
+
+message EventStreamRequest{}
+
+message EventStreamResponse {
+    string name = 1;
+    string raw_json =2;
+}
