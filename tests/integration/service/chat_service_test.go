@@ -32,7 +32,7 @@ func (s *ChatTestSuite) SetupSuite() {
 	userRepo := repository_mongo.NewUserMongoRepository(db)
 
 	s.userRepo = userRepo
-	s.service = service.NewChatService(chatRepo, userRepo, nil, nil)
+	s.service = service.NewChatService(nil, chatRepo, userRepo, nil)
 
 	s.userID = fmt.Sprintf("%d", random.GenerateUserID())
 	s.recipientUserID = fmt.Sprintf("%d", random.GenerateUserID())

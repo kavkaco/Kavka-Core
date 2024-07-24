@@ -50,8 +50,7 @@ services:
       - default_network
     image: nats
     ports:
-      - "8222:8222"
-    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --http_port 8222 "
+      - "4222:4222"
   nats-web:
     image: sphqxe/nats-webui
     ports:

@@ -2,14 +2,16 @@ package chat
 
 import (
 	"context"
-	"log"
+	"encoding/json"
 
 	"github.com/kavkaco/Kavka-Core/infra/stream"
-	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
+
+const SubjChats = "chats"
 
 type ChatService interface {
 	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror)
@@ -20,24 +22,15 @@ type ChatService interface {
 }
 
 type ChatManager struct {
-	chatRepo          repository.ChatRepository
-	userRepo          repository.UserRepository
-	validator         *vali.Vali
-	chatInfraProducer stream_producers.ChatProducer
-	events            chan map[string]interface{}
+	logger         *log.SubLogger
+	chatRepo       repository.ChatRepository
+	userRepo       repository.UserRepository
+	validator      *vali.Vali
+	eventPublisher stream.StreamPublisher
 }
 
-func NewChatService(chatRepo repository.ChatRepository, userRepo repository.UserRepository, chatInfraProducer stream_producers.ChatProducer, events chan map[string]interface{}) ChatService {
-	// FIXME - replace with real logger
-	if chatInfraProducer == nil {
-		log.Println("[Warn] no infra producer set for chat service")
-	}
-
-	if events == nil {
-		log.Println("[Warn] no events channel set for chat service")
-	}
-
-	return &ChatManager{chatRepo, userRepo, vali.Validator(), chatInfraProducer, events}
+func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, userRepo repository.UserRepository, eventPublisher stream.StreamPublisher) ChatService {
+	return &ChatManager{logger, chatRepo, userRepo, vali.Validator(), eventPublisher}
 }
 
 // find single chat with chat id
@@ -141,14 +134,27 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		Owner:       userID,
 	})
 
+	go func() {
+		chatModelJson, err := json.Marshal(chatModel)
+		if err != nil {
+			s.logger.Error("unable to marshal chat model into json: " + err.Error())
+			return
+		}
+
+		err = s.eventPublisher.Publish(stream.StreamEvent{
+			SenderUserID:     userID,
+			ReceiversUserIDs: []string{userID},
+			Name:             "add-chat",
+			DataJson:         string(chatModelJson),
+		})
+		if err != nil {
+			s.logger.Error("unable to publish add-chat event in eventPublisher: " + err.Error())
+		}
+	}()
+
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrCreateChat}
-	}
-
-	err = s.chatInfraProducer.ChatCreated(userID, *chatModel)
-	if err != nil {
-		return nil, &vali.Varror{Error: stream.ErrProducer}
 	}
 
 	return saved, nil

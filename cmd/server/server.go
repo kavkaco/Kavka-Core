@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/pprof"
 
@@ -14,10 +12,10 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
-	stream_consumers "github.com/kavkaco/Kavka-Core/infra/stream/consumers"
-	stream_producers "github.com/kavkaco/Kavka-Core/infra/stream/producer"
+	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
+	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
@@ -31,7 +29,7 @@ import (
 
 func handleError(err error) {
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
@@ -45,43 +43,44 @@ func handleCORS(allowedOrigins []string, h http.Handler) http.Handler {
 }
 
 func main() {
-	ctx := context.Background()
+	// [=== Load Config ===]
+	cfg := config.Read()
 
-	// Init Zap Logger
-	// logger := logs.InitZapLogger()
+	// [=== Init Logger ===]
+	log.InitGlobalLogger(cfg.Logger)
 
-	// Load Configs
-	configs := config.Read()
-
-	// Init MongoDB
-	mongoDB, mongoErr := database.GetMongoDBInstance(
+	// [=== Init MongoDB ===]
+	mongoDB, err := database.GetMongoDBInstance(
 		database.NewMongoDBConnectionString(
-			configs.Mongo.Host,
-			configs.Mongo.Port,
-			configs.Mongo.Username,
-			configs.Mongo.Password,
+			cfg.Mongo.Host,
+			cfg.Mongo.Port,
+			cfg.Mongo.Username,
+			cfg.Mongo.Password,
 		),
-		configs.Mongo.DBName,
+		cfg.Mongo.DBName,
 	)
-	if mongoErr != nil {
-		panic(mongoErr)
-	}
+	handleError(err)
 
-	// Init RedisDB
-	redisClient := database.GetRedisDBInstance(configs.Redis)
+	// [=== Init RedisDB ===]
+	redisClient := database.GetRedisDBInstance(cfg.Redis)
 
+	// [=== Init Auth Manager Service ===]
+	// Repo: github.com/tahadostifam/go-auth-manager
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
-		PrivateKey: configs.Auth.SecretKey,
+		PrivateKey: cfg.Auth.SecretKey,
 	})
 
-	// Init Infra
-	chatStreamEvents := make(chan map[string]interface{})
-	chatProducer, err := stream_producers.NewBroadcastStreamProducer(&configs.Kafka)
+	// [=== Init Infra ===]
+	natsClient, err := stream.NewNATSAdapter(cfg, log.NewSubLogger("infra"))
 	handleError(err)
 
-	broadcastConsumer, err := stream_consumers.NewBroadcastConsumer(ctx, configs.Kafka.Brokers, *configs.Kafka.Sarama)
+	streamPublisher, err := stream.NewStreamPublisher(natsClient)
 	handleError(err)
 
+	streamSubscriber, err := stream.NewStreamSubscriber(natsClient, log.NewSubLogger("stream-subscriber"))
+	handleError(err)
+
+	// [=== Init Internal Services ===]
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 
 	userRepo := repository_mongo.NewUserMongoRepository(mongoDB)
@@ -91,7 +90,7 @@ func main() {
 
 	var emailService email.EmailService
 	if config.CurrentEnv == config.Production {
-		emailService = email.NewEmailService(&configs.Email, "email/templates")
+		emailService = email.NewEmailService(&cfg.Email, "email/templates")
 	} else {
 		emailService = email.NewEmailDevelopmentService()
 	}
@@ -99,13 +98,13 @@ func main() {
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
-	chatService := chat.NewChatService(chatRepo, userRepo, chatProducer, chatStreamEvents)
+	chatService := chat.NewChatService(log.NewSubLogger("chat-service"), chatRepo, userRepo, streamPublisher)
 
 	// messageRepo := repository.NewMessageRepository(mongoDB)
 	// messageService := message.NewMessageService(messageRepo, chatRepo)
 
-	// Init grpc server
-	grpcListenAddr := fmt.Sprintf("%s:%d", configs.HTTP.Host, configs.HTTP.Port)
+	// [=== Init grpc server ===]
+	grpcListenAddr := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
 	gRPCRouter := http.NewServeMux()
 
 	authInterceptor := interceptor.NewAuthInterceptor(authService)
@@ -117,20 +116,21 @@ func main() {
 	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
-	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(broadcastConsumer)
+	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(log.NewSubLogger("events-handler"), streamSubscriber)
 	eventsGrpcRoute, eventsGrpcRouter := eventsv1connect.NewEventsServiceHandler(eventsGrpcHandler, interceptors)
 
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 	gRPCRouter.Handle(eventsGrpcRoute, eventsGrpcRouter)
 
-	// PPROF Memory Profiling Tool
+	// [=== PPROF Memory Profiling Tool ===]
 	if config.CurrentEnv == config.Development {
 		gRPCRouter.HandleFunc("/debug/pprof/*", pprof.Index)
 		gRPCRouter.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
-	handler := handleCORS(configs.HTTP.Cors.AllowOrigins, gRPCRouter)
+	// [=== Init HTTP Server ===]
+	handler := handleCORS(cfg.HTTP.Cors.AllowOrigins, gRPCRouter)
 	server := &http.Server{
 		Addr:         grpcListenAddr,
 		Handler:      h2c.NewHandler(handler, &http2.Server{}),
