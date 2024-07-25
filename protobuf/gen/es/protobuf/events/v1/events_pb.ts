@@ -5,6 +5,56 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
+import { Chat } from "../../model/chat/v1/chat_pb.ts";
+
+/**
+ * @generated from message protobuf.events.v1.StreamEvent
+ */
+export class StreamEvent extends Message<StreamEvent> {
+  /**
+   * @generated from field: string sender_user_id = 1;
+   */
+  senderUserId = "";
+
+  /**
+   * @generated from field: repeated string receivers_user_id = 2;
+   */
+  receiversUserId: string[] = [];
+
+  /**
+   * @generated from field: bytes payload = 3;
+   */
+  payload = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<StreamEvent>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.events.v1.StreamEvent";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sender_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "receivers_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: "payload", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StreamEvent {
+    return new StreamEvent().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StreamEvent {
+    return new StreamEvent().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StreamEvent {
+    return new StreamEvent().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StreamEvent | PlainMessage<StreamEvent> | undefined, b: StreamEvent | PlainMessage<StreamEvent> | undefined): boolean {
+    return proto3.util.equals(StreamEvent, a, b);
+  }
+}
 
 /**
  * @generated from message protobuf.events.v1.EventStreamRequest
@@ -47,9 +97,20 @@ export class EventStreamResponse extends Message<EventStreamResponse> {
   name = "";
 
   /**
-   * @generated from field: string raw_json = 2;
+   * @generated from field: protobuf.events.v1.EventStreamResponse.Type type = 2;
    */
-  rawJson = "";
+  type = EventStreamResponse_Type.UNKNOWN_EVENT;
+
+  /**
+   * @generated from oneof protobuf.events.v1.EventStreamResponse.payload
+   */
+  payload: {
+    /**
+     * @generated from field: protobuf.events.v1.AddChat add_chat = 3;
+     */
+    value: AddChat;
+    case: "addChat";
+  } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<EventStreamResponse>) {
     super();
@@ -60,7 +121,8 @@ export class EventStreamResponse extends Message<EventStreamResponse> {
   static readonly typeName = "protobuf.events.v1.EventStreamResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "raw_json", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(EventStreamResponse_Type) },
+    { no: 3, name: "add_chat", kind: "message", T: AddChat, oneof: "payload" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventStreamResponse {
@@ -77,6 +139,105 @@ export class EventStreamResponse extends Message<EventStreamResponse> {
 
   static equals(a: EventStreamResponse | PlainMessage<EventStreamResponse> | undefined, b: EventStreamResponse | PlainMessage<EventStreamResponse> | undefined): boolean {
     return proto3.util.equals(EventStreamResponse, a, b);
+  }
+}
+
+/**
+ * @generated from enum protobuf.events.v1.EventStreamResponse.Type
+ */
+export enum EventStreamResponse_Type {
+  /**
+   * @generated from enum value: UNKNOWN_EVENT = 0;
+   */
+  UNKNOWN_EVENT = 0,
+
+  /**
+   * @generated from enum value: ADD_CHAT = 1;
+   */
+  ADD_CHAT = 1,
+
+  /**
+   * @generated from enum value: REMOVE_CHAT = 2;
+   */
+  REMOVE_CHAT = 2,
+
+  /**
+   * @generated from enum value: UPDATE_CHAT = 3;
+   */
+  UPDATE_CHAT = 3,
+
+  /**
+   * @generated from enum value: ADD_MESSAGE = 4;
+   */
+  ADD_MESSAGE = 4,
+
+  /**
+   * @generated from enum value: REMOVE_MESSAGE = 5;
+   */
+  REMOVE_MESSAGE = 5,
+
+  /**
+   * @generated from enum value: UPDATE_MESSAGE = 6;
+   */
+  UPDATE_MESSAGE = 6,
+
+  /**
+   * @generated from enum value: CLEAR_CHAT = 7;
+   */
+  CLEAR_CHAT = 7,
+
+  /**
+   * @generated from enum value: MESSAGE_SEEN = 8;
+   */
+  MESSAGE_SEEN = 8,
+}
+// Retrieve enum metadata with: proto3.getEnumType(EventStreamResponse_Type)
+proto3.util.setEnumType(EventStreamResponse_Type, "protobuf.events.v1.EventStreamResponse.Type", [
+  { no: 0, name: "UNKNOWN_EVENT" },
+  { no: 1, name: "ADD_CHAT" },
+  { no: 2, name: "REMOVE_CHAT" },
+  { no: 3, name: "UPDATE_CHAT" },
+  { no: 4, name: "ADD_MESSAGE" },
+  { no: 5, name: "REMOVE_MESSAGE" },
+  { no: 6, name: "UPDATE_MESSAGE" },
+  { no: 7, name: "CLEAR_CHAT" },
+  { no: 8, name: "MESSAGE_SEEN" },
+]);
+
+/**
+ * @generated from message protobuf.events.v1.AddChat
+ */
+export class AddChat extends Message<AddChat> {
+  /**
+   * @generated from field: protobuf.model.chat.v1.Chat chat = 1;
+   */
+  chat?: Chat;
+
+  constructor(data?: PartialMessage<AddChat>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.events.v1.AddChat";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "chat", kind: "message", T: Chat },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddChat {
+    return new AddChat().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddChat {
+    return new AddChat().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddChat {
+    return new AddChat().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AddChat | PlainMessage<AddChat> | undefined, b: AddChat | PlainMessage<AddChat> | undefined): boolean {
+    return proto3.util.equals(AddChat, a, b);
   }
 }
 

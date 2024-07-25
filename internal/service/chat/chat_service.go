@@ -2,13 +2,15 @@ package chat
 
 import (
 	"context"
-	"encoding/json"
 
+	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/log"
+	eventsv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
+	"google.golang.org/protobuf/proto"
 )
 
 const SubjChats = "chats"
@@ -134,18 +136,31 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		Owner:       userID,
 	})
 
+	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chatModel)
+	if err != nil {
+		return nil, &vali.Varror{Error: grpc_model.ErrTransformToGrpcModel}
+	}
+
 	go func() {
-		chatModelJson, err := json.Marshal(chatModel)
+		payloadProtoBuf, err := proto.Marshal(&eventsv1.EventStreamResponse{
+			Name: "add-chat",
+			Type: eventsv1.EventStreamResponse_ADD_CHAT,
+			Payload: &eventsv1.EventStreamResponse_AddChat{
+				AddChat: &eventsv1.AddChat{
+					Chat: chatGrpcModel,
+				},
+			},
+		},
+		)
 		if err != nil {
-			s.logger.Error("unable to marshal chat model into json: " + err.Error())
+			s.logger.Error("proto marshal error: " + err.Error())
 			return
 		}
 
-		err = s.eventPublisher.Publish(stream.StreamEvent{
-			SenderUserID:     userID,
-			ReceiversUserIDs: []string{userID},
-			Name:             "add-chat",
-			DataJson:         string(chatModelJson),
+		err = s.eventPublisher.Publish(eventsv1.StreamEvent{
+			SenderUserId:    userID,
+			ReceiversUserId: []string{userID},
+			Payload:         payloadProtoBuf,
 		})
 		if err != nil {
 			s.logger.Error("unable to publish add-chat event in eventPublisher: " + err.Error())

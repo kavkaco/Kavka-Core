@@ -1,7 +1,15 @@
 syntax = "proto3";
 package protobuf.events.v1;
 
+import "protobuf/model/chat/v1/chat.proto";
+
 option go_package = "protobuf/events/v1";
+
+message StreamEvent {
+  string sender_user_id = 1;
+  repeated string receivers_user_id = 2;
+  bytes payload = 3;
+}
 
 service EventsService {
   rpc SubscribeEventsStream(EventStreamRequest) returns (stream EventStreamResponse) {}
@@ -10,6 +18,25 @@ service EventsService {
 message EventStreamRequest{}
 
 message EventStreamResponse {
-    string name = 1;
-    string raw_json =2;
+  enum Type {
+    UNKNOWN_EVENT = 0;
+    ADD_CHAT = 1;
+    REMOVE_CHAT = 2;
+    UPDATE_CHAT = 3;
+    ADD_MESSAGE = 4;
+    REMOVE_MESSAGE = 5;
+    UPDATE_MESSAGE = 6;
+    CLEAR_CHAT = 7;
+    MESSAGE_SEEN = 8;
+  }
+
+  string name = 1;
+  Type type =2;
+  oneof payload {
+    AddChat add_chat = 3;
+  }
+}
+
+message AddChat {
+  model.chat.v1.Chat chat = 1;
 }
