@@ -24,7 +24,7 @@ func NewEventsGrpcHandler(logger *log.SubLogger, streamer stream.StreamSubscribe
 }
 
 func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.EventStreamRequest], str *connect.ServerStream[eventsv1.EventStreamResponse]) error {
-	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
 
 	userCh := make(chan stream.StreamEvent)
 	e.streamer.UserSubscribe(userID, userCh)

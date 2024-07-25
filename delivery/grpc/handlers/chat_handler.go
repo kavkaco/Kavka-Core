@@ -2,7 +2,6 @@ package grpc_handlers
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"connectrpc.com/connect"
@@ -16,10 +15,6 @@ import (
 	chatv1model "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
 )
 
-var (
-	ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
-)
-
 type chatHandler struct {
 	chatService chat.ChatService
 	chatv1.CreateChannelRequest
@@ -30,9 +25,9 @@ func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceH
 }
 
 func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
-	userID := ctx.Value(interceptor.UserIDKey{}).(model.UserID)
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
 	if userID == "" {
-		return nil, connect.NewError(connect.CodeDataLoss, ErrEmptyUserID)
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
 	}
 
 	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)

@@ -10,7 +10,11 @@ import (
 
 const accessTokenHeader = "X-Access-Token"
 
-type UserIDKey struct{}
+type UserID struct{}
+
+var (
+	ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
+)
 
 type authInterceptor struct {
 	authService auth.AuthService
@@ -56,7 +60,7 @@ func (i *authInterceptor) authRequired(ctx context.Context, accessToken string) 
 		return nil, connect.NewError(connect.CodeUnauthenticated, nil)
 	}
 
-	ctx = context.WithValue(ctx, UserIDKey{}, user.UserID)
+	ctx = context.WithValue(ctx, UserID{}, user.UserID)
 
 	return ctx, nil
 }
