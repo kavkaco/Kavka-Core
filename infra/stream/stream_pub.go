@@ -9,7 +9,7 @@ import (
 const subjEvent = "events"
 
 type StreamPublisher interface {
-	Publish(event eventsv1.StreamEvent) error
+	Publish(event *eventsv1.StreamEvent) error
 }
 
 type pub struct {
@@ -20,8 +20,8 @@ func NewStreamPublisher(nc *nats.Conn) (StreamPublisher, error) {
 	return &pub{nc}, nil
 }
 
-func (p *pub) Publish(event eventsv1.StreamEvent) error {
-	eventBuf, err := proto.Marshal(&event)
+func (p *pub) Publish(event *eventsv1.StreamEvent) error {
+	eventBuf, err := proto.Marshal(event)
 	if err != nil {
 		return err
 	}

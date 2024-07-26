@@ -15,7 +15,7 @@ service EventsService {
   rpc SubscribeEventsStream(EventStreamRequest) returns (stream EventStreamResponse) {}
 }
 
-message EventStreamRequest{}
+message EventStreamRequest {}
 
 message EventStreamResponse {
   enum Type {
@@ -31,7 +31,7 @@ message EventStreamResponse {
   }
 
   string name = 1;
-  Type type =2;
+  Type type = 2;
   oneof payload {
     AddChat add_chat = 3;
   }

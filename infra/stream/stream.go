@@ -11,5 +11,5 @@ var ErrPublishEvent = errors.New("publishing event went wrong")
 
 type StreamSubscribedUser struct {
 	UserID   model.UserID
-	UserPipe chan eventsv1.EventStreamResponse
+	UserPipe chan *eventsv1.EventStreamResponse
 }

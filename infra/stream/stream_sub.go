@@ -11,7 +11,7 @@ import (
 const eventStreamSubject = "events"
 
 type StreamSubscriber interface {
-	UserSubscribe(userID model.UserID, userCh chan eventsv1.EventStreamResponse)
+	UserSubscribe(userID model.UserID, userCh chan *eventsv1.EventStreamResponse)
 	UserUnsubscribe(userID model.UserID)
 }
 
@@ -24,7 +24,7 @@ type sub struct {
 func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber, error) {
 	subInstance := &sub{nc, logger, []StreamSubscribedUser{}}
 
-	nc.Subscribe(eventStreamSubject, func(msg *nats.Msg) {
+	_, err := nc.Subscribe(eventStreamSubject, func(msg *nats.Msg) {
 		go func() {
 			var event eventsv1.StreamEvent
 			err := proto.Unmarshal(msg.Data, &event)
@@ -49,13 +49,17 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 					}
 
 					go func() {
-						su.UserPipe <- payload
+						su.UserPipe <- &payload
 					}()
 				}
 			}
 		}()
 	})
-	err := nc.Flush()
+	if err != nil {
+		return nil, err
+	}
+
+	err = nc.Flush()
 	if err != nil {
 		logger.Error("nats flush error: " + err.Error())
 	}
@@ -63,7 +67,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 	return subInstance, nil
 }
 
-func (p *sub) UserSubscribe(userID model.UserID, userCh chan eventsv1.EventStreamResponse) {
+func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.EventStreamResponse) {
 	p.logger.Debug("user stream established")
 	p.subscribedUsers = append(p.subscribedUsers, StreamSubscribedUser{UserID: userID, UserPipe: userCh})
 }

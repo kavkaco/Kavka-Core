@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func TransformChatToGrpcModel(chat *model.Chat) (*modelv1.Chat, error) {
+func TransformChatToGrpcModel(chat model.Chat) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":

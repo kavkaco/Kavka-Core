@@ -17,7 +17,6 @@ import (
 
 type chatHandler struct {
 	chatService chat.ChatService
-	chatv1.CreateChannelRequest
 }
 
 func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceHandler {
@@ -38,7 +37,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connectErr
 	}
 
-	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(chat)
+	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(*chat)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -73,10 +72,10 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 		return nil, varror.Error
 	}
 
-	var transformedChats []*chatv1model.Chat
+	transformedChats := []*chatv1model.Chat{}
 
 	for _, v := range chats {
-		c, err := grpc_model.TransformChatToGrpcModel(&v)
+		c, err := grpc_model.TransformChatToGrpcModel(v)
 		if err != nil {
 			// FIXME - Replace with real logger
 			log.Println(err)

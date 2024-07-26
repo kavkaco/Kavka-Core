@@ -12,9 +12,7 @@ const accessTokenHeader = "X-Access-Token"
 
 type UserID struct{}
 
-var (
-	ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
-)
+var ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
 
 type authInterceptor struct {
 	authService auth.AuthService
