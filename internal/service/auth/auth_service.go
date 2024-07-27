@@ -239,10 +239,7 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
-	err = a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID)
-	if err != nil {
-		return nil, "", "", &vali.Varror{Error: ErrClearFailedLoginAttempts}
-	}
+	go a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID)
 
 	return user, accessToken, refreshToken, nil
 }
@@ -261,7 +258,7 @@ func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, o
 	// Validate with old password
 	validPassword := a.hashManager.CheckPasswordHash(oldPassword, auth.PasswordHash)
 	if !validPassword {
-		return &vali.Varror{Error: ErrInvalidPassword}
+		return &vali.Varror{Error: ErrInvalidEmailOrPassword}
 	}
 
 	newPasswordHash, err := a.hashManager.HashPassword(newPassword)
@@ -381,7 +378,7 @@ func (s *AuthManager) DeleteAccount(ctx context.Context, userID model.UserID, pa
 
 	validPassword := s.hashManager.CheckPasswordHash(password, auth.PasswordHash)
 	if !validPassword {
-		return &vali.Varror{Error: ErrInvalidPassword}
+		return &vali.Varror{Error: ErrInvalidEmailOrPassword}
 	}
 
 	err = s.authRepo.DeleteByID(ctx, userID)

@@ -172,5 +172,10 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
 
+	err = s.chatRepo.AddToUsersChatsList(ctx, userID, saved.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
+	}
+
 	return saved, nil
 }

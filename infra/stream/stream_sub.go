@@ -28,7 +28,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 		go func() {
 			var event eventsv1.StreamEvent
 			err := proto.Unmarshal(msg.Data, &event)
-			if err != nil { // || msgMap["payload"] == nil
+			if err != nil {
 				logger.Error("proto unmarshal error when decoding incoming msg of the broker: " + err.Error())
 				return
 			}
@@ -44,7 +44,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 			for _, receiverUserID := range event.ReceiversUserId {
 				if su := MatchUserSubscription(receiverUserID, subInstance.subscribedUsers); su != nil {
 					if su.UserPipe == nil {
-						logger.Error("global event stream skipped broken user pipe")
+						logger.Error("event stream skipped broken user pipe")
 						continue
 					}
 

@@ -55,6 +55,10 @@ type DirectChatDetail struct {
 	Sides [2]UserID `bson:"sides" json:"sides"`
 }
 
+type DirectChatFetchedDetail struct {
+	UserInfo User
+}
+
 func (c *Chat) IsMember(userID UserID) bool {
 	d, _ := utils.TypeConverter[ChannelChatDetail](c.ChatDetail)
 	for _, memberUserID := range d.Members {

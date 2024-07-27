@@ -113,7 +113,7 @@ func main() {
 	authGrpcHandler := grpc_handlers.NewAuthGrpcHandler(authService)
 	authGrpcRoute, authGrpcRouter := authv1connect.NewAuthServiceHandler(authGrpcHandler)
 
-	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(chatService)
+	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(log.NewSubLogger("chats-handler"), chatService)
 	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
 
 	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(log.NewSubLogger("events-handler"), streamSubscriber)

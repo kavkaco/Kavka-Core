@@ -2,7 +2,6 @@ package grpc_handlers
 
 import (
 	"context"
-	"log"
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
@@ -10,17 +9,19 @@ import (
 	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
+	"github.com/kavkaco/Kavka-Core/log"
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	chatv1model "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
 )
 
 type chatHandler struct {
+	logger      *log.SubLogger
 	chatService chat.ChatService
 }
 
-func NewChatGrpcHandler(chatService chat.ChatService) chatv1connect.ChatServiceHandler {
-	return chatHandler{chatService: chatService}
+func NewChatGrpcHandler(logger *log.SubLogger, chatService chat.ChatService) chatv1connect.ChatServiceHandler {
+	return chatHandler{logger, chatService}
 }
 
 func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
@@ -65,7 +66,10 @@ func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.Ge
 }
 
 func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
-	userID := req.Msg.UserId
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
 
 	chats, varror := h.chatService.GetUserChats(ctx, userID)
 	if varror != nil {
@@ -77,8 +81,7 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 	for _, v := range chats {
 		c, err := grpc_model.TransformChatToGrpcModel(v)
 		if err != nil {
-			// FIXME - Replace with real logger
-			log.Println(err)
+			h.logger.Error(grpc_model.ErrTransformation.Error())
 			continue
 		}
 

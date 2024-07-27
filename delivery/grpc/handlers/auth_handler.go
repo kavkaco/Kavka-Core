@@ -22,10 +22,7 @@ func NewAuthGrpcHandler(authService auth.AuthService) AuthGrpcServer {
 func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.LoginRequest]) (*connect.Response[authv1.LoginResponse], error) {
 	user, accessToken, refreshToken, varror := a.authService.Login(ctx, req.Msg.Email, req.Msg.Password)
 	if varror != nil {
-		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
-		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
-		connectErr.AddDetail(varrorDetail)
-		return nil, connectErr
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeInvalidArgument)
 	}
 
 	res := connect.NewResponse(&authv1.LoginResponse{
