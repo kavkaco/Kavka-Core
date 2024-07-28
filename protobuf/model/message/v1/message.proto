@@ -1,0 +1,25 @@
+syntax = "proto3";
+package protobuf.model.message.v1;
+
+option go_package = "protobuf/model/message/v1";
+
+message Message {
+  string message_id = 1;
+  string sender_id = 2;
+  int64 created_at = 3;
+  bool edited = 4;
+  bool seen = 5;
+  string type = 6;
+  oneof payload {
+    TextMessage text_message = 7;
+    LabelMessage label_message = 8;
+  }
+}
+
+message TextMessage {
+    string text = 1;
+}
+
+message LabelMessage {
+    string text = 1;
+}

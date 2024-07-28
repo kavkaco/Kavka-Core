@@ -11,6 +11,7 @@ type MessageID = primitive.ObjectID
 const (
 	TypeTextMessage  = "text"
 	TypeImageMessage = "image"
+	TypeLabelMessage = "label"
 )
 
 type LastMessage struct {
@@ -34,7 +35,11 @@ type Message struct {
 }
 
 type TextMessage struct {
-	Data string `bson:"data" json:"data"`
+	Text string `bson:"text" json:"text"`
+}
+
+type LabelMessage struct {
+	Text string `bson:"text" json:"text"`
 }
 
 type ImageMessage struct {

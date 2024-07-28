@@ -10,6 +10,7 @@ import (
 )
 
 type MessageService interface {
+	FetchMessages(ctx context.Context, chatID model.ChatID) ([]model.Message, *vali.Varror)
 	UpdateTextMessage(ctx context.Context, chatID model.ChatID, newMessageContent string) *vali.Varror
 	InsertTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.Message, *vali.Varror)
 	DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror
@@ -25,6 +26,15 @@ func NewMessageService(messageRepo repository.MessageRepository, chatRepo reposi
 	return &MessageManager{messageRepo, chatRepo, vali.Validator()}
 }
 
+func (s *MessageManager) FetchMessages(ctx context.Context, chatID model.ChatID) ([]model.Message, *vali.Varror) {
+	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: err}
+	}
+
+	return messages, nil
+}
+
 func (s *MessageManager) InsertTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.Message, *vali.Varror) {
 	validationErrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
 	if len(validationErrors) > 0 {
@@ -38,7 +48,7 @@ func (s *MessageManager) InsertTextMessage(ctx context.Context, chatID model.Cha
 
 	if HasAccessToSendMessage(chat.ChatType, chat.ChatDetail, userID) {
 		messageModel := model.NewMessage(model.TypeTextMessage, model.TextMessage{
-			Data: messageContent,
+			Text: messageContent,
 		}, userID)
 		message, err := s.messageRepo.Insert(ctx, chatID, messageModel)
 		if err != nil {

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package protobuf.message.v1;
+
+import "protobuf/model/message/v1/message.proto";
+
+option go_package = "protobuf/message/v1";
+
+service MessageService {
+  rpc FetchMessages(FetchMessagesRequest) returns (FetchMessagesResponse) {}
+}
+
+message FetchMessagesRequest {
+    string chat_id = 1;
+}
+
+message FetchMessagesResponse {
+  repeated protobuf.model.message.v1.Message messages = 1; 
+}

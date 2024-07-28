@@ -15,11 +15,13 @@ import (
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
+	"github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/messagev1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/rs/cors"
 	auth_manager "github.com/tahadostifam/go-auth-manager"
@@ -80,7 +82,7 @@ func main() {
 	streamSubscriber, err := stream.NewStreamSubscriber(natsClient, log.NewSubLogger("stream-subscriber"))
 	handleError(err)
 
-	// [=== Init Internal Services ===]
+	// [=== Init Internal Services & Repositories ===]
 	hashManager := hash.NewHashManager(hash.DefaultHashParams)
 
 	userRepo := repository_mongo.NewUserMongoRepository(mongoDB)
@@ -97,11 +99,12 @@ func main() {
 
 	authService := auth.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 
-	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
-	chatService := chat.NewChatService(log.NewSubLogger("chat-service"), chatRepo, userRepo, streamPublisher)
+	messageRepo := repository_mongo.NewMessageMongoRepository(mongoDB)
 
-	// messageRepo := repository.NewMessageRepository(mongoDB)
-	// messageService := message.NewMessageService(messageRepo, chatRepo)
+	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
+	chatService := chat.NewChatService(log.NewSubLogger("chat-service"), chatRepo, userRepo, messageRepo, streamPublisher)
+
+	messageService := message.NewMessageService(messageRepo, chatRepo)
 
 	// [=== Init grpc server ===]
 	grpcListenAddr := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
@@ -119,9 +122,13 @@ func main() {
 	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(log.NewSubLogger("events-handler"), streamSubscriber)
 	eventsGrpcRoute, eventsGrpcRouter := eventsv1connect.NewEventsServiceHandler(eventsGrpcHandler, interceptors)
 
+	messageGrpcHandler := grpc_handlers.NewMessageGrpcHandler(log.NewSubLogger("message-handler"), messageService)
+	messageGrpcRoute, messageGrpcRouter := messagev1connect.NewMessageServiceHandler(messageGrpcHandler, interceptors)
+
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 	gRPCRouter.Handle(eventsGrpcRoute, eventsGrpcRouter)
+	gRPCRouter.Handle(messageGrpcRoute, messageGrpcRouter)
 
 	// [=== PPROF Memory Profiling Tool ===]
 	if config.CurrentEnv == config.Development {

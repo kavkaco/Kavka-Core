@@ -54,7 +54,7 @@ func (s *MessageTestSuite) SetupSuite() {
 func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	ctx := context.TODO()
 
-	messageContentModel := model.TextMessage{Data: s.lem.Sentence(1, 3)}
+	messageContentModel := model.TextMessage{Text: s.lem.Sentence(1, 3)}
 	messageModel := model.NewMessage(model.TypeTextMessage, messageContentModel, s.senderID)
 	saved, err := s.repo.Insert(ctx, s.chatID, messageModel)
 	require.NoError(s.T(), err)
@@ -100,7 +100,7 @@ func (s *MessageTestSuite) TestD_UpdateTextMessage() {
 	lastMessageContent, err := utils.TypeConverter[model.TextMessage](messages[0].Content)
 	require.NoError(s.T(), err)
 
-	updatedMessageContent := lastMessageContent.Data
+	updatedMessageContent := lastMessageContent.Text
 
 	require.Equal(s.T(), newMessageContent, updatedMessageContent)
 }

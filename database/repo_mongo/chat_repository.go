@@ -88,10 +88,27 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	return nil
 }
 
-func (repo *chatRepository) FindManyByChatID(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
-	filter := bson.M{"_id": bson.M{"$in": chatIDs}}
+func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"_id": bson.M{"$in": chatIDs},
+			},
+		},
+		// bson.M{
+		// 	"$lookup": bson.M{
+		// 		"from":         "messages",
+		// 		"localField":   "_id",
+		// 		"foreignField": "chat_id",
+		// 		"as":           "messages",
+		// 	},
+		// },
+		// bson.M{
+		// 	"$unwind": "$messages",
+		// },
+	}
 
-	cursor, err := repo.chatsCollection.Find(ctx, filter)
+	cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}

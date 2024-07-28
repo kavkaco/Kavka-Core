@@ -27,12 +27,13 @@ type ChatManager struct {
 	logger         *log.SubLogger
 	chatRepo       repository.ChatRepository
 	userRepo       repository.UserRepository
+	messageRepo    repository.MessageRepository
 	validator      *vali.Vali
 	eventPublisher stream.StreamPublisher
 }
 
-func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, userRepo repository.UserRepository, eventPublisher stream.StreamPublisher) ChatService {
-	return &ChatManager{logger, chatRepo, userRepo, vali.Validator(), eventPublisher}
+func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, userRepo repository.UserRepository, messageRepo repository.MessageRepository, eventPublisher stream.StreamPublisher) ChatService {
+	return &ChatManager{logger, chatRepo, userRepo, messageRepo, vali.Validator(), eventPublisher}
 }
 
 // find single chat with chat id
@@ -64,7 +65,7 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 
 	userChatsListIDs := user.ChatsListIDs
 
-	userChats, err := s.chatRepo.FindManyByChatID(ctx, userChatsListIDs)
+	userChats, err := s.chatRepo.GetUserChats(ctx, userChatsListIDs)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrGetUserChats}
 	}
@@ -173,6 +174,24 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
+
+	go func() {
+		err := s.messageRepo.Create(context.TODO(), saved.ChatID)
+		if err != nil {
+			s.logger.Error("message store creation failed: " + err.Error())
+			return
+		}
+
+		messageModel := model.NewMessage(model.TypeLabelMessage, model.LabelMessage{
+			Text: "Channel created",
+		}, userID)
+
+		_, err = s.messageRepo.Insert(context.TODO(), saved.ChatID, messageModel)
+		if err != nil {
+			s.logger.Error("failed to insert message in channel creation: " + err.Error())
+			return
+		}
+	}()
 
 	err = s.chatRepo.AddToUsersChatsList(ctx, userID, saved.ChatID)
 	if err != nil {

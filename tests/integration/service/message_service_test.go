@@ -61,7 +61,7 @@ func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	require.NoError(s.T(), err)
 
 	require.Equal(s.T(), message.SenderID, s.userID)
-	require.Equal(s.T(), savedMessageContent.Data, messageContent)
+	require.Equal(s.T(), savedMessageContent.Text, messageContent)
 
 	s.savedMessageID = message.MessageID
 }
