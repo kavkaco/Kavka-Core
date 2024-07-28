@@ -239,7 +239,7 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
-	go a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID)
+	go a.authRepo.ClearFailedLoginAttempts(ctx, auth.UserID) // nolint
 
 	return user, accessToken, refreshToken, nil
 }
