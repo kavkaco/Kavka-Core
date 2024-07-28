@@ -143,10 +143,10 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 
 	if s.eventPublisher != nil {
 		go func() {
-			payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.EventStreamResponse{
+			payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
 				Name: "add-chat",
-				Type: eventsv1.EventStreamResponse_ADD_CHAT,
-				Payload: &eventsv1.EventStreamResponse_AddChat{
+				Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_CHAT,
+				Payload: &eventsv1.SubscribeEventsStreamResponse_AddChat{
 					AddChat: &eventsv1.AddChat{
 						Chat: chatGrpcModel,
 					},

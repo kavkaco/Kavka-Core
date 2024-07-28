@@ -12,22 +12,22 @@ message StreamEvent {
 }
 
 service EventsService {
-  rpc SubscribeEventsStream(EventStreamRequest) returns (stream EventStreamResponse) {}
+  rpc SubscribeEventsStream(SubscribeEventsStreamRequest) returns (stream SubscribeEventsStreamResponse) {}
 }
 
-message EventStreamRequest {}
+message SubscribeEventsStreamRequest {}
 
-message EventStreamResponse {
+message SubscribeEventsStreamResponse {
   enum Type {
-    UNKNOWN_EVENT = 0;
-    ADD_CHAT = 1;
-    REMOVE_CHAT = 2;
-    UPDATE_CHAT = 3;
-    ADD_MESSAGE = 4;
-    REMOVE_MESSAGE = 5;
-    UPDATE_MESSAGE = 6;
-    CLEAR_CHAT = 7;
-    MESSAGE_SEEN = 8;
+    TYPE_UNSPECIFIED = 0;
+    TYPE_ADD_CHAT = 1;
+    TYPE_REMOVE_CHAT = 2;
+    TYPE_UPDATE_CHAT = 3;
+    TYPE_ADD_MESSAGE = 4;
+    TYPE_REMOVE_MESSAGE = 5;
+    TYPE_UPDATE_MESSAGE = 6;
+    TYPE_CLEAR_CHAT = 7;
+    TYPE_MESSAGE_SEEN = 8;
   }
 
   string name = 1;

@@ -46,7 +46,7 @@ var (
 
 // EventsServiceClient is a client for the protobuf.events.v1.EventsService service.
 type EventsServiceClient interface {
-	SubscribeEventsStream(context.Context, *connect.Request[v1.EventStreamRequest]) (*connect.ServerStreamForClient[v1.EventStreamResponse], error)
+	SubscribeEventsStream(context.Context, *connect.Request[v1.SubscribeEventsStreamRequest]) (*connect.ServerStreamForClient[v1.SubscribeEventsStreamResponse], error)
 }
 
 // NewEventsServiceClient constructs a client for the protobuf.events.v1.EventsService service. By
@@ -59,7 +59,7 @@ type EventsServiceClient interface {
 func NewEventsServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) EventsServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &eventsServiceClient{
-		subscribeEventsStream: connect.NewClient[v1.EventStreamRequest, v1.EventStreamResponse](
+		subscribeEventsStream: connect.NewClient[v1.SubscribeEventsStreamRequest, v1.SubscribeEventsStreamResponse](
 			httpClient,
 			baseURL+EventsServiceSubscribeEventsStreamProcedure,
 			connect.WithSchema(eventsServiceSubscribeEventsStreamMethodDescriptor),
@@ -70,17 +70,17 @@ func NewEventsServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // eventsServiceClient implements EventsServiceClient.
 type eventsServiceClient struct {
-	subscribeEventsStream *connect.Client[v1.EventStreamRequest, v1.EventStreamResponse]
+	subscribeEventsStream *connect.Client[v1.SubscribeEventsStreamRequest, v1.SubscribeEventsStreamResponse]
 }
 
 // SubscribeEventsStream calls protobuf.events.v1.EventsService.SubscribeEventsStream.
-func (c *eventsServiceClient) SubscribeEventsStream(ctx context.Context, req *connect.Request[v1.EventStreamRequest]) (*connect.ServerStreamForClient[v1.EventStreamResponse], error) {
+func (c *eventsServiceClient) SubscribeEventsStream(ctx context.Context, req *connect.Request[v1.SubscribeEventsStreamRequest]) (*connect.ServerStreamForClient[v1.SubscribeEventsStreamResponse], error) {
 	return c.subscribeEventsStream.CallServerStream(ctx, req)
 }
 
 // EventsServiceHandler is an implementation of the protobuf.events.v1.EventsService service.
 type EventsServiceHandler interface {
-	SubscribeEventsStream(context.Context, *connect.Request[v1.EventStreamRequest], *connect.ServerStream[v1.EventStreamResponse]) error
+	SubscribeEventsStream(context.Context, *connect.Request[v1.SubscribeEventsStreamRequest], *connect.ServerStream[v1.SubscribeEventsStreamResponse]) error
 }
 
 // NewEventsServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -108,6 +108,6 @@ func NewEventsServiceHandler(svc EventsServiceHandler, opts ...connect.HandlerOp
 // UnimplementedEventsServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedEventsServiceHandler struct{}
 
-func (UnimplementedEventsServiceHandler) SubscribeEventsStream(context.Context, *connect.Request[v1.EventStreamRequest], *connect.ServerStream[v1.EventStreamResponse]) error {
+func (UnimplementedEventsServiceHandler) SubscribeEventsStream(context.Context, *connect.Request[v1.SubscribeEventsStreamRequest], *connect.ServerStream[v1.SubscribeEventsStreamResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.events.v1.EventsService.SubscribeEventsStream is not implemented"))
 }

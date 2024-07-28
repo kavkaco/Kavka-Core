@@ -23,10 +23,10 @@ func NewEventsGrpcHandler(logger *log.SubLogger, streamer stream.StreamSubscribe
 	return &eventsHandler{logger, streamer}
 }
 
-func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.EventStreamRequest], str *connect.ServerStream[eventsv1.EventStreamResponse]) error {
+func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.SubscribeEventsStreamRequest], str *connect.ServerStream[eventsv1.SubscribeEventsStreamResponse]) error {
 	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
 
-	userCh := make(chan *eventsv1.EventStreamResponse)
+	userCh := make(chan *eventsv1.SubscribeEventsStreamResponse)
 	e.streamer.UserSubscribe(userID, userCh)
 
 	occurredErrorsCount := 0

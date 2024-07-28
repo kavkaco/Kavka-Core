@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { EventStreamRequest, EventStreamResponse } from "./events_pb.ts";
+import { SubscribeEventsStreamRequest, SubscribeEventsStreamResponse } from "./events_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -17,8 +17,8 @@ export const EventsService = {
      */
     subscribeEventsStream: {
       name: "SubscribeEventsStream",
-      I: EventStreamRequest,
-      O: EventStreamResponse,
+      I: SubscribeEventsStreamRequest,
+      O: SubscribeEventsStreamResponse,
       kind: MethodKind.ServerStreaming,
     },
   }

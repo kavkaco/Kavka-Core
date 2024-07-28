@@ -57,52 +57,52 @@ export class StreamEvent extends Message<StreamEvent> {
 }
 
 /**
- * @generated from message protobuf.events.v1.EventStreamRequest
+ * @generated from message protobuf.events.v1.SubscribeEventsStreamRequest
  */
-export class EventStreamRequest extends Message<EventStreamRequest> {
-  constructor(data?: PartialMessage<EventStreamRequest>) {
+export class SubscribeEventsStreamRequest extends Message<SubscribeEventsStreamRequest> {
+  constructor(data?: PartialMessage<SubscribeEventsStreamRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.events.v1.EventStreamRequest";
+  static readonly typeName = "protobuf.events.v1.SubscribeEventsStreamRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventStreamRequest {
-    return new EventStreamRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeEventsStreamRequest {
+    return new SubscribeEventsStreamRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): EventStreamRequest {
-    return new EventStreamRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeEventsStreamRequest {
+    return new SubscribeEventsStreamRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): EventStreamRequest {
-    return new EventStreamRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeEventsStreamRequest {
+    return new SubscribeEventsStreamRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EventStreamRequest | PlainMessage<EventStreamRequest> | undefined, b: EventStreamRequest | PlainMessage<EventStreamRequest> | undefined): boolean {
-    return proto3.util.equals(EventStreamRequest, a, b);
+  static equals(a: SubscribeEventsStreamRequest | PlainMessage<SubscribeEventsStreamRequest> | undefined, b: SubscribeEventsStreamRequest | PlainMessage<SubscribeEventsStreamRequest> | undefined): boolean {
+    return proto3.util.equals(SubscribeEventsStreamRequest, a, b);
   }
 }
 
 /**
- * @generated from message protobuf.events.v1.EventStreamResponse
+ * @generated from message protobuf.events.v1.SubscribeEventsStreamResponse
  */
-export class EventStreamResponse extends Message<EventStreamResponse> {
+export class SubscribeEventsStreamResponse extends Message<SubscribeEventsStreamResponse> {
   /**
    * @generated from field: string name = 1;
    */
   name = "";
 
   /**
-   * @generated from field: protobuf.events.v1.EventStreamResponse.Type type = 2;
+   * @generated from field: protobuf.events.v1.SubscribeEventsStreamResponse.Type type = 2;
    */
-  type = EventStreamResponse_Type.UNKNOWN_EVENT;
+  type = SubscribeEventsStreamResponse_Type.UNSPECIFIED;
 
   /**
-   * @generated from oneof protobuf.events.v1.EventStreamResponse.payload
+   * @generated from oneof protobuf.events.v1.SubscribeEventsStreamResponse.payload
    */
   payload: {
     /**
@@ -112,96 +112,96 @@ export class EventStreamResponse extends Message<EventStreamResponse> {
     case: "addChat";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
-  constructor(data?: PartialMessage<EventStreamResponse>) {
+  constructor(data?: PartialMessage<SubscribeEventsStreamResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.events.v1.EventStreamResponse";
+  static readonly typeName = "protobuf.events.v1.SubscribeEventsStreamResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(EventStreamResponse_Type) },
+    { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(SubscribeEventsStreamResponse_Type) },
     { no: 3, name: "add_chat", kind: "message", T: AddChat, oneof: "payload" },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EventStreamResponse {
-    return new EventStreamResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeEventsStreamResponse {
+    return new SubscribeEventsStreamResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): EventStreamResponse {
-    return new EventStreamResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeEventsStreamResponse {
+    return new SubscribeEventsStreamResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): EventStreamResponse {
-    return new EventStreamResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeEventsStreamResponse {
+    return new SubscribeEventsStreamResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: EventStreamResponse | PlainMessage<EventStreamResponse> | undefined, b: EventStreamResponse | PlainMessage<EventStreamResponse> | undefined): boolean {
-    return proto3.util.equals(EventStreamResponse, a, b);
+  static equals(a: SubscribeEventsStreamResponse | PlainMessage<SubscribeEventsStreamResponse> | undefined, b: SubscribeEventsStreamResponse | PlainMessage<SubscribeEventsStreamResponse> | undefined): boolean {
+    return proto3.util.equals(SubscribeEventsStreamResponse, a, b);
   }
 }
 
 /**
- * @generated from enum protobuf.events.v1.EventStreamResponse.Type
+ * @generated from enum protobuf.events.v1.SubscribeEventsStreamResponse.Type
  */
-export enum EventStreamResponse_Type {
+export enum SubscribeEventsStreamResponse_Type {
   /**
-   * @generated from enum value: UNKNOWN_EVENT = 0;
+   * @generated from enum value: TYPE_UNSPECIFIED = 0;
    */
-  UNKNOWN_EVENT = 0,
+  UNSPECIFIED = 0,
 
   /**
-   * @generated from enum value: ADD_CHAT = 1;
+   * @generated from enum value: TYPE_ADD_CHAT = 1;
    */
   ADD_CHAT = 1,
 
   /**
-   * @generated from enum value: REMOVE_CHAT = 2;
+   * @generated from enum value: TYPE_REMOVE_CHAT = 2;
    */
   REMOVE_CHAT = 2,
 
   /**
-   * @generated from enum value: UPDATE_CHAT = 3;
+   * @generated from enum value: TYPE_UPDATE_CHAT = 3;
    */
   UPDATE_CHAT = 3,
 
   /**
-   * @generated from enum value: ADD_MESSAGE = 4;
+   * @generated from enum value: TYPE_ADD_MESSAGE = 4;
    */
   ADD_MESSAGE = 4,
 
   /**
-   * @generated from enum value: REMOVE_MESSAGE = 5;
+   * @generated from enum value: TYPE_REMOVE_MESSAGE = 5;
    */
   REMOVE_MESSAGE = 5,
 
   /**
-   * @generated from enum value: UPDATE_MESSAGE = 6;
+   * @generated from enum value: TYPE_UPDATE_MESSAGE = 6;
    */
   UPDATE_MESSAGE = 6,
 
   /**
-   * @generated from enum value: CLEAR_CHAT = 7;
+   * @generated from enum value: TYPE_CLEAR_CHAT = 7;
    */
   CLEAR_CHAT = 7,
 
   /**
-   * @generated from enum value: MESSAGE_SEEN = 8;
+   * @generated from enum value: TYPE_MESSAGE_SEEN = 8;
    */
   MESSAGE_SEEN = 8,
 }
-// Retrieve enum metadata with: proto3.getEnumType(EventStreamResponse_Type)
-proto3.util.setEnumType(EventStreamResponse_Type, "protobuf.events.v1.EventStreamResponse.Type", [
-  { no: 0, name: "UNKNOWN_EVENT" },
-  { no: 1, name: "ADD_CHAT" },
-  { no: 2, name: "REMOVE_CHAT" },
-  { no: 3, name: "UPDATE_CHAT" },
-  { no: 4, name: "ADD_MESSAGE" },
-  { no: 5, name: "REMOVE_MESSAGE" },
-  { no: 6, name: "UPDATE_MESSAGE" },
-  { no: 7, name: "CLEAR_CHAT" },
-  { no: 8, name: "MESSAGE_SEEN" },
+// Retrieve enum metadata with: proto3.getEnumType(SubscribeEventsStreamResponse_Type)
+proto3.util.setEnumType(SubscribeEventsStreamResponse_Type, "protobuf.events.v1.SubscribeEventsStreamResponse.Type", [
+  { no: 0, name: "TYPE_UNSPECIFIED" },
+  { no: 1, name: "TYPE_ADD_CHAT" },
+  { no: 2, name: "TYPE_REMOVE_CHAT" },
+  { no: 3, name: "TYPE_UPDATE_CHAT" },
+  { no: 4, name: "TYPE_ADD_MESSAGE" },
+  { no: 5, name: "TYPE_REMOVE_MESSAGE" },
+  { no: 6, name: "TYPE_UPDATE_MESSAGE" },
+  { no: 7, name: "TYPE_CLEAR_CHAT" },
+  { no: 8, name: "TYPE_MESSAGE_SEEN" },
 ]);
 
 /**

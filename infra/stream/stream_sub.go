@@ -11,7 +11,7 @@ import (
 const eventStreamSubject = "events"
 
 type StreamSubscriber interface {
-	UserSubscribe(userID model.UserID, userCh chan *eventsv1.EventStreamResponse)
+	UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse)
 	UserUnsubscribe(userID model.UserID)
 }
 
@@ -33,7 +33,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 				return
 			}
 
-			var payload eventsv1.EventStreamResponse
+			var payload eventsv1.SubscribeEventsStreamResponse
 			err = proto.Unmarshal(event.Payload, &payload)
 			if err != nil {
 				logger.Error("proto unmarshal error when decoding msg payload of the broker event: " + err.Error())
@@ -67,7 +67,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 	return subInstance, nil
 }
 
-func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.EventStreamResponse) {
+func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse) {
 	p.logger.Debug("user stream established")
 	p.subscribedUsers = append(p.subscribedUsers, StreamSubscribedUser{UserID: userID, UserPipe: userCh})
 }
