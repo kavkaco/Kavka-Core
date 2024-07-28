@@ -141,31 +141,33 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		return nil, &vali.Varror{Error: grpc_model.ErrTransformToGrpcModel}
 	}
 
-	go func() {
-		payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.EventStreamResponse{
-			Name: "add-chat",
-			Type: eventsv1.EventStreamResponse_ADD_CHAT,
-			Payload: &eventsv1.EventStreamResponse_AddChat{
-				AddChat: &eventsv1.AddChat{
-					Chat: chatGrpcModel,
+	if s.eventPublisher != nil {
+		go func() {
+			payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.EventStreamResponse{
+				Name: "add-chat",
+				Type: eventsv1.EventStreamResponse_ADD_CHAT,
+				Payload: &eventsv1.EventStreamResponse_AddChat{
+					AddChat: &eventsv1.AddChat{
+						Chat: chatGrpcModel,
+					},
 				},
 			},
-		},
-		)
-		if marshalErr != nil {
-			s.logger.Error("proto marshal error: " + marshalErr.Error())
-			return
-		}
+			)
+			if marshalErr != nil {
+				s.logger.Error("proto marshal error: " + marshalErr.Error())
+				return
+			}
 
-		publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
-			SenderUserId:    userID,
-			ReceiversUserId: []string{userID},
-			Payload:         payloadProtoBuf,
-		})
-		if publishErr != nil {
-			s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
-		}
-	}()
+			publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
+				SenderUserId:    userID,
+				ReceiversUserId: []string{userID},
+				Payload:         payloadProtoBuf,
+			})
+			if publishErr != nil {
+				s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
+			}
+		}()
+	}
 
 	saved, err := s.chatRepo.Create(ctx, *chatModel)
 	if err != nil {
