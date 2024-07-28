@@ -5,11 +5,11 @@ go 1.22.4
 require (
 	connectrpc.com/connect v1.16.2
 	connectrpc.com/cors v0.1.0
-	github.com/IBM/sarama v1.43.2
 	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/knadh/koanf v1.5.0
 	github.com/minio/minio-go/v7 v7.0.69
+	github.com/nats-io/nats.go v1.36.0
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/cors v1.11.0
 	github.com/rs/zerolog v1.33.0
@@ -24,22 +24,12 @@ require (
 )
 
 require (
-	github.com/eapache/go-resiliency v1.6.0 // indirect
-	github.com/eapache/go-xerial-snappy v0.0.0-20230731223053-c322873962e3 // indirect
-	github.com/eapache/queue v1.1.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
-	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
-	github.com/jcmturner/gofork v1.7.6 // indirect
-	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
-	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
-	github.com/pierrec/lz4/v4 v4.1.21 // indirect
-	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
+	github.com/nats-io/nkeys v0.4.7 // indirect
+	github.com/nats-io/nuid v1.0.1 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 require (

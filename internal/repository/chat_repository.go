@@ -15,4 +15,5 @@ type ChatRepository interface {
 	FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
 	FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error)
 	GetChatMembers(chatID model.ChatID) []model.Member
+	AddToUsersChatsList(ctx context.Context, userID model.UserID, chatID model.ChatID) error
 }

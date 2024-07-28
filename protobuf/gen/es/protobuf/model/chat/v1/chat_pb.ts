@@ -5,6 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
+import { User } from "../../user/v1/user_pb.ts";
 
 /**
  * @generated from enum protobuf.model.chat.v1.ChatType
@@ -338,9 +339,9 @@ export class GroupChatDetail extends Message<GroupChatDetail> {
  */
 export class DirectChatDetail extends Message<DirectChatDetail> {
   /**
-   * @generated from field: repeated string sides = 1;
+   * @generated from field: protobuf.model.user.v1.User user_info = 1;
    */
-  sides: string[] = [];
+  userInfo?: User;
 
   constructor(data?: PartialMessage<DirectChatDetail>) {
     super();
@@ -350,7 +351,7 @@ export class DirectChatDetail extends Message<DirectChatDetail> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "protobuf.model.chat.v1.DirectChatDetail";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sides", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: "user_info", kind: "message", T: User },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DirectChatDetail {

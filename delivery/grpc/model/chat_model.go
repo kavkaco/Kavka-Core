@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func TransformChatToGrpcModel(chat *model.Chat) (*modelv1.Chat, error) {
+func TransformChatToGrpcModel(chat model.Chat) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":
@@ -74,7 +74,7 @@ func TransformChatDetailToGrpcModel(chatType string, chatDetail interface{}) (*m
 			},
 		}, nil
 	case "direct":
-		cd, err := utils.TypeConverter[model.DirectChatDetail](chatDetail)
+		cd, err := utils.TypeConverter[model.DirectChatFetchedDetail](chatDetail)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func TransformChatDetailToGrpcModel(chatType string, chatDetail interface{}) (*m
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					Sides: []string{cd.Sides[0], cd.Sides[1]},
+					UserInfo: TransformUserToGrpcModel(&cd.UserInfo),
 				},
 			},
 		}, nil

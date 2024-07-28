@@ -45,21 +45,16 @@ services:
       - minio
     ports:
       - "8000:8000"
-  kafka:
+  nats:
     networks:
       - default_network
-    restart: always
-    image: apache/kafka:3.7.1
+    image: nats
     ports:
-      - "9092:9092"
-  kafka-ui:
-    network_mode: host
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
+      - "4222:4222"
+  nats-web:
+    image: sphqxe/nats-webui
     ports:
-      - 8080:8080
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
+      - "8223:80"
 
 networks:
   default_network:

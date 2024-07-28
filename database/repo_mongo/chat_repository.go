@@ -7,6 +7,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -30,6 +31,21 @@ func (repo *chatRepository) UpdateChatLastMessage(ctx context.Context, chatID mo
 
 	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
 		return repository.ErrNotModified
+	}
+
+	return nil
+}
+
+func (repo *chatRepository) AddToUsersChatsList(ctx context.Context, userID string, chatID primitive.ObjectID) error {
+	filter := bson.M{"user_id": userID}
+	update := bson.M{
+		"$addToSet": bson.M{
+			"chats_list_ids": chatID,
+		},
+	}
+	_, err := repo.usersCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
 	}
 
 	return nil

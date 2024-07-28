@@ -33,8 +33,7 @@ logger:
     targets: [console, file]
     max_size: 10
     max_backups: 1
-    compress: true
+    compress: false
 
-kafka:
-    brokers:
-        - localhost:9092
+nats:
+    url: 127.0.0.1:4222
