@@ -73,7 +73,6 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 }
 
 func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse) {
-	p.logger.Debug("user stream established")
 	p.subscribedUsers = append(p.subscribedUsers, StreamSubscribedUser{UserID: userID, UserPipe: userCh})
 
 	// FIXME
@@ -81,8 +80,6 @@ func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.Subscribe
 }
 
 func (p *sub) UserUnsubscribe(userID model.UserID) {
-	p.logger.Debug("user stream purged")
-
 	idx := -1
 
 	for i, su := range p.subscribedUsers {
