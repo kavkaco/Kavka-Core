@@ -81,3 +81,83 @@ export class FetchMessagesResponse extends Message<FetchMessagesResponse> {
   }
 }
 
+/**
+ * @generated from message protobuf.message.v1.SendTextMessageRequest
+ */
+export class SendTextMessageRequest extends Message<SendTextMessageRequest> {
+  /**
+   * @generated from field: string chat_id = 1;
+   */
+  chatId = "";
+
+  /**
+   * @generated from field: string text = 2;
+   */
+  text = "";
+
+  constructor(data?: PartialMessage<SendTextMessageRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.message.v1.SendTextMessageRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "chat_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "text", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendTextMessageRequest {
+    return new SendTextMessageRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendTextMessageRequest {
+    return new SendTextMessageRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendTextMessageRequest {
+    return new SendTextMessageRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SendTextMessageRequest | PlainMessage<SendTextMessageRequest> | undefined, b: SendTextMessageRequest | PlainMessage<SendTextMessageRequest> | undefined): boolean {
+    return proto3.util.equals(SendTextMessageRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message protobuf.message.v1.SendTextMessageResponse
+ */
+export class SendTextMessageResponse extends Message<SendTextMessageResponse> {
+  /**
+   * @generated from field: protobuf.model.message.v1.Message message = 1;
+   */
+  message?: Message$1;
+
+  constructor(data?: PartialMessage<SendTextMessageResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.message.v1.SendTextMessageResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "message", kind: "message", T: Message$1 },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendTextMessageResponse {
+    return new SendTextMessageResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendTextMessageResponse {
+    return new SendTextMessageResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendTextMessageResponse {
+    return new SendTextMessageResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SendTextMessageResponse | PlainMessage<SendTextMessageResponse> | undefined, b: SendTextMessageResponse | PlainMessage<SendTextMessageResponse> | undefined): boolean {
+    return proto3.util.equals(SendTextMessageResponse, a, b);
+  }
+}
+

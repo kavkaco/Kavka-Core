@@ -36,17 +36,22 @@ const (
 	// MessageServiceFetchMessagesProcedure is the fully-qualified name of the MessageService's
 	// FetchMessages RPC.
 	MessageServiceFetchMessagesProcedure = "/protobuf.message.v1.MessageService/FetchMessages"
+	// MessageServiceSendTextMessageProcedure is the fully-qualified name of the MessageService's
+	// SendTextMessage RPC.
+	MessageServiceSendTextMessageProcedure = "/protobuf.message.v1.MessageService/SendTextMessage"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	messageServiceServiceDescriptor             = message.File_protobuf_message_message_proto.Services().ByName("MessageService")
-	messageServiceFetchMessagesMethodDescriptor = messageServiceServiceDescriptor.Methods().ByName("FetchMessages")
+	messageServiceServiceDescriptor               = message.File_protobuf_message_message_proto.Services().ByName("MessageService")
+	messageServiceFetchMessagesMethodDescriptor   = messageServiceServiceDescriptor.Methods().ByName("FetchMessages")
+	messageServiceSendTextMessageMethodDescriptor = messageServiceServiceDescriptor.Methods().ByName("SendTextMessage")
 )
 
 // MessageServiceClient is a client for the protobuf.message.v1.MessageService service.
 type MessageServiceClient interface {
 	FetchMessages(context.Context, *connect.Request[message.FetchMessagesRequest]) (*connect.Response[message.FetchMessagesResponse], error)
+	SendTextMessage(context.Context, *connect.Request[message.SendTextMessageRequest]) (*connect.Response[message.SendTextMessageResponse], error)
 }
 
 // NewMessageServiceClient constructs a client for the protobuf.message.v1.MessageService service.
@@ -65,12 +70,19 @@ func NewMessageServiceClient(httpClient connect.HTTPClient, baseURL string, opts
 			connect.WithSchema(messageServiceFetchMessagesMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		sendTextMessage: connect.NewClient[message.SendTextMessageRequest, message.SendTextMessageResponse](
+			httpClient,
+			baseURL+MessageServiceSendTextMessageProcedure,
+			connect.WithSchema(messageServiceSendTextMessageMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // messageServiceClient implements MessageServiceClient.
 type messageServiceClient struct {
-	fetchMessages *connect.Client[message.FetchMessagesRequest, message.FetchMessagesResponse]
+	fetchMessages   *connect.Client[message.FetchMessagesRequest, message.FetchMessagesResponse]
+	sendTextMessage *connect.Client[message.SendTextMessageRequest, message.SendTextMessageResponse]
 }
 
 // FetchMessages calls protobuf.message.v1.MessageService.FetchMessages.
@@ -78,9 +90,15 @@ func (c *messageServiceClient) FetchMessages(ctx context.Context, req *connect.R
 	return c.fetchMessages.CallUnary(ctx, req)
 }
 
+// SendTextMessage calls protobuf.message.v1.MessageService.SendTextMessage.
+func (c *messageServiceClient) SendTextMessage(ctx context.Context, req *connect.Request[message.SendTextMessageRequest]) (*connect.Response[message.SendTextMessageResponse], error) {
+	return c.sendTextMessage.CallUnary(ctx, req)
+}
+
 // MessageServiceHandler is an implementation of the protobuf.message.v1.MessageService service.
 type MessageServiceHandler interface {
 	FetchMessages(context.Context, *connect.Request[message.FetchMessagesRequest]) (*connect.Response[message.FetchMessagesResponse], error)
+	SendTextMessage(context.Context, *connect.Request[message.SendTextMessageRequest]) (*connect.Response[message.SendTextMessageResponse], error)
 }
 
 // NewMessageServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -95,10 +113,18 @@ func NewMessageServiceHandler(svc MessageServiceHandler, opts ...connect.Handler
 		connect.WithSchema(messageServiceFetchMessagesMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	messageServiceSendTextMessageHandler := connect.NewUnaryHandler(
+		MessageServiceSendTextMessageProcedure,
+		svc.SendTextMessage,
+		connect.WithSchema(messageServiceSendTextMessageMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/protobuf.message.v1.MessageService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case MessageServiceFetchMessagesProcedure:
 			messageServiceFetchMessagesHandler.ServeHTTP(w, r)
+		case MessageServiceSendTextMessageProcedure:
+			messageServiceSendTextMessageHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -110,4 +136,8 @@ type UnimplementedMessageServiceHandler struct{}
 
 func (UnimplementedMessageServiceHandler) FetchMessages(context.Context, *connect.Request[message.FetchMessagesRequest]) (*connect.Response[message.FetchMessagesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.message.v1.MessageService.FetchMessages is not implemented"))
+}
+
+func (UnimplementedMessageServiceHandler) SendTextMessage(context.Context, *connect.Request[message.SendTextMessageRequest]) (*connect.Response[message.SendTextMessageResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.message.v1.MessageService.SendTextMessage is not implemented"))
 }

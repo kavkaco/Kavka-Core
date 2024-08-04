@@ -1,11 +1,20 @@
 syntax = "proto3";
 package protobuf.model.message.v1;
 
+import "protobuf/model/user/v1/user.proto";
+
 option go_package = "protobuf/model/message/v1";
+
+message MessageSender {
+  string  user_id = 1;
+  string  name = 2;
+  string  last_name = 3;
+  string username = 4;
+}
 
 message Message {
   string message_id = 1;
-  string sender_id = 2;
+  MessageSender sender = 2;
   int64 created_at = 3;
   bool edited = 4;
   bool seen = 5;
@@ -17,9 +26,9 @@ message Message {
 }
 
 message TextMessage {
-    string text = 1;
+  string text = 1;
 }
 
 message LabelMessage {
-    string text = 1;
+  string text = 1;
 }

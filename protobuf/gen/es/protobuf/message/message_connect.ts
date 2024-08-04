@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { FetchMessagesRequest, FetchMessagesResponse } from "./message_pb.ts";
+import { FetchMessagesRequest, FetchMessagesResponse, SendTextMessageRequest, SendTextMessageResponse } from "./message_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -19,6 +19,15 @@ export const MessageService = {
       name: "FetchMessages",
       I: FetchMessagesRequest,
       O: FetchMessagesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc protobuf.message.v1.MessageService.SendTextMessage
+     */
+    sendTextMessage: {
+      name: "SendTextMessage",
+      I: SendTextMessageRequest,
+      O: SendTextMessageResponse,
       kind: MethodKind.Unary,
     },
   }

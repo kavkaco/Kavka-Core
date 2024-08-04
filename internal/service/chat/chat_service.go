@@ -3,12 +3,12 @@ package chat
 import (
 	"context"
 
-	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/log"
 	eventsv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1"
+	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	"google.golang.org/protobuf/proto"
 )
@@ -137,9 +137,9 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		Owner:       userID,
 	})
 
-	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(*chatModel)
+	chatProto, err := proto_model_transformer.ChatToProto(*chatModel)
 	if err != nil {
-		return nil, &vali.Varror{Error: grpc_model.ErrTransformToGrpcModel}
+		return nil, &vali.Varror{Error: proto_model_transformer.ErrTransformToProto}
 	}
 
 	if s.eventPublisher != nil {
@@ -149,7 +149,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 				Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_CHAT,
 				Payload: &eventsv1.SubscribeEventsStreamResponse_AddChat{
 					AddChat: &eventsv1.AddChat{
-						Chat: chatGrpcModel,
+						Chat: chatProto,
 					},
 				},
 			},

@@ -29,7 +29,8 @@ func (s *MessageTestSuite) SetupSuite() {
 
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	messageRepo := repository_mongo.NewMessageMongoRepository(db)
-	s.service = service.NewMessageService(messageRepo, chatRepo)
+	userRepo := repository_mongo.NewUserMongoRepository(db)
+	s.service = service.NewMessageService(nil, messageRepo, chatRepo, userRepo, nil)
 
 	s.userID = fmt.Sprintf("%d", random.GenerateUserID())
 	s.recipientUserID = fmt.Sprintf("%d", random.GenerateUserID())
@@ -50,20 +51,20 @@ func (s *MessageTestSuite) SetupSuite() {
 	s.chatID = chat.ChatID
 }
 
-func (s *MessageTestSuite) TestA_InsertTextMessage() {
+func (s *MessageTestSuite) TestA_SendTextMessage() {
 	ctx := context.TODO()
 
 	messageContent := "Hello from kavka's integration tests"
-	message, varror := s.service.InsertTextMessage(ctx, s.chatID, s.userID, messageContent)
+	messageGetter, varror := s.service.SendTextMessage(ctx, s.chatID, s.userID, messageContent)
 	require.Nil(s.T(), varror)
 
-	savedMessageContent, err := utils.TypeConverter[model.TextMessage](message.Content)
+	savedMessageContent, err := utils.TypeConverter[model.TextMessage](messageGetter.Message.Content)
 	require.NoError(s.T(), err)
 
-	require.Equal(s.T(), message.SenderID, s.userID)
+	require.Equal(s.T(), messageGetter.Message, s.userID)
 	require.Equal(s.T(), savedMessageContent.Text, messageContent)
 
-	s.savedMessageID = message.MessageID
+	s.savedMessageID = messageGetter.Message.MessageID
 }
 
 func (s *MessageTestSuite) TestB_DeleteMessage() {

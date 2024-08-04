@@ -1,4 +1,4 @@
-package grpc_model
+package proto_model_transformer
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func TransformChatToGrpcModel(chat model.Chat) (*modelv1.Chat, error) {
+func ChatToProto(chat model.Chat) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":
@@ -21,7 +21,7 @@ func TransformChatToGrpcModel(chat model.Chat) (*modelv1.Chat, error) {
 		chatType = modelv1.ChatType_CHAT_TYPE_DIRECT
 	}
 
-	chatDetailGrpcModel, err := TransformChatDetailToGrpcModel(chat.ChatType, chat.ChatDetail)
+	chatDetailProto, err := ChatDetailToProto(chat.ChatType, chat.ChatDetail)
 	if err != nil {
 		return nil, err
 	}
@@ -29,11 +29,11 @@ func TransformChatToGrpcModel(chat model.Chat) (*modelv1.Chat, error) {
 	return &modelv1.Chat{
 		ChatId:     chat.ChatID.Hex(),
 		ChatType:   chatType,
-		ChatDetail: chatDetailGrpcModel,
+		ChatDetail: chatDetailProto,
 	}, nil
 }
 
-func TransformChatDetailToGrpcModel(chatType string, chatDetail interface{}) (*modelv1.ChatDetail, error) {
+func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDetail, error) {
 	switch chatType {
 	case "channel":
 		cd, err := utils.TypeConverter[model.ChannelChatDetail](chatDetail)
@@ -82,7 +82,7 @@ func TransformChatDetailToGrpcModel(chatType string, chatDetail interface{}) (*m
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					UserInfo: TransformUserToGrpcModel(&cd.UserInfo),
+					UserInfo: UserToProto(&cd.UserInfo),
 				},
 			},
 		}, nil

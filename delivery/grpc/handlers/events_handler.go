@@ -12,7 +12,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
 )
 
-const maximumConnectionErrorCount = 5
+const maximumConnectionErrorCount = 2
 
 type eventsHandler struct {
 	logger   *log.SubLogger
@@ -43,10 +43,11 @@ func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.
 			return nil
 		}
 
-		e.logger.Debug("events-handler", "event-name")
+		e.logger.Debug("events-handler", "event-name", event.Name)
 
 		err := str.Send(event)
 		if err != nil {
+			log.Error("unable to send message with grpc: " + err.Error())
 			occurredErrorsCount++
 		}
 

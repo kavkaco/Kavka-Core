@@ -5,11 +5,13 @@ import (
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
-	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
+	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/log"
 	messagev1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/messagev1connect"
+	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/genproto/googleapis/rpc/code"
@@ -30,14 +32,39 @@ func (h MessageGrpcServer) FetchMessages(ctx context.Context, req *connect.Reque
 		return nil, grpc_helpers.GrpcVarror(&vali.Varror{Error: err}, connect.Code(code.Code_INTERNAL))
 	}
 
-	messages, varror := h.messageService.FetchMessages(ctx, chatID)
+	chatMessages, varror := h.messageService.FetchMessages(ctx, chatID)
 	if varror != nil {
 		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_INTERNAL))
 	}
 
 	res := connect.Response[messagev1.FetchMessagesResponse]{
 		Msg: &messagev1.FetchMessagesResponse{
-			Messages: grpc_model.TransformMessagesToGrpcModel(messages),
+			Messages: proto_model_transformer.MessagesToProto(chatMessages.Messages),
+		},
+	}
+
+	return &res, nil
+}
+
+func (h MessageGrpcServer) SendTextMessage(ctx context.Context, req *connect.Request[messagev1.SendTextMessageRequest]) (*connect.Response[messagev1.SendTextMessageResponse], error) {
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
+	chatID, err := primitive.ObjectIDFromHex(req.Msg.ChatId)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	msg, varror := h.messageService.SendTextMessage(ctx, chatID, userID, req.Msg.Text)
+	if varror != nil {
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodePermissionDenied)
+	}
+
+	res := connect.Response[messagev1.SendTextMessageResponse]{
+		Msg: &messagev1.SendTextMessageResponse{
+			Message: proto_model_transformer.MessageToProto(msg),
 		},
 	}
 

@@ -104,9 +104,9 @@ func main() {
 	chatRepo := repository_mongo.NewChatMongoRepository(mongoDB)
 	chatService := chat.NewChatService(log.NewSubLogger("chat-service"), chatRepo, userRepo, messageRepo, streamPublisher)
 
-	messageService := message.NewMessageService(messageRepo, chatRepo)
+	messageService := message.NewMessageService(log.NewSubLogger("message-service"), messageRepo, chatRepo, userRepo, streamPublisher)
 
-	// [=== Init grpc server ===]
+	// [=== Init Grpc Server ===]
 	grpcListenAddr := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
 	gRPCRouter := http.NewServeMux()
 

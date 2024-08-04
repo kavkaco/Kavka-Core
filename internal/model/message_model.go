@@ -19,9 +19,9 @@ type LastMessage struct {
 	MessageCaption string `bson:"caption" json:"caption"`
 }
 
-type MessageStore struct {
-	ChatID   ChatID    `bson:"chat_id"`
-	Messages []Message `bson:"messages"`
+type ChatMessages struct {
+	ChatID   ChatID           `bson:"chat_id"`
+	Messages []*MessageGetter `bson:"messages"`
 }
 
 type Message struct {
@@ -32,6 +32,18 @@ type Message struct {
 	Seen      bool        `bson:"seen" json:"seen"`
 	Type      string      `bson:"type" json:"type"`
 	Content   interface{} `bson:"content" json:"content"`
+}
+
+type MessageSender struct {
+	UserID   UserID `bson:"user_id" json:"userID"`
+	Name     string `bson:"name" json:"name"`
+	LastName string `bson:"last_name" json:"lastName"`
+	Username string `bson:"username" json:"username"`
+}
+
+type MessageGetter struct {
+	Sender  *MessageSender `bson:"sender" json:"sender"`
+	Message *Message       `bson:"message" json:"message"`
 }
 
 type TextMessage struct {

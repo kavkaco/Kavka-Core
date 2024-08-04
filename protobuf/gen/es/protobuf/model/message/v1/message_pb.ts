@@ -7,6 +7,61 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message as Message$1, proto3, protoInt64 } from "@bufbuild/protobuf";
 
 /**
+ * @generated from message protobuf.model.message.v1.MessageSender
+ */
+export class MessageSender extends Message$1<MessageSender> {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string last_name = 3;
+   */
+  lastName = "";
+
+  /**
+   * @generated from field: string username = 4;
+   */
+  username = "";
+
+  constructor(data?: PartialMessage<MessageSender>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.model.message.v1.MessageSender";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MessageSender {
+    return new MessageSender().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MessageSender {
+    return new MessageSender().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MessageSender {
+    return new MessageSender().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MessageSender | PlainMessage<MessageSender> | undefined, b: MessageSender | PlainMessage<MessageSender> | undefined): boolean {
+    return proto3.util.equals(MessageSender, a, b);
+  }
+}
+
+/**
  * @generated from message protobuf.model.message.v1.Message
  */
 export class Message extends Message$1<Message> {
@@ -16,9 +71,9 @@ export class Message extends Message$1<Message> {
   messageId = "";
 
   /**
-   * @generated from field: string sender_id = 2;
+   * @generated from field: protobuf.model.message.v1.MessageSender sender = 2;
    */
-  senderId = "";
+  sender?: MessageSender;
 
   /**
    * @generated from field: int64 created_at = 3;
@@ -66,7 +121,7 @@ export class Message extends Message$1<Message> {
   static readonly typeName = "protobuf.model.message.v1.Message";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "message_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "sender_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "sender", kind: "message", T: MessageSender },
     { no: 3, name: "created_at", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 4, name: "edited", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 5, name: "seen", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
