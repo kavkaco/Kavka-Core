@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func ChatToProto(chat model.Chat) (*modelv1.Chat, error) {
+func ChatToProto(chat *model.ChatGetter) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":
@@ -26,10 +26,30 @@ func ChatToProto(chat model.Chat) (*modelv1.Chat, error) {
 		return nil, err
 	}
 
+	lastMessage := &modelv1.LastMessage{
+		MessageType:    "unknown",
+		MessageCaption: "UNKNOWN MESSAGE TYPE",
+	}
+
+	if chat.LastMessage != nil {
+		lastMessage.MessageType = chat.LastMessage.Type
+
+		switch chat.LastMessage.Type {
+		case model.TypeTextMessage, model.TypeLabelMessage:
+			messageContent, err := utils.TypeConverter[model.TextMessage](chat.LastMessage.Content)
+			if err != nil {
+				return nil, err
+			}
+
+			lastMessage.MessageCaption = messageContent.Text
+		}
+	}
+
 	return &modelv1.Chat{
-		ChatId:     chat.ChatID.Hex(),
-		ChatType:   chatType,
-		ChatDetail: chatDetailProto,
+		ChatId:      chat.ChatID.Hex(),
+		ChatType:    chatType,
+		ChatDetail:  chatDetailProto,
+		LastMessage: lastMessage,
 	}, nil
 }
 

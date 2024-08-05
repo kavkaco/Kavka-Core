@@ -31,7 +31,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
 	}
 
-	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
+	chat, chatCreatedMessage, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
 		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
 		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
@@ -39,7 +39,10 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connectErr
 	}
 
-	chatProto, err := proto_model_transformer.ChatToProto(*chat)
+	chatGetter := model.NewChatGetter(chat)
+	chatGetter.LastMessage = chatCreatedMessage
+
+	chatProto, err := proto_model_transformer.ChatToProto(chatGetter)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -86,7 +89,7 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 	transformedChats := []*chatv1model.Chat{}
 
 	for _, v := range chats {
-		c, err := proto_model_transformer.ChatToProto(v)
+		c, err := proto_model_transformer.ChatToProto(&v)
 		if err != nil {
 			h.logger.Error(proto_model_transformer.ErrTransformation.Error())
 			continue

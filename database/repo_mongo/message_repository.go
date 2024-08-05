@@ -111,7 +111,11 @@ func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.C
 		return nil, err
 	}
 
-	return &chatMessages[0], nil
+	if len(chatMessages) > 0 {
+		return &chatMessages[0], nil
+	}
+
+	return &model.ChatMessages{}, nil
 }
 
 func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, message *model.Message) (*model.Message, error) {
