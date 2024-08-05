@@ -30,9 +30,10 @@ type ChatTestSuite struct {
 func (s *ChatTestSuite) SetupSuite() {
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	userRepo := repository_mongo.NewUserMongoRepository(db)
+	messageRepo := repository_mongo.NewMessageMongoRepository(db)
 
 	s.userRepo = userRepo
-	s.service = service.NewChatService(nil, chatRepo, userRepo, nil)
+	s.service = service.NewChatService(nil, chatRepo, userRepo, messageRepo, nil)
 
 	s.userID = fmt.Sprintf("%d", random.GenerateUserID())
 	s.recipientUserID = fmt.Sprintf("%d", random.GenerateUserID())

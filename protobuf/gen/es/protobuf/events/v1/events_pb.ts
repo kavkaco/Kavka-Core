@@ -6,6 +6,7 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Chat } from "../../model/chat/v1/chat_pb.ts";
+import { Message as Message$1 } from "../../model/message/v1/message_pb.ts";
 
 /**
  * @generated from message protobuf.events.v1.StreamEvent
@@ -110,6 +111,12 @@ export class SubscribeEventsStreamResponse extends Message<SubscribeEventsStream
      */
     value: AddChat;
     case: "addChat";
+  } | {
+    /**
+     * @generated from field: protobuf.events.v1.AddMessage add_message = 4;
+     */
+    value: AddMessage;
+    case: "addMessage";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<SubscribeEventsStreamResponse>) {
@@ -123,6 +130,7 @@ export class SubscribeEventsStreamResponse extends Message<SubscribeEventsStream
     { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(SubscribeEventsStreamResponse_Type) },
     { no: 3, name: "add_chat", kind: "message", T: AddChat, oneof: "payload" },
+    { no: 4, name: "add_message", kind: "message", T: AddMessage, oneof: "payload" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeEventsStreamResponse {
@@ -238,6 +246,49 @@ export class AddChat extends Message<AddChat> {
 
   static equals(a: AddChat | PlainMessage<AddChat> | undefined, b: AddChat | PlainMessage<AddChat> | undefined): boolean {
     return proto3.util.equals(AddChat, a, b);
+  }
+}
+
+/**
+ * @generated from message protobuf.events.v1.AddMessage
+ */
+export class AddMessage extends Message<AddMessage> {
+  /**
+   * @generated from field: string chat_id = 1;
+   */
+  chatId = "";
+
+  /**
+   * @generated from field: protobuf.model.message.v1.Message message = 2;
+   */
+  message?: Message$1;
+
+  constructor(data?: PartialMessage<AddMessage>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "protobuf.events.v1.AddMessage";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "chat_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "message", kind: "message", T: Message$1 },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddMessage {
+    return new AddMessage().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddMessage {
+    return new AddMessage().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddMessage {
+    return new AddMessage().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AddMessage | PlainMessage<AddMessage> | undefined, b: AddMessage | PlainMessage<AddMessage> | undefined): boolean {
+    return proto3.util.equals(AddMessage, a, b);
   }
 }
 

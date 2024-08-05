@@ -2,6 +2,7 @@ syntax = "proto3";
 package protobuf.events.v1;
 
 import "protobuf/model/chat/v1/chat.proto";
+import "protobuf/model/message/v1/message.proto";
 
 option go_package = "protobuf/events/v1";
 
@@ -32,11 +33,18 @@ message SubscribeEventsStreamResponse {
 
   string name = 1;
   Type type = 2;
+
   oneof payload {
     AddChat add_chat = 3;
+    AddMessage add_message = 4;
   }
 }
 
 message AddChat {
   model.chat.v1.Chat chat = 1;
+}
+
+message AddMessage {
+  string chat_id = 1;
+  model.message.v1.Message message = 2;
 }
