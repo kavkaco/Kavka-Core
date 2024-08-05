@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	service "github.com/kavkaco/Kavka-Core/internal/service/auth"
@@ -18,7 +17,6 @@ import (
 type AuthTestSuite struct {
 	suite.Suite
 	service service.AuthService
-	lem     *lorem.Lorem
 
 	userID                   model.UserID
 	verifyEmailToken         string
@@ -31,8 +29,6 @@ type AuthTestSuite struct {
 }
 
 func (s *AuthTestSuite) SetupSuite() {
-	s.lem = lorem.New()
-
 	authRepo := repository_mongo.NewAuthMongoRepository(db)
 	userRepo := repository_mongo.NewUserMongoRepository(db)
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{

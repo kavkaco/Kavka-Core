@@ -5,7 +5,6 @@ go 1.22.4
 require (
 	connectrpc.com/connect v1.16.2
 	connectrpc.com/cors v0.1.0
-	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/knadh/koanf v1.5.0
 	github.com/minio/minio-go/v7 v7.0.69
