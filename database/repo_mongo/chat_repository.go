@@ -35,12 +35,7 @@ func (repo *chatRepository) AddToUsersChatsList(ctx context.Context, userID stri
 	return nil
 }
 
-// TODO
-func (repo *chatRepository) SearchInChats(ctx context.Context, key string) ([]model.Chat, error) {
-	panic("unimplemented")
-}
-
-// TODO
+// FIXME
 func (repo *chatRepository) GetChatMembers(chatID model.ChatID) []model.Member {
 	return []model.Member{}
 }

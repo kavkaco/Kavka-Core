@@ -16,12 +16,14 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/internal/service/message"
+	"github.com/kavkaco/Kavka-Core/internal/service/search"
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/messagev1connect"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/search/v1/searchv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/rs/cors"
 	auth_manager "github.com/tahadostifam/go-auth-manager"
@@ -90,6 +92,8 @@ func main() {
 
 	authRepo := repository_mongo.NewAuthMongoRepository(mongoDB)
 
+	searchRepo := repository_mongo.NewSearchRepository(mongoDB)
+
 	var emailService email.EmailService
 	if config.CurrentEnv == config.Production {
 		emailService = email.NewEmailService(&cfg.Email, "email/templates")
@@ -105,6 +109,8 @@ func main() {
 	chatService := chat.NewChatService(log.NewSubLogger("chat-service"), chatRepo, userRepo, messageRepo, streamPublisher)
 
 	messageService := message.NewMessageService(log.NewSubLogger("message-service"), messageRepo, chatRepo, userRepo, streamPublisher)
+
+	searchService := search.NewSearchService(log.NewSubLogger("search-service"), searchRepo)
 
 	// [=== Init Grpc Server ===]
 	grpcListenAddr := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
@@ -125,10 +131,14 @@ func main() {
 	messageGrpcHandler := grpc_handlers.NewMessageGrpcHandler(log.NewSubLogger("message-handler"), messageService)
 	messageGrpcRoute, messageGrpcRouter := messagev1connect.NewMessageServiceHandler(messageGrpcHandler, interceptors)
 
+	searchGrpcHandler := grpc_handlers.NewSearchGrpcHandler(log.NewSubLogger("message-handler"), searchService)
+	searchGrpcRoute, searchGrpcRouter := searchv1connect.NewSearchServiceHandler(searchGrpcHandler, interceptors)
+
 	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
 	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
 	gRPCRouter.Handle(eventsGrpcRoute, eventsGrpcRouter)
 	gRPCRouter.Handle(messageGrpcRoute, messageGrpcRouter)
+	gRPCRouter.Handle(searchGrpcRoute, searchGrpcRouter)
 
 	// [=== PPROF Memory Profiling Tool ===]
 	if config.CurrentEnv == config.Development {

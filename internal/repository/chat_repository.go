@@ -7,7 +7,6 @@ import (
 )
 
 type ChatRepository interface {
-	SearchInChats(ctx context.Context, key string) ([]model.Chat, error)
 	Create(ctx context.Context, chatModel model.Chat) (*model.Chat, error)
 	Destroy(ctx context.Context, chatID model.ChatID) error
 	GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.ChatGetter, error)

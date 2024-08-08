@@ -12,8 +12,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
 )
 
-const maximumConnectionErrorCount = 1
-
 type eventsHandler struct {
 	logger   *log.SubLogger
 	streamer stream.StreamSubscriber

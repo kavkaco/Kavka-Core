@@ -42,7 +42,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 				return
 			}
 
-			// // Broadcast event to receivers by their pipe
+			// Broadcast event to receivers by their pipe
 			for _, receiverUserID := range event.ReceiversUserId {
 				for _, su := range subInstance.subscribedUsers {
 					if su.UserID == receiverUserID {

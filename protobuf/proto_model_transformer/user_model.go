@@ -15,3 +15,13 @@ func UserToProto(user *model.User) *modelv1.User {
 		Biography: user.Biography,
 	}
 }
+
+func UsersToProto(users []model.User) []*modelv1.User {
+	var result []*modelv1.User
+
+	for _, v := range users {
+		result = append(result, UserToProto(&v))
+	}
+
+	return result
+}

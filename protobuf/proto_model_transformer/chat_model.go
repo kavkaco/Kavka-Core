@@ -27,8 +27,8 @@ func ChatToProto(chat *model.ChatGetter) (*modelv1.Chat, error) {
 	}
 
 	lastMessage := &modelv1.LastMessage{
-		MessageType:    "unknown",
-		MessageCaption: "UNKNOWN MESSAGE TYPE",
+		MessageType:    "",
+		MessageCaption: "",
 	}
 
 	if chat.LastMessage != nil {
@@ -51,6 +51,21 @@ func ChatToProto(chat *model.ChatGetter) (*modelv1.Chat, error) {
 		ChatDetail:  chatDetailProto,
 		LastMessage: lastMessage,
 	}, nil
+}
+
+func ChatsToProto(chats []model.ChatGetter) ([]*modelv1.Chat, error) {
+	var result []*modelv1.Chat
+
+	for _, v := range chats {
+		c, err := ChatToProto(&v)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, c)
+	}
+
+	return result, nil
 }
 
 func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDetail, error) {
