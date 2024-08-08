@@ -13,7 +13,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/messagev1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
@@ -27,7 +26,7 @@ func NewMessageGrpcHandler(logger *log.SubLogger, messageService message.Message
 }
 
 func (h MessageGrpcServer) FetchMessages(ctx context.Context, req *connect.Request[messagev1.FetchMessagesRequest]) (*connect.Response[messagev1.FetchMessagesResponse], error) {
-	chatID, err := primitive.ObjectIDFromHex(req.Msg.ChatId)
+	chatID, err := model.ParseChatID(req.Msg.ChatId)
 	if err != nil {
 		return nil, grpc_helpers.GrpcVarror(&vali.Varror{Error: err}, connect.Code(code.Code_INTERNAL))
 	}
@@ -52,7 +51,7 @@ func (h MessageGrpcServer) SendTextMessage(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
 	}
 
-	chatID, err := primitive.ObjectIDFromHex(req.Msg.ChatId)
+	chatID, err := model.ParseChatID(req.Msg.ChatId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}

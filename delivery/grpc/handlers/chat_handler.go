@@ -70,9 +70,30 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 	panic("unimplemented")
 }
 
-// FIXME - Think about it more how to handle events of the changes of a chat and how to deliver it client side.
 func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
-	panic("unimplemented")
+	chatID, err := model.ParseChatID(req.Msg.ChatId)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	chat, varror := h.chatService.GetChat(ctx, chatID)
+	if varror != nil {
+		return nil, varror.Error
+	}
+
+	chatGetter := model.NewChatGetter(chat)
+	chatProto, err := proto_model_transformer.ChatToProto(chatGetter)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	res := &connect.Response[chatv1.GetChatResponse]{
+		Msg: &chatv1.GetChatResponse{
+			Chat: chatProto,
+		},
+	}
+
+	return res, nil
 }
 
 func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chatv1.GetUserChatsRequest]) (*connect.Response[chatv1.GetUserChatsResponse], error) {
