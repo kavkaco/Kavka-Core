@@ -13,6 +13,7 @@ import (
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
 	chatv1model "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
+	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
 type chatHandler struct {
@@ -32,10 +33,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 
 	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
-		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
-		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
-		connectErr.AddDetail(varrorDetail)
-		return nil, connectErr
+		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_UNAVAILABLE))
 	}
 
 	chatGrpcModel, err := grpc_model.TransformChatToGrpcModel(*chat)
