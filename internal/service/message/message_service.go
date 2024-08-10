@@ -54,68 +54,68 @@ func (s *MessageManager) SendTextMessage(ctx context.Context, chatID model.ChatI
 		return nil, &vali.Varror{Error: ErrChatNotFound}
 	}
 
-	if HasAccessToSendMessage(c.ChatType, c.ChatDetail, userID) {
-		m, err := s.messageRepo.Insert(ctx, chatID, model.NewMessage(model.TypeTextMessage, model.TextMessage{
-			Text: messageContent,
-		}, userID))
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrInsertMessage}
-		}
-
-		u, err := s.userRepo.FindByUserID(ctx, userID)
-		if err != nil {
-			return nil, &vali.Varror{Error: err}
-		}
-
-		messageGetter := &model.MessageGetter{
-			Sender: &model.MessageSender{
-				UserID:   u.UserID,
-				Name:     u.Name,
-				LastName: u.LastName,
-				Username: u.Username,
-			},
-			Message: m,
-		}
-
-		if s.eventPublisher != nil {
-			go func() {
-				eventReceivers, receiversErr := ReceiversIDs(c)
-				if receiversErr != nil {
-					s.logger.Error(receiversErr.Error())
-					return
-				}
-
-				payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
-					Name: "add-message",
-					Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_MESSAGE,
-					Payload: &eventsv1.SubscribeEventsStreamResponse_AddMessage{
-						AddMessage: &eventsv1.AddMessage{
-							ChatId:  chatID.Hex(),
-							Message: proto_model_transformer.MessageToProto(messageGetter),
-						},
-					},
-				},
-				)
-				if marshalErr != nil {
-					s.logger.Error("proto marshal error: " + marshalErr.Error())
-					return
-				}
-
-				publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
-					SenderUserId:    userID,
-					ReceiversUserId: eventReceivers,
-					Payload:         payloadProtoBuf,
-				})
-				if publishErr != nil {
-					s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
-				}
-			}()
-		}
-
-		return messageGetter, nil
+	if !HasAccessToSendMessage(c.ChatType, c.ChatDetail, userID) {
+		return nil, &vali.Varror{Error: ErrAccessDenied}
 	}
 
-	return nil, &vali.Varror{Error: ErrAccessDenied}
+	m, err := s.messageRepo.Insert(ctx, chatID, model.NewMessage(model.TypeTextMessage, model.TextMessage{
+		Text: messageContent,
+	}, userID))
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrInsertMessage}
+	}
+
+	u, err := s.userRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, &vali.Varror{Error: err}
+	}
+
+	messageGetter := &model.MessageGetter{
+		Sender: &model.MessageSender{
+			UserID:   u.UserID,
+			Name:     u.Name,
+			LastName: u.LastName,
+			Username: u.Username,
+		},
+		Message: m,
+	}
+
+	if s.eventPublisher != nil {
+		go func() {
+			eventReceivers, receiversErr := ReceiversIDs(c)
+			if receiversErr != nil {
+				s.logger.Error(receiversErr.Error())
+				return
+			}
+
+			payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
+				Name: "add-message",
+				Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_MESSAGE,
+				Payload: &eventsv1.SubscribeEventsStreamResponse_AddMessage{
+					AddMessage: &eventsv1.AddMessage{
+						ChatId:  chatID.Hex(),
+						Message: proto_model_transformer.MessageToProto(messageGetter),
+					},
+				},
+			},
+			)
+			if marshalErr != nil {
+				s.logger.Error("proto marshal error: " + marshalErr.Error())
+				return
+			}
+
+			publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
+				SenderUserId:    userID,
+				ReceiversUserId: eventReceivers,
+				Payload:         payloadProtoBuf,
+			})
+			if publishErr != nil {
+				s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
+			}
+		}()
+	}
+
+	return messageGetter, nil
 }
 
 func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {

@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func ChatToProto(chat *model.ChatGetter) (*modelv1.Chat, error) {
+func ChatToProto(chat model.ChatGetter) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":
@@ -53,19 +53,21 @@ func ChatToProto(chat *model.ChatGetter) (*modelv1.Chat, error) {
 	}, nil
 }
 
+var transformedChats []*modelv1.Chat
+
 func ChatsToProto(chats []model.ChatGetter) ([]*modelv1.Chat, error) {
-	var result []*modelv1.Chat
+	transformedChats = []*modelv1.Chat{}
 
 	for _, v := range chats {
-		c, err := ChatToProto(&v)
+		c, err := ChatToProto(v)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, c)
+		transformedChats = append(transformedChats, c)
 	}
 
-	return result, nil
+	return transformedChats, nil
 }
 
 func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDetail, error) {
@@ -117,7 +119,7 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					UserInfo: UserToProto(&cd.UserInfo),
+					UserInfo: UserToProto(cd.UserInfo),
 				},
 			},
 		}, nil

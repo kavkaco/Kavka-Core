@@ -121,15 +121,15 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 	}, userID)
 
 	go func() {
-		err := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
-		if err != nil {
-			s.logger.Error("message store creation failed: " + err.Error())
+		createErr := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+		if createErr != nil {
+			s.logger.Error("message store creation failed: " + createErr.Error())
 			return
 		}
 
-		_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
-		if err != nil {
-			s.logger.Error("failed to insert message in group creation: " + err.Error())
+		_, createErr = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+		if createErr != nil {
+			s.logger.Error("failed to insert message in group creation: " + createErr.Error())
 			return
 		}
 	}()
@@ -170,15 +170,15 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	}, userID)
 
 	go func() {
-		err := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
-		if err != nil {
-			s.logger.Error("message store creation failed: " + err.Error())
+		createError := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+		if createError != nil {
+			s.logger.Error("message store creation failed: " + createError.Error())
 			return
 		}
 
-		_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
-		if err != nil {
-			s.logger.Error("failed to insert message in channel creation: " + err.Error())
+		_, createError = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+		if createError != nil {
+			s.logger.Error("failed to insert message in channel creation: " + createError.Error())
 			return
 		}
 	}()

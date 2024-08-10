@@ -27,7 +27,7 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 	}
 
 	res := connect.NewResponse(&authv1.LoginResponse{
-		User:         proto_model_transformer.UserToProto(user),
+		User:         proto_model_transformer.UserToProto(*user),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
@@ -53,7 +53,7 @@ func (a AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[a
 	}
 
 	res := connect.NewResponse(&authv1.AuthenticateResponse{
-		User: proto_model_transformer.UserToProto(user),
+		User: proto_model_transformer.UserToProto(*user),
 	})
 
 	return res, nil

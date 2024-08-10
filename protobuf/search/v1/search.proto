@@ -11,14 +11,14 @@ service SearchService {
 }
 
 message SearchRequest {
-    string input = 1;
+  string input = 1;
 }
 
 message SearchResponse {
-    message SearchResult {
-        repeated model.chat.v1.Chat chats = 1;
-        repeated model.user.v1.User users = 2;
-    }
+  message SearchResult {
+    repeated model.chat.v1.Chat chats = 1;
+    repeated model.user.v1.User users = 2;
+  }
 
-    SearchResult result = 1;
+  SearchResult result = 1;
 }

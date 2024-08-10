@@ -1,14 +1,12 @@
 syntax = "proto3";
 package protobuf.model.message.v1;
 
-import "protobuf/model/user/v1/user.proto";
-
 option go_package = "protobuf/model/message/v1";
 
 message MessageSender {
-  string  user_id = 1;
-  string  name = 2;
-  string  last_name = 3;
+  string user_id = 1;
+  string name = 2;
+  string last_name = 3;
   string username = 4;
 }
 

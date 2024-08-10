@@ -9,7 +9,7 @@ import (
 func MessageToProto(messageGetter *model.MessageGetter) *messagev1.Message {
 	message := messageGetter.Message
 
-	transformedModel := &messagev1.Message{
+	result := &messagev1.Message{
 		MessageId: message.MessageID.Hex(),
 		Sender:    MessageSenderToProto(messageGetter.Sender),
 		CreatedAt: message.CreatedAt.Unix(),
@@ -18,11 +18,11 @@ func MessageToProto(messageGetter *model.MessageGetter) *messagev1.Message {
 		Type:      message.Type,
 	}
 
-	switch transformedModel.Type {
+	switch result.Type {
 	case "text":
 		messageContent, _ := utils.TypeConverter[model.TextMessage](message.Content)
 
-		transformedModel.Payload = &messagev1.Message_TextMessage{
+		result.Payload = &messagev1.Message_TextMessage{
 			TextMessage: &messagev1.TextMessage{
 				Text: messageContent.Text,
 			},
@@ -30,14 +30,14 @@ func MessageToProto(messageGetter *model.MessageGetter) *messagev1.Message {
 	case "label":
 		messageContent, _ := utils.TypeConverter[model.LabelMessage](message.Content)
 
-		transformedModel.Payload = &messagev1.Message_LabelMessage{
+		result.Payload = &messagev1.Message_LabelMessage{
 			LabelMessage: &messagev1.LabelMessage{
 				Text: messageContent.Text,
 			},
 		}
 	}
 
-	return transformedModel
+	return result
 }
 
 func MessageSenderToProto(messageSender *model.MessageSender) *messagev1.MessageSender {
@@ -49,8 +49,10 @@ func MessageSenderToProto(messageSender *model.MessageSender) *messagev1.Message
 	}
 }
 
+var transformedMessages []*messagev1.Message
+
 func MessagesToProto(messageGetters []*model.MessageGetter) []*messagev1.Message {
-	var transformedMessages []*messagev1.Message
+	transformedMessages = []*messagev1.Message{}
 
 	for _, v := range messageGetters {
 		transformedMessages = append(transformedMessages, MessageToProto(v))

@@ -12,7 +12,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/log"
 	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
-	chatv1model "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 )
 
@@ -39,7 +38,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connectErr
 	}
 
-	chatProto, err := proto_model_transformer.ChatToProto(chat)
+	chatProto, err := proto_model_transformer.ChatToProto(*chat)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -77,7 +76,7 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 		return nil, connectErr
 	}
 
-	chatProto, err := proto_model_transformer.ChatToProto(chat)
+	chatProto, err := proto_model_transformer.ChatToProto(*chat)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -101,7 +100,7 @@ func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.Ge
 	}
 
 	chatGetter := model.NewChatGetter(chat)
-	chatProto, err := proto_model_transformer.ChatToProto(chatGetter)
+	chatProto, err := proto_model_transformer.ChatToProto(*chatGetter)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -126,21 +125,14 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 		return nil, varror.Error
 	}
 
-	transformedChats := []*chatv1model.Chat{}
-
-	for _, v := range chats {
-		c, err := proto_model_transformer.ChatToProto(&v)
-		if err != nil {
-			h.logger.Error(proto_model_transformer.ErrTransformation.Error())
-			continue
-		}
-
-		transformedChats = append(transformedChats, c)
+	chatsProto, err := proto_model_transformer.ChatsToProto(chats)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	res := connect.NewResponse(
 		&chatv1.GetUserChatsResponse{
-			Chats: transformedChats,
+			Chats: chatsProto,
 		},
 	)
 

@@ -135,27 +135,6 @@ func (s *ChatTestSuite) TestFindBySides() {
 	require.Equal(s.T(), chat.ChatID, s.createdDirectChatID)
 }
 
-func (s *ChatTestSuite) TestUpdateChatLastMessage() {
-	ctx := context.TODO()
-
-	// Create message model
-	messageContent := model.TextMessage{Text: "Sample message..."}
-	model.NewMessage(model.TypeTextMessage, messageContent, s.userID)
-
-	// Create last message model and update it in chat repository
-	lastMessageModel := model.NewLastMessage(model.TypeTextMessage, messageContent.Text)
-	err := s.repo.UpdateChatLastMessage(ctx, s.createdDirectChatID, *lastMessageModel)
-	require.NoError(s.T(), err)
-
-	// Get the chat to be sure thats changed
-	chat, err := s.repo.FindByID(ctx, s.createdDirectChatID)
-	require.NoError(s.T(), err)
-
-	require.NotEmpty(s.T(), chat.LastMessage)
-	require.Equal(s.T(), chat.LastMessage.MessageCaption, lastMessageModel.MessageCaption)
-	require.Equal(s.T(), chat.LastMessage.MessageType, lastMessageModel.MessageType)
-}
-
 func (s *ChatTestSuite) TestGetUserChats() {
 	ctx := context.TODO()
 

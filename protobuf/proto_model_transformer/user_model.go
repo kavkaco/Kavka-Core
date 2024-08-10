@@ -5,7 +5,7 @@ import (
 	modelv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/user/v1"
 )
 
-func UserToProto(user *model.User) *modelv1.User {
+func UserToProto(user model.User) *modelv1.User {
 	return &modelv1.User{
 		UserId:    user.UserID,
 		Name:      user.Name,
@@ -16,12 +16,14 @@ func UserToProto(user *model.User) *modelv1.User {
 	}
 }
 
+var transformedUsers []*modelv1.User
+
 func UsersToProto(users []model.User) []*modelv1.User {
-	var result []*modelv1.User
+	transformedUsers = []*modelv1.User{}
 
 	for _, v := range users {
-		result = append(result, UserToProto(&v))
+		transformedUsers = append(transformedUsers, UserToProto(v))
 	}
 
-	return result
+	return transformedUsers
 }
