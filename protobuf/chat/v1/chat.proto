@@ -36,8 +36,7 @@ message GetUserChatsResponse {
 }
 
 message CreateDirectRequest {
-  string user_id = 1;
-  string recipient_user_id = 2;
+  string recipient_user_id = 1;
 }
 
 message CreateDirectResponse {
@@ -45,10 +44,9 @@ message CreateDirectResponse {
 }
 
 message CreateGroupRequest {
-  string user_id = 1;
-  string title = 2;
-  string username = 3;
-  string description = 4;
+  string title = 1;
+  string username = 2;
+  string description = 3;
 }
 
 message CreateGroupResponse {

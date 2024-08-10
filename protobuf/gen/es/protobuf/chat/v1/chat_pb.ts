@@ -228,12 +228,7 @@ export class GetUserChatsResponse extends Message<GetUserChatsResponse> {
  */
 export class CreateDirectRequest extends Message<CreateDirectRequest> {
   /**
-   * @generated from field: string user_id = 1;
-   */
-  userId = "";
-
-  /**
-   * @generated from field: string recipient_user_id = 2;
+   * @generated from field: string recipient_user_id = 1;
    */
   recipientUserId = "";
 
@@ -245,8 +240,7 @@ export class CreateDirectRequest extends Message<CreateDirectRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "protobuf.chat.v1.CreateDirectRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "recipient_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "recipient_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateDirectRequest {
@@ -308,22 +302,17 @@ export class CreateDirectResponse extends Message<CreateDirectResponse> {
  */
 export class CreateGroupRequest extends Message<CreateGroupRequest> {
   /**
-   * @generated from field: string user_id = 1;
-   */
-  userId = "";
-
-  /**
-   * @generated from field: string title = 2;
+   * @generated from field: string title = 1;
    */
   title = "";
 
   /**
-   * @generated from field: string username = 3;
+   * @generated from field: string username = 2;
    */
   username = "";
 
   /**
-   * @generated from field: string description = 4;
+   * @generated from field: string description = 3;
    */
   description = "";
 
@@ -335,10 +324,9 @@ export class CreateGroupRequest extends Message<CreateGroupRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "protobuf.chat.v1.CreateGroupRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateGroupRequest {

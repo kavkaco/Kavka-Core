@@ -31,7 +31,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
 	}
 
-	chat, chatCreatedMessage, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
+	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
 		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
 		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
@@ -39,10 +39,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 		return nil, connectErr
 	}
 
-	chatGetter := model.NewChatGetter(chat)
-	chatGetter.LastMessage = chatCreatedMessage
-
-	chatProto, err := proto_model_transformer.ChatToProto(chatGetter)
+	chatProto, err := proto_model_transformer.ChatToProto(chat)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -67,7 +64,29 @@ func (h chatHandler) CreateDirect(ctx context.Context, req *connect.Request[chat
 }
 
 func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv1.CreateGroupRequest]) (*connect.Response[chatv1.CreateGroupResponse], error) {
-	panic("unimplemented")
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
+	chat, varror := h.chatService.CreateGroup(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
+	if varror != nil {
+		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
+		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
+		connectErr.AddDetail(varrorDetail)
+		return nil, connectErr
+	}
+
+	chatProto, err := proto_model_transformer.ChatToProto(chat)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	res := connect.NewResponse(&chatv1.CreateGroupResponse{
+		Chat: chatProto,
+	})
+
+	return res, nil
 }
 
 func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
