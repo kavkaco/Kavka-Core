@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -20,7 +19,6 @@ type ChatTestSuite struct {
 	suite.Suite
 	userRepo repository.UserRepository
 	repo     repository.ChatRepository
-	lem      *lorem.Lorem
 
 	userID               model.UserID
 	createdChannelChatID model.ChatID
@@ -30,7 +28,6 @@ type ChatTestSuite struct {
 }
 
 func (s *ChatTestSuite) SetupSuite() {
-	s.lem = lorem.New()
 	s.repo = repository_mongo.NewChatMongoRepository(db)
 	s.userRepo = repository_mongo.NewUserMongoRepository(db)
 
@@ -42,12 +39,12 @@ func (s *ChatTestSuite) TestCreateChannel() {
 	ctx := context.TODO()
 
 	chatDetail := model.ChannelChatDetail{
-		Title:       s.lem.Word(3, 6),
-		Username:    s.lem.LastName(),
+		Title:       "Test Channel",
+		Username:    "TestChannelUsername",
 		Members:     []model.UserID{s.userID},
 		Admins:      []model.UserID{s.userID},
 		Owner:       s.userID,
-		Description: s.lem.Paragraph(1, 4),
+		Description: "Test Channel Description",
 	}
 	chatModel := model.NewChat(model.TypeChannel, chatDetail)
 
@@ -72,12 +69,12 @@ func (s *ChatTestSuite) TestCreateGroup() {
 	ctx := context.TODO()
 
 	chatDetail := model.GroupChatDetail{
-		Title:       s.lem.Word(3, 6),
-		Username:    s.lem.LastName(),
+		Title:       "Test Group",
+		Username:    "TestGroupUsername",
 		Members:     []model.UserID{s.userID},
 		Admins:      []model.UserID{s.userID},
 		Owner:       s.userID,
-		Description: s.lem.Paragraph(1, 4),
+		Description: "Test Group Description",
 	}
 	chatModel := model.NewChat(model.TypeGroup, chatDetail)
 

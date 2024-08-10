@@ -2,27 +2,43 @@ package auth
 
 import "errors"
 
+// General errors
 var (
-	ErrInvalidValidation = errors.New("failed to validate arguments")
+	ErrInvalidValidation = errors.New("invalid validation")
+	ErrAccessDenied      = errors.New("access denied")
+	ErrEmailNotVerified  = errors.New("email not verified")
+	ErrAccountLocked     = errors.New("account locked")
+)
 
-	ErrNotFound                 = errors.New("user not found")
-	ErrInvalidEmailOrPassword   = errors.New("invalid email or password")
-	ErrAccessDenied             = errors.New("access denied")
-	ErrEmailNotVerified         = errors.New("email not verified")
-	ErrAccountLocked            = errors.New("account locked")
-	ErrVerifyEmail              = errors.New("failed verify email")
-	ErrGenerateToken            = errors.New("failed to generate token")
-	ErrHashingPassword          = errors.New("failed to hash password")
-	ErrCreateAuthStore          = errors.New("failed to to create auth store")
-	ErrCreateUser               = errors.New("failed to to create user")
-	ErrCreateEmailToken         = errors.New("failed to create email token")
-	ErrDestroyToken             = errors.New("failed to destroy token")
+// User errors
+var (
+	ErrNotFound               = errors.New("user not found")
+	ErrInvalidEmailOrPassword = errors.New("invalid email or password")
+	ErrEmailAlreadyExist      = errors.New("email already exists")
+	ErrUsernameAlreadyExist   = errors.New("username already exists")
+)
+
+// Authentication errors
+var (
+	ErrGenerateToken    = errors.New("failed to generate token")
+	ErrHashingPassword  = errors.New("failed to hash password")
+	ErrCreateAuthStore  = errors.New("failed to create auth store")
+	ErrCreateUser       = errors.New("failed to create user")
+	ErrCreateEmailToken = errors.New("failed to create email token")
+	ErrDestroyToken     = errors.New("failed to destroy token")
+	ErrVerifyEmail      = errors.New("failed to verify email")
+)
+
+// Password management errors
+var (
 	ErrChangePassword           = errors.New("failed to change password")
 	ErrClearFailedLoginAttempts = errors.New("failed to clear failed login attempts")
-	ErrUnlockAccount            = errors.New("failed to unlock account")
-	ErrLockAccount              = errors.New("failed to lock account")
-	ErrDeleteUser               = errors.New("failed to delete user")
-	ErrEmailWasNotSent          = errors.New("email wasn't sent")
-	ErrEmailAlreadyExist        = errors.New("email already exists")
-	ErrUsernameAlreadyExist     = errors.New("username already exists")
+)
+
+// Account management errors
+var (
+	ErrUnlockAccount   = errors.New("failed to unlock account")
+	ErrLockAccount     = errors.New("failed to lock account")
+	ErrDeleteUser      = errors.New("failed to delete user")
+	ErrEmailWasNotSent = errors.New("email was not sent")
 )

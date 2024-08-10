@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	lorem "github.com/bozaro/golorem"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -17,7 +16,6 @@ import (
 type MessageTestSuite struct {
 	suite.Suite
 	repo repository.MessageRepository
-	lem  *lorem.Lorem
 
 	chatID         model.ChatID
 	senderID       model.UserID
@@ -28,14 +26,13 @@ func (s *MessageTestSuite) SetupSuite() {
 	ctx := context.TODO()
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	s.repo = repository_mongo.NewMessageMongoRepository(db)
-	s.lem = lorem.New()
 	s.senderID = fmt.Sprintf("%d", random.GenerateUserID())
 
 	// Create a sample chat
 	chatModel := model.NewChat(model.TypeChannel, model.ChannelChatDetail{
-		Title:       s.lem.Word(1, 10),
-		Username:    s.lem.LastName(),
-		Description: s.lem.Paragraph(1, 2),
+		Title:       "Chat 1",
+		Username:    "Username_1",
+		Description: "Test Chat 1",
 		Owner:       s.senderID,
 		Members:     []model.UserID{s.senderID},
 		Admins:      []model.UserID{s.senderID},
@@ -53,7 +50,7 @@ func (s *MessageTestSuite) SetupSuite() {
 func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	ctx := context.TODO()
 
-	messageContentModel := model.TextMessage{Text: s.lem.Sentence(1, 3)}
+	messageContentModel := model.TextMessage{Text: "Text message"}
 	messageModel := model.NewMessage(model.TypeTextMessage, messageContentModel, s.senderID)
 	saved, err := s.repo.Insert(ctx, s.chatID, messageModel)
 	require.NoError(s.T(), err)
@@ -87,7 +84,7 @@ func (s *MessageTestSuite) TestA_InsertTextMessage() {
 // func (s *MessageTestSuite) TestD_UpdateTextMessage() {
 // 	ctx := context.TODO()
 
-// 	newMessageContent := s.lem.Sentence(1, 2)
+// 	newMessageContent := "Test message updated"
 // 	err := s.repo.UpdateMessageContent(ctx, s.chatID, s.savedMessageID, newMessageContent)
 // 	require.NoError(s.T(), err)
 
