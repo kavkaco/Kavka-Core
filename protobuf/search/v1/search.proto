@@ -1,0 +1,24 @@
+syntax = "proto3";
+package protobuf.search.v1;
+
+import "protobuf/model/chat/v1/chat.proto";
+import "protobuf/model/user/v1/user.proto";
+
+option go_package = "protobuf/search/v1";
+
+service SearchService {
+  rpc Search(SearchRequest) returns (SearchResponse) {}
+}
+
+message SearchRequest {
+  string input = 1;
+}
+
+message SearchResponse {
+  message SearchResult {
+    repeated model.chat.v1.Chat chats = 1;
+    repeated model.user.v1.User users = 2;
+  }
+
+  SearchResult result = 1;
+}

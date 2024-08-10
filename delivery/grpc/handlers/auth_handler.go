@@ -5,9 +5,10 @@ import (
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
-	grpc_model "github.com/kavkaco/Kavka-Core/delivery/grpc/model"
+
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	authv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1"
+	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
@@ -27,7 +28,7 @@ func (a AuthGrpcServer) Login(ctx context.Context, req *connect.Request[authv1.L
 	}
 
 	res := connect.NewResponse(&authv1.LoginResponse{
-		User:         grpc_model.TransformUserToGrpcModel(user),
+		User:         proto_model_transformer.UserToProto(*user),
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
@@ -53,7 +54,7 @@ func (a AuthGrpcServer) Authenticate(ctx context.Context, req *connect.Request[a
 	}
 
 	res := connect.NewResponse(&authv1.AuthenticateResponse{
-		User: grpc_model.TransformUserToGrpcModel(user),
+		User: proto_model_transformer.UserToProto(*user),
 	})
 
 	return res, nil

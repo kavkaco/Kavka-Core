@@ -2,6 +2,7 @@ package repository_mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -19,7 +20,7 @@ func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository 
 	return &messageRepository{db.Collection(database.MessagesCollection)}
 }
 
-func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
+func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.MessageGetter, error) {
 	filter := bson.M{"chat_id": chatID}
 
 	result := repo.messagesCollection.FindOne(ctx, filter)
@@ -27,21 +28,21 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		return nil, result.Err()
 	}
 
-	var message model.Message
-	var messageStore *model.MessageStore
+	var message model.MessageGetter
+	var chatMessages *model.ChatMessages
 
-	err := result.Decode(&messageStore)
+	err := result.Decode(&chatMessages)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, m := range messageStore.Messages {
-		if m.MessageID == messageID {
-			message = m
+	for i, m := range chatMessages.Messages {
+		if m.Message.MessageID == messageID {
+			message = *m
 			break
 		}
 
-		if i == len(messageStore.Messages)-1 {
+		if i == len(chatMessages.Messages)-1 {
 			return nil, repository.ErrNotFound
 		}
 	}
@@ -50,9 +51,9 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 }
 
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {
-	messageStoreModel := model.MessageStore{
+	messageStoreModel := model.ChatMessages{
 		ChatID:   chatID,
-		Messages: []model.Message{},
+		Messages: []*model.MessageGetter{},
 	}
 	_, err := repo.messagesCollection.InsertOne(ctx, messageStoreModel)
 	if err != nil {
@@ -62,24 +63,59 @@ func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) 
 	return nil
 }
 
-func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.ChatID) ([]model.Message, error) {
-	filter := bson.M{"chat_id": chatID}
-	result := repo.messagesCollection.FindOne(ctx, filter)
-	if result.Err() != nil {
-		if database.IsRowExistsError(result.Err()) {
-			return nil, repository.ErrNotFound
-		}
-
-		return nil, result.Err()
+func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.ChatID) (*model.ChatMessages, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"chat_id": chatID,
+			},
+		},
+		bson.M{"$unwind": bson.M{"path": "$messages"}},
+		bson.M{
+			"$lookup": bson.M{
+				"from":         "users",
+				"localField":   "messages.sender_id",
+				"foreignField": "user_id",
+				"as":           "sender",
+			},
+		},
+		bson.M{"$unwind": bson.M{"path": "$sender"}},
+		bson.M{
+			"$group": bson.M{
+				"_id": "$_id",
+				"chat_id": bson.M{
+					"$first": "$chat_id",
+				},
+				"messages": bson.M{
+					"$push": bson.M{
+						"message": "$messages",
+						"sender":  "$sender",
+					},
+				},
+			},
+		},
 	}
 
-	var messageStore *model.MessageStore
-	err := result.Decode(&messageStore)
+	cursor, err := repo.messagesCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return &model.ChatMessages{}, nil
+		}
+
+		return nil, err
+	}
+
+	var chatMessages []model.ChatMessages
+	err = cursor.All(ctx, &chatMessages)
 	if err != nil {
 		return nil, err
 	}
 
-	return messageStore.Messages, nil
+	if len(chatMessages) > 0 {
+		return &chatMessages[0], nil
+	}
+
+	return &model.ChatMessages{}, nil
 }
 
 func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, message *model.Message) (*model.Message, error) {
