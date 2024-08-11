@@ -70,13 +70,12 @@ func (s *ChatTestSuite) TestCreateChannel() {
 	ctx := context.TODO()
 
 	detailModel := model.ChannelChatDetail{
-		Title:        "Channel1",
-		Username:     "channel1",
-		Owner:        s.users[0].UserID,
-		Members:      []model.UserID{s.users[0].UserID},
-		Admins:       []model.UserID{s.users[0].UserID},
-		Description:  "Channel1:Description",
-		RemovedUsers: []model.UserID{},
+		Title:       "Channel1",
+		Username:    "channel1",
+		Owner:       s.users[0].UserID,
+		Members:     []model.UserID{s.users[0].UserID},
+		Admins:      []model.UserID{s.users[0].UserID},
+		Description: "Channel1:Description",
 	}
 
 	saved, varror := s.service.CreateChannel(ctx, detailModel.Owner, detailModel.Title, detailModel.Username, detailModel.Description)
@@ -95,17 +94,17 @@ func (s *ChatTestSuite) TestCreateChannel() {
 
 	s.createdChannelChatID = saved.ChatID
 }
+
 func (s *ChatTestSuite) TestCreateGroup() {
 	ctx := context.TODO()
 
 	detailModel := model.GroupChatDetail{
-		Title:        "Group1",
-		Username:     "Group1",
-		Owner:        s.users[0].UserID,
-		Members:      []model.UserID{s.users[0].UserID},
-		Admins:       []model.UserID{s.users[0].UserID},
-		Description:  "Group1:Description",
-		RemovedUsers: []model.UserID{},
+		Title:       "Group1",
+		Username:    "Group1",
+		Owner:       s.users[0].UserID,
+		Members:     []model.UserID{s.users[0].UserID},
+		Admins:      []model.UserID{s.users[0].UserID},
+		Description: "Group1:Description",
 	}
 
 	saved, varror := s.service.CreateGroup(ctx, detailModel.Owner, detailModel.Title, detailModel.Username, detailModel.Description)
