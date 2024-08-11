@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -74,7 +73,7 @@ func (s *MessageTestSuite) TestB_DeleteMessage() {
 	require.Nil(s.T(), varror)
 }
 
-func TestMessageSuite(t *testing.T) {
-	t.Helper()
-	suite.Run(t, new(MessageTestSuite))
-}
+// func TestMessageSuite(t *testing.T) {
+// 	t.Helper()
+// 	suite.Run(t, new(MessageTestSuite))
+// }

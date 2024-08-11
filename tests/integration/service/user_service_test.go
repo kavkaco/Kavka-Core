@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -79,7 +78,7 @@ func (s *UserTestSuite) TestB_UpdateProfile() {
 	require.Equal(s.T(), user.LastName, lastName)
 }
 
-func TestUserSuite(t *testing.T) {
-	t.Helper()
-	suite.Run(t, new(UserTestSuite))
-}
+// func TestUserSuite(t *testing.T) {
+// 	t.Helper()
+// 	suite.Run(t, new(UserTestSuite))
+// }

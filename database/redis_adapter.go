@@ -52,6 +52,8 @@ func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
 		log.Fatalf("Could not start resource: %s", err)
 	}
 
+	ipAddr := resource.Container.NetworkSettings.IPAddress + ":6379"
+
 	// Kill the container
 	defer func() {
 		if err = pool.Purge(resource); err != nil {
@@ -60,8 +62,6 @@ func GetRedisTestInstance(callback func(redisClient *redis.Client)) {
 	}()
 
 	err = pool.Retry(func() error {
-		ipAddr := resource.Container.NetworkSettings.IPAddress + ":6379"
-
 		fmt.Printf("Docker redis container network ip address: %s\n", ipAddr)
 
 		client = redis.NewClient(&redis.Options{

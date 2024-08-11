@@ -18,12 +18,17 @@ type AuthTestSuite struct {
 	suite.Suite
 	service service.AuthService
 
-	userID                   model.UserID
-	verifyEmailToken         string
-	email, password          string
-	accessToken              string
-	refreshToken             string
-	resetPasswordToken       string
+	// User
+	userID          model.UserID
+	email, password string
+
+	// Tokens
+	verifyEmailToken   string
+	accessToken        string
+	refreshToken       string
+	resetPasswordToken string
+
+	// Urls
 	verifyEmailRedirectUrl   string
 	resetPasswordRedirectUrl string
 }
@@ -37,6 +42,7 @@ func (s *AuthTestSuite) SetupSuite() {
 
 	emailService := email.NewEmailDevelopmentService()
 
+	// FIXME
 	s.verifyEmailRedirectUrl = "example.com"
 	s.resetPasswordRedirectUrl = "example.com"
 
@@ -44,21 +50,27 @@ func (s *AuthTestSuite) SetupSuite() {
 	s.service = service.NewAuthService(authRepo, userRepo, authManager, hashManager, emailService)
 }
 
+func (s *AuthTestSuite) quickLogin(email string, password string) {
+	ctx := context.TODO()
+
+	user, _, _, varror := s.service.Login(ctx, email, password)
+	require.Nil(s.T(), varror)
+
+	require.NotEmpty(s.T(), user)
+	require.Equal(s.T(), user.Email, email)
+}
+
 func (s *AuthTestSuite) TestA_Register() {
 	ctx := context.TODO()
 
-	name := "John"
-	lastName := "Doe"
-	username := "john_doe"
-	email := "john_doe@kavka.org"
-	password := "12345678"
+	user := userTestModels[0]
+	s.email = user.Email
+	s.password = "plain-password"
 
-	verifyEmailToken, varror := s.service.Register(ctx, name, lastName, username, email, password, s.verifyEmailRedirectUrl)
+	verifyEmailToken, varror := s.service.Register(ctx, user.Name, user.LastName, user.Username, user.Email, s.password, s.verifyEmailRedirectUrl)
 	require.Nil(s.T(), varror)
 
 	s.verifyEmailToken = verifyEmailToken
-	s.email = email
-	s.password = password
 }
 
 func (s *AuthTestSuite) TestB_VerifyEmail() {
@@ -87,19 +99,12 @@ func (s *AuthTestSuite) TestC_Login() {
 func (s *AuthTestSuite) TestD_ChangePassword() {
 	ctx := context.TODO()
 
-	newPassword := "12341234"
+	newPassword := "password-must-be-changed"
 
 	varror := s.service.ChangePassword(ctx, s.userID, s.password, newPassword)
 	require.Nil(s.T(), varror)
 
-	// Login again with new password to be sure that's changed!
-
-	user, _, _, varror := s.service.Login(ctx, s.email, newPassword)
-	require.Nil(s.T(), varror)
-
-	require.NotEmpty(s.T(), user)
-	require.Equal(s.T(), user.Email, s.email)
-
+	s.quickLogin(s.email, newPassword)
 	s.password = newPassword
 }
 
@@ -139,19 +144,12 @@ func (s *AuthTestSuite) TestG_SendResetPassword() {
 func (s *AuthTestSuite) TestH_SubmitResetPassword() {
 	ctx := context.TODO()
 
-	newPassword := "98769876"
+	newPassword := "password-reset-must-work"
 
 	varror := s.service.SubmitResetPassword(ctx, s.resetPasswordToken, newPassword)
 	require.Nil(s.T(), varror)
 
-	// Login again with new password to be sure that's changed!
-
-	user, _, _, varror := s.service.Login(ctx, s.email, newPassword)
-	require.Nil(s.T(), varror)
-
-	require.NotEmpty(s.T(), user)
-	require.Equal(s.T(), user.Email, s.email)
-
+	s.quickLogin(s.email, newPassword)
 	s.password = newPassword
 }
 
