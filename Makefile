@@ -7,10 +7,10 @@ devtools:
 
 # Tests
 unit_test:
-	go test $(shell go list ./... | grep -v /tests)
+	go test -cover $(shell go list ./... | grep -v /tests)
 
 integration_test:
-	go test ./tests/integration/*
+	go test -cover -coverpkg ./internal/service/... ./tests/integration/service
 
 test:
 	make unit_test
