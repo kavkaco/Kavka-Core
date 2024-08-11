@@ -51,10 +51,6 @@ services:
     image: nats
     ports:
       - "4222:4222"
-  nats-web:
-    image: sphqxe/nats-webui
-    ports:
-      - "8223:80"
 
 networks:
   default_network:

@@ -14,6 +14,13 @@ const (
 	TypeLabelMessage = "label"
 )
 
+// used in internal queries
+type MessageStore struct {
+	ChatID   ChatID     `bson:"chat_id"`
+	Messages []*Message `bson:"messages"`
+}
+
+// used in external queries that are going to delivery part of the app
 type ChatMessages struct {
 	ChatID   ChatID           `bson:"chat_id"`
 	Messages []*MessageGetter `bson:"messages"`

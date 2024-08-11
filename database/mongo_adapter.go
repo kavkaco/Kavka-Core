@@ -185,8 +185,9 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 
 	ConfigureCollections(db)
 
-	ipAddr := resource.Container.NetworkSettings.IPAddress
-	fmt.Printf("Docker container network ip address: %s\n\n", ipAddr)
+	ipAddr := resource.Container.NetworkSettings.IPAddress + ":27017"
+
+	fmt.Printf("Docker mongodb container network ip address: %s\n", ipAddr)
 
 	callback(db)
 

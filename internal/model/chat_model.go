@@ -129,3 +129,7 @@ func NewChatGetter(chatModel *Chat) *ChatGetter {
 func ParseChatID(chatID string) (ChatID, error) {
 	return primitive.ObjectIDFromHex(chatID)
 }
+
+func NewChatID() ChatID {
+	return primitive.NewObjectID()
+}

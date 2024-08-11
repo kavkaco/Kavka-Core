@@ -75,7 +75,7 @@ func main() {
 	})
 
 	// [=== Init Infra ===]
-	natsClient, err := stream.NewNATSAdapter(cfg, log.NewSubLogger("infra"))
+	natsClient, err := stream.NewNATSAdapter(&cfg.Nats, log.NewSubLogger("infra"))
 	handleError(err)
 
 	streamPublisher, err := stream.NewStreamPublisher(natsClient)

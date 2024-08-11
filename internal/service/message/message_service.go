@@ -129,12 +129,12 @@ func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID,
 		return &vali.Varror{Error: ErrChatNotFound}
 	}
 
-	messageGetter, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
+	message, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
 	if err != nil {
 		return &vali.Varror{Error: ErrNotFound}
 	}
 
-	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *messageGetter.Message) {
+	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {
 		err = s.messageRepo.Delete(ctx, chatID, messageID)
 		if err != nil {
 			return &vali.Varror{Error: ErrDeleteMessage}
