@@ -20,7 +20,7 @@ func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository 
 	return &messageRepository{db.Collection(database.MessagesCollection)}
 }
 
-func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.MessageGetter, error) {
+func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
 	filter := bson.M{"chat_id": chatID}
 
 	result := repo.messagesCollection.FindOne(ctx, filter)
@@ -28,26 +28,30 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 		return nil, result.Err()
 	}
 
-	var message model.MessageGetter
-	var chatMessages *model.ChatMessages
+	var message *model.Message
+	var chatMessages *model.MessageStore
 
 	err := result.Decode(&chatMessages)
 	if err != nil {
 		return nil, err
 	}
 
-	for i, m := range chatMessages.Messages {
-		if m.Message.MessageID == messageID {
-			message = *m
-			break
+	if chatMessages != nil {
+		for i, m := range chatMessages.Messages {
+			if m != nil && m.MessageID == messageID {
+				message = m
+				break
+			}
+
+			if i == len(chatMessages.Messages)-1 {
+				return nil, repository.ErrNotFound
+			}
 		}
 
-		if i == len(chatMessages.Messages)-1 {
-			return nil, repository.ErrNotFound
-		}
+		return message, nil
 	}
 
-	return &message, nil
+	return nil, repository.ErrNotFound
 }
 
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {

@@ -19,6 +19,7 @@ type AuthTestSuite struct {
 	service service.AuthService
 
 	// User
+	user            *model.User
 	userID          model.UserID
 	email, password string
 
@@ -63,7 +64,12 @@ func (s *AuthTestSuite) quickLogin(email string, password string) {
 func (s *AuthTestSuite) TestA_Register() {
 	ctx := context.TODO()
 
-	user := userTestModels[0]
+	user := model.User{
+		Name:     "User1:Name",
+		LastName: "User1:LastName",
+		Email:    "user1@kavka.org",
+		Username: "user1",
+	}
 	s.email = user.Email
 	s.password = "plain-password"
 
@@ -94,6 +100,8 @@ func (s *AuthTestSuite) TestC_Login() {
 	s.accessToken = accessToken
 	s.refreshToken = refreshToken
 	s.userID = user.UserID
+
+	s.user = user
 }
 
 func (s *AuthTestSuite) TestD_ChangePassword() {
