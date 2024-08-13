@@ -20,22 +20,6 @@ func NewChatMongoRepository(db *mongo.Database) repository.ChatRepository {
 	return &chatRepository{db.Collection(database.UsersCollection), db.Collection(database.ChatsCollection)}
 }
 
-func (repo *chatRepository) UpdateChatLastMessage(ctx context.Context, chatID model.ChatID, lastMessage model.LastMessage) error {
-	filter := bson.M{"_id": chatID}
-	update := bson.M{"$set": bson.M{"last_message": lastMessage}}
-
-	result, err := repo.chatsCollection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-
-	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
-		return repository.ErrNotModified
-	}
-
-	return nil
-}
-
 func (repo *chatRepository) AddToUsersChatsList(ctx context.Context, userID string, chatID primitive.ObjectID) error {
 	filter := bson.M{"user_id": userID}
 	update := bson.M{
@@ -51,12 +35,7 @@ func (repo *chatRepository) AddToUsersChatsList(ctx context.Context, userID stri
 	return nil
 }
 
-// TODO
-func (repo *chatRepository) SearchInChats(ctx context.Context, key string) ([]model.Chat, error) {
-	panic("unimplemented")
-}
-
-// TODO
+// FIXME
 func (repo *chatRepository) GetChatMembers(chatID model.ChatID) []model.Member {
 	return []model.Member{}
 }
@@ -88,15 +67,44 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	return nil
 }
 
-func (repo *chatRepository) FindManyByChatID(ctx context.Context, chatIDs []model.ChatID) ([]model.Chat, error) {
-	filter := bson.M{"_id": bson.M{"$in": chatIDs}}
+func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.ChatGetter, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"_id": bson.M{"$in": chatIDs},
+			},
+		},
+		bson.M{
+			"$lookup": bson.M{
+				"from":         "messages",
+				"localField":   "_id",
+				"foreignField": "chat_id",
+				"as":           "chat_messages",
+			},
+		},
+		bson.M{
+			"$unwind": "$chat_messages",
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"last_message": bson.M{
+					"$last": "$chat_messages.messages",
+				},
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"chat_messages": 0,
+			},
+		},
+	}
 
-	cursor, err := repo.chatsCollection.Find(ctx, filter)
+	cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
 
-	var chats []model.Chat
+	var chats []model.ChatGetter
 
 	decodeErr := cursor.All(ctx, &chats)
 	if decodeErr != nil {

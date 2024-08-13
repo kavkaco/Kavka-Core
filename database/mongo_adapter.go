@@ -55,15 +55,54 @@ func GetMongoDBInstance(uri, dbName string) (*mongo.Database, error) {
 }
 
 func ConfigureCollections(db *mongo.Database) {
-	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
-		Keys:    bson.D{{Key: "email", Value: 1}},
-		Options: options.Index().SetUnique(true),
-	})
+	handleError := func(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
 
-	db.Collection(UsersCollection).Indexes().CreateOne(context.Background(), mongo.IndexModel{ //nolint
-		Keys:    bson.D{{Key: "username", Value: 1}},
-		Options: options.Index().SetUnique(true),
+	// Users indexes
+
+	_, err := db.Collection(UsersCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys:    bson.M{"email": 1},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys:    bson.M{"username": 1},
+			Options: options.Index().SetUnique(true),
+		},
 	})
+	handleError(err)
+
+	_, err = db.Collection(UsersCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{ //nolint
+		{
+			Keys: bson.D{
+				{Key: "name", Value: "text"},
+				{Key: "email", Value: "text"},
+				{Key: "username", Value: "text"},
+				{Key: "last_name", Value: "text"},
+			},
+		},
+	})
+	handleError(err)
+
+	// Chats indexes
+
+	_, err = db.Collection(ChatsCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "chat_detail.username", Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{
+				{Key: "chat_detail.title", Value: "text"},
+				{Key: "chat_detail.username", Value: "text"},
+			},
+			Options: options.Index(),
+		},
+	})
+	handleError(err)
 }
 
 func IsDuplicateKeyError(err error) bool {
@@ -146,8 +185,9 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 
 	ConfigureCollections(db)
 
-	ipAddr := resource.Container.NetworkSettings.IPAddress
-	fmt.Printf("Docker container network ip address: %s\n\n", ipAddr)
+	ipAddr := resource.Container.NetworkSettings.IPAddress + ":27017"
+
+	fmt.Printf("Docker mongodb container network ip address: %s\n", ipAddr)
 
 	callback(db)
 

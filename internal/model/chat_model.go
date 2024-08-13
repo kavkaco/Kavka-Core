@@ -14,10 +14,16 @@ const (
 )
 
 type Chat struct {
-	ChatID      ChatID       `bson:"_id" json:"chatId"`
-	ChatType    string       `bson:"chat_type" json:"chatType"`
-	ChatDetail  interface{}  `bson:"chat_detail" json:"chatDetail"`
-	LastMessage *LastMessage `bson:"last_message" json:"lastMessage"`
+	ChatID     ChatID      `bson:"_id" json:"chatId"`
+	ChatType   string      `bson:"chat_type" json:"chatType"`
+	ChatDetail interface{} `bson:"chat_detail" json:"chatDetail"`
+}
+
+type ChatGetter struct {
+	ChatID      ChatID      `bson:"_id" json:"chatId"`
+	ChatType    string      `bson:"chat_type" json:"chatType"`
+	ChatDetail  interface{} `bson:"chat_detail" json:"chatDetail"`
+	LastMessage *Message    `bson:"last_message" json:"lastMessage"`
 }
 
 type Member struct {
@@ -106,7 +112,24 @@ func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m.ChatType = chatType
 	m.ChatDetail = chatDetail
 	m.ChatID = primitive.NewObjectID()
-	m.LastMessage = nil
 
 	return m
+}
+
+func NewChatGetter(chatModel *Chat) *ChatGetter {
+	m := &ChatGetter{}
+
+	m.ChatID = chatModel.ChatID
+	m.ChatType = chatModel.ChatType
+	m.ChatDetail = chatModel.ChatDetail
+
+	return m
+}
+
+func ParseChatID(chatID string) (ChatID, error) {
+	return primitive.ObjectIDFromHex(chatID)
+}
+
+func NewChatID() ChatID {
+	return primitive.NewObjectID()
 }

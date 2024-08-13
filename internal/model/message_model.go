@@ -11,16 +11,19 @@ type MessageID = primitive.ObjectID
 const (
 	TypeTextMessage  = "text"
 	TypeImageMessage = "image"
+	TypeLabelMessage = "label"
 )
 
-type LastMessage struct {
-	MessageType    string `bson:"type" json:"type"`
-	MessageCaption string `bson:"caption" json:"caption"`
+// used in internal queries
+type MessageStore struct {
+	ChatID   ChatID     `bson:"chat_id"`
+	Messages []*Message `bson:"messages"`
 }
 
-type MessageStore struct {
-	ChatID   ChatID    `bson:"chat_id"`
-	Messages []Message `bson:"messages"`
+// used in external queries that are going to delivery part of the app
+type ChatMessages struct {
+	ChatID   ChatID           `bson:"chat_id"`
+	Messages []*MessageGetter `bson:"messages"`
 }
 
 type Message struct {
@@ -33,8 +36,24 @@ type Message struct {
 	Content   interface{} `bson:"content" json:"content"`
 }
 
+type MessageSender struct {
+	UserID   UserID `bson:"user_id" json:"userID"`
+	Name     string `bson:"name" json:"name"`
+	LastName string `bson:"last_name" json:"lastName"`
+	Username string `bson:"username" json:"username"`
+}
+
+type MessageGetter struct {
+	Sender  *MessageSender `bson:"sender" json:"sender"`
+	Message *Message       `bson:"message" json:"message"`
+}
+
 type TextMessage struct {
-	Data string `bson:"data" json:"data"`
+	Text string `bson:"text" json:"text"`
+}
+
+type LabelMessage struct {
+	Text string `bson:"text" json:"text"`
 }
 
 type ImageMessage struct {
@@ -55,11 +74,4 @@ func NewMessage(messageType string, content interface{}, senderID UserID) *Messa
 	m.CreatedAt = now
 
 	return m
-}
-
-func NewLastMessage(messageType string, messageCaption string) *LastMessage {
-	return &LastMessage{
-		MessageType:    messageType,
-		MessageCaption: messageCaption,
-	}
 }

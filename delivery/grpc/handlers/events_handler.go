@@ -12,8 +12,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
 )
 
-const maximumConnectionErrorCount = 5
-
 type eventsHandler struct {
 	logger   *log.SubLogger
 	streamer stream.StreamSubscriber
@@ -26,10 +24,11 @@ func NewEventsGrpcHandler(logger *log.SubLogger, streamer stream.StreamSubscribe
 func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.SubscribeEventsStreamRequest], str *connect.ServerStream[eventsv1.SubscribeEventsStreamResponse]) error {
 	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
 
+	done := ctx.Done()
 	userCh := make(chan *eventsv1.SubscribeEventsStreamResponse)
 	e.streamer.UserSubscribe(userID, userCh)
 
-	occurredErrorsCount := 0
+	e.logger.Debug("user stream established")
 
 	for {
 		if str == nil {
@@ -37,25 +36,24 @@ func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.
 			return nil
 		}
 
-		event, ok := <-userCh
-		if !ok {
-			e.logger.Error("user channel closed in user-subscribe method")
-			return nil
-		}
-
-		e.logger.Debug("events-handler", "event-name")
-
-		err := str.Send(event)
-		if err != nil {
-			occurredErrorsCount++
-		}
-
-		// resource releasing after achieving maximum error count
-		if occurredErrorsCount >= maximumConnectionErrorCount {
-			e.logger.Debug("stream resource released")
+		select {
+		case <-done:
+			e.logger.Debug("user disconnected!")
 			e.streamer.UserUnsubscribe(userID)
-			close(userCh)
 			return nil
+		case event, ok := <-userCh:
+			if !ok {
+				e.logger.Error("user channel closed in user-subscribe method")
+				return nil
+			}
+
+			e.logger.Debug("events-handler", "event-name", event.Name)
+
+			err := str.Send(event)
+			if err != nil {
+				log.Error("unable to send message with grpc: " + err.Error())
+				continue
+			}
 		}
 	}
 }
