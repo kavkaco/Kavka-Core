@@ -18,6 +18,7 @@ import (
 type ChatTestSuite struct {
 	suite.Suite
 	userRepo repository.UserRepository
+	chatRepo repository.ChatRepository
 	service  service.ChatService
 
 	// Created chats
@@ -36,6 +37,7 @@ func (s *ChatTestSuite) SetupSuite() {
 	messageRepo := repository_mongo.NewMessageMongoRepository(db)
 
 	s.userRepo = userRepo
+	s.chatRepo = chatRepo
 	s.service = service.NewChatService(nil, chatRepo, userRepo, messageRepo, nil)
 
 	s.users = [2]model.User{
@@ -188,6 +190,36 @@ func (s *ChatTestSuite) TestGetUserChats() {
 			require.Equal(s.T(), v.ChatID, s.createdDirectChatID)
 		}
 	}
+}
+
+func (s *ChatTestSuite) TestJoinChat() {
+	ctx := context.TODO()
+
+	// Create a plain channel chat
+	detailModel := model.ChannelChatDetail{
+		Title:       "Channel3",
+		Username:    "channel3",
+		Owner:       s.users[0].UserID,
+		Members:     []model.UserID{},
+		Admins:      []model.UserID{},
+		Description: "Channel3:Description",
+	}
+	channelChat, err := s.chatRepo.Create(ctx, model.Chat{
+		ChatID:     model.NewChatID(),
+		ChatType:   model.TypeChannel,
+		ChatDetail: detailModel,
+	})
+	require.NoError(s.T(), err)
+
+	userID := s.users[1].UserID
+
+	joinResult, varror := s.service.JoinChat(ctx, channelChat.ChatID, userID)
+	if varror != nil {
+		s.T().Log(varror.Error)
+	}
+	require.Nil(s.T(), varror)
+	require.True(s.T(), joinResult.Joined)
+	require.NotEmpty(s.T(), joinResult.UpdatedChat)
 }
 
 func TestChatSuite(t *testing.T) {

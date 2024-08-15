@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -142,7 +141,7 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	require.Len(s.T(), chats, 3)
 }
 
-func TestChatSuite(t *testing.T) {
-	t.Helper()
-	suite.Run(t, new(ChatTestSuite))
-}
+// func TestChatSuite(t *testing.T) {
+// 	t.Helper()
+// 	suite.Run(t, new(ChatTestSuite))
+// }

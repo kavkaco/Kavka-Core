@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -65,9 +64,8 @@ type DirectChatFetchedDetail struct {
 	UserInfo User
 }
 
-func (c *Chat) IsMember(userID UserID) bool {
-	d, _ := utils.TypeConverter[ChannelChatDetail](c.ChatDetail)
-	for _, memberUserID := range d.Members {
+func (c *ChannelChatDetail) IsMember(userID UserID) bool {
+	for _, memberUserID := range c.Members {
 		if memberUserID == userID {
 			return true
 		}
@@ -76,9 +74,28 @@ func (c *Chat) IsMember(userID UserID) bool {
 	return false
 }
 
-func (c *Chat) IsAdmin(userID UserID) bool {
-	d, _ := utils.TypeConverter[ChannelChatDetail](c.ChatDetail)
-	for _, adminUserID := range d.Admins {
+func (c *ChannelChatDetail) IsAdmin(userID UserID) bool {
+	for _, adminUserID := range c.Admins {
+		if adminUserID == userID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *GroupChatDetail) IsMember(userID UserID) bool {
+	for _, memberUserID := range c.Members {
+		if memberUserID == userID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *GroupChatDetail) IsAdmin(userID UserID) bool {
+	for _, adminUserID := range c.Admins {
 		if adminUserID == userID {
 			return true
 		}

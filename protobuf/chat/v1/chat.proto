@@ -11,6 +11,7 @@ service ChatService {
   rpc CreateDirect(CreateDirectRequest) returns (CreateDirectResponse) {}
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
   rpc CreateChannel(CreateChannelRequest) returns (CreateChannelResponse) {}
+  rpc JoinChat(JoinChatRequest) returns (JoinChatResponse) {}
 }
 
 message ChatEventRequest {}
@@ -60,5 +61,13 @@ message CreateChannelRequest {
 }
 
 message CreateChannelResponse {
+  model.chat.v1.Chat chat = 1;
+}
+
+message JoinChatRequest {
+  string chat_id = 1;
+}
+
+message JoinChatResponse {
   model.chat.v1.Chat chat = 1;
 }
