@@ -123,6 +123,38 @@ func DetectRecipient(userIDs [2]UserID, currentUserID UserID) *UserID {
 	return &userIDs[0]
 }
 
+// Safe means no duplication
+func (d *ChannelChatDetail) AddMemberSafely(userID UserID) {
+	isMember := d.IsMember(userID)
+	if !isMember {
+		d.Members = append(d.Members, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *GroupChatDetail) AddMemberSafely(userID UserID) {
+	isMember := d.IsMember(userID)
+	if !isMember {
+		d.Members = append(d.Members, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *ChannelChatDetail) AddAdminSafely(userID UserID) {
+	isAdmin := d.IsAdmin(userID)
+	if !isAdmin {
+		d.Admins = append(d.Admins, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *GroupChatDetail) AddAdminSafely(userID UserID) {
+	isAdmin := d.IsAdmin(userID)
+	if !isAdmin {
+		d.Admins = append(d.Admins, userID)
+	}
+}
+
 func NewChat(chatType string, chatDetail interface{}) *Chat {
 	m := &Chat{}
 

@@ -69,6 +69,10 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 
 	userChatsListIDs := user.ChatsListIDs
 
+	if len(userChatsListIDs) == 0 {
+		return []model.ChatGetter{}, nil
+	}
+
 	userChats, err := s.chatRepo.GetUserChats(ctx, userChatsListIDs)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrGetUserChats}
@@ -141,7 +145,7 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 		}
 	}()
 
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -190,7 +194,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		}
 	}()
 
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -222,6 +226,8 @@ func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 		}
 
 		isMember = chatDetail.IsMember(userID)
+		chatDetail.AddMemberSafely(userID)
+		chat.ChatDetail = chatDetail
 	case model.TypeGroup:
 		chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](chat.ChatDetail)
 		if err != nil {
@@ -229,12 +235,14 @@ func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 		}
 
 		isMember = chatDetail.IsMember(userID)
+		chatDetail.AddMemberSafely(userID)
+		chat.ChatDetail = chatDetail
 	default:
 		return nil, &vali.Varror{Error: ErrJoinDirectChat}
 	}
 
 	if !isMember {
-		err := s.chatRepo.AddToUsersChatsList(ctx, userID, chatID)
+		err := s.chatRepo.JoinChat(ctx, userID, chatID)
 		if err != nil {
 			return nil, &vali.Varror{Error: err}
 		}
