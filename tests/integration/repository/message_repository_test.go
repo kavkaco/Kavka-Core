@@ -24,9 +24,23 @@ type MessageTestSuite struct {
 
 func (s *MessageTestSuite) SetupSuite() {
 	ctx := context.TODO()
+
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
+	userRepo := repository_mongo.NewUserMongoRepository(db)
 	s.repo = repository_mongo.NewMessageMongoRepository(db)
-	s.senderID = fmt.Sprintf("%d", random.GenerateUserID())
+
+	user, err := userRepo.Create(ctx, &model.User{
+		UserID:       fmt.Sprintf("%d", random.GenerateUserID()),
+		Name:         "User2:Name",
+		LastName:     "User2:LastName",
+		Email:        "user2@kavka.org",
+		Username:     "user2",
+		Biography:    "User2:biography",
+		ChatsListIDs: []model.ChatID{},
+	})
+	require.NoError(s.T(), err)
+
+	s.senderID = user.UserID
 
 	// Create a sample chat
 	chatModel := model.NewChat(model.TypeChannel, model.ChannelChatDetail{
@@ -62,13 +76,24 @@ func (s *MessageTestSuite) TestA_InsertTextMessage() {
 	s.savedMessageID = saved.MessageID
 }
 
-// func (s *MessageTestSuite) TestB_FetchMessages() {
-// 	ctx := context.TODO()
+func (s *MessageTestSuite) TestB_FetchMessages() {
+	ctx := context.TODO()
 
-// 	// messages, err := s.repo.FetchMessages(ctx, s.chatID)
-// 	// require.NoError(s.T(), err)
+	messages, err := s.repo.FetchMessages(ctx, s.chatID)
+	require.NoError(s.T(), err)
+	require.NotEmpty(s.T(), messages)
+	require.Len(s.T(), messages, 1)
+	require.Equal(s.T(), messages[0].Message.MessageID, s.savedMessageID)
+	require.Equal(s.T(), messages[0].Sender.UserID, s.senderID)
+}
 
-// }
+func (s *MessageTestSuite) TestC_FetchLastMessage() {
+	ctx := context.TODO()
+
+	lastMessage, err := s.repo.FetchLastMessage(ctx, s.chatID)
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), lastMessage.MessageID, s.savedMessageID)
+}
 
 // func (s *MessageTestSuite) TestC_FindMessage() {
 // 	ctx := context.TODO()

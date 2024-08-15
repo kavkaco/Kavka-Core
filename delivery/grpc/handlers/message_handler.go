@@ -31,14 +31,14 @@ func (h MessageGrpcServer) FetchMessages(ctx context.Context, req *connect.Reque
 		return nil, grpc_helpers.GrpcVarror(&vali.Varror{Error: err}, connect.Code(code.Code_INTERNAL))
 	}
 
-	chatMessages, varror := h.messageService.FetchMessages(ctx, chatID)
+	messages, varror := h.messageService.FetchMessages(ctx, chatID)
 	if varror != nil {
 		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_INTERNAL))
 	}
 
 	res := connect.Response[messagev1.FetchMessagesResponse]{
 		Msg: &messagev1.FetchMessagesResponse{
-			Messages: proto_model_transformer.MessagesToProto(chatMessages.Messages),
+			Messages: proto_model_transformer.MessagesToProto(messages),
 		},
 	}
 

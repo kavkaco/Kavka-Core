@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/kavkaco/Kavka-Core/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -65,9 +64,8 @@ type DirectChatFetchedDetail struct {
 	UserInfo User
 }
 
-func (c *Chat) IsMember(userID UserID) bool {
-	d, _ := utils.TypeConverter[ChannelChatDetail](c.ChatDetail)
-	for _, memberUserID := range d.Members {
+func (c *ChannelChatDetail) IsMember(userID UserID) bool {
+	for _, memberUserID := range c.Members {
 		if memberUserID == userID {
 			return true
 		}
@@ -76,9 +74,28 @@ func (c *Chat) IsMember(userID UserID) bool {
 	return false
 }
 
-func (c *Chat) IsAdmin(userID UserID) bool {
-	d, _ := utils.TypeConverter[ChannelChatDetail](c.ChatDetail)
-	for _, adminUserID := range d.Admins {
+func (c *ChannelChatDetail) IsAdmin(userID UserID) bool {
+	for _, adminUserID := range c.Admins {
+		if adminUserID == userID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *GroupChatDetail) IsMember(userID UserID) bool {
+	for _, memberUserID := range c.Members {
+		if memberUserID == userID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (c *GroupChatDetail) IsAdmin(userID UserID) bool {
+	for _, adminUserID := range c.Admins {
 		if adminUserID == userID {
 			return true
 		}
@@ -104,6 +121,38 @@ func DetectRecipient(userIDs [2]UserID, currentUserID UserID) *UserID {
 	}
 
 	return &userIDs[0]
+}
+
+// Safe means no duplication
+func (d *ChannelChatDetail) AddMemberSafely(userID UserID) {
+	isMember := d.IsMember(userID)
+	if !isMember {
+		d.Members = append(d.Members, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *GroupChatDetail) AddMemberSafely(userID UserID) {
+	isMember := d.IsMember(userID)
+	if !isMember {
+		d.Members = append(d.Members, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *ChannelChatDetail) AddAdminSafely(userID UserID) {
+	isAdmin := d.IsAdmin(userID)
+	if !isAdmin {
+		d.Admins = append(d.Admins, userID)
+	}
+}
+
+// Safe means no duplication
+func (d *GroupChatDetail) AddAdminSafely(userID UserID) {
+	isAdmin := d.IsAdmin(userID)
+	if !isAdmin {
+		d.Admins = append(d.Admins, userID)
+	}
 }
 
 func NewChat(chatType string, chatDetail interface{}) *Chat {

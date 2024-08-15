@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ChatRepository interface {
@@ -13,5 +14,5 @@ type ChatRepository interface {
 	FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error)
 	FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error)
 	GetChatMembers(chatID model.ChatID) []model.Member
-	AddToUsersChatsList(ctx context.Context, userID model.UserID, chatID model.ChatID) error
+	JoinChat(ctx context.Context, userID string, chatID primitive.ObjectID) error
 }

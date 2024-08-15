@@ -7,10 +7,16 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/log"
+	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
 
 const SubjChats = "chats"
+
+type JoinChatResult struct {
+	Joined      bool
+	UpdatedChat *model.ChatGetter
+}
 
 type ChatService interface {
 	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror)
@@ -18,6 +24,7 @@ type ChatService interface {
 	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatGetter, *vali.Varror)
 	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror)
 	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror)
+	JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror)
 }
 
 type ChatManager struct {
@@ -61,6 +68,10 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	}
 
 	userChatsListIDs := user.ChatsListIDs
+
+	if len(userChatsListIDs) == 0 {
+		return []model.ChatGetter{}, nil
+	}
 
 	userChats, err := s.chatRepo.GetUserChats(ctx, userChatsListIDs)
 	if err != nil {
@@ -134,7 +145,7 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 		}
 	}()
 
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -183,7 +194,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		}
 	}()
 
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -192,4 +203,63 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	chatGetter.LastMessage = messageModel
 
 	return chatGetter, nil
+}
+
+func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror) {
+	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: err}
+	}
+
+	lastMessage, err := s.messageRepo.FetchLastMessage(ctx, chatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: err}
+	}
+
+	isMember := false
+
+	switch chat.ChatType {
+	case model.TypeChannel:
+		chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](chat.ChatDetail)
+		if err != nil {
+			return nil, &vali.Varror{Error: err}
+		}
+
+		isMember = chatDetail.IsMember(userID)
+		chatDetail.AddMemberSafely(userID)
+		chat.ChatDetail = chatDetail
+	case model.TypeGroup:
+		chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](chat.ChatDetail)
+		if err != nil {
+			return nil, &vali.Varror{Error: err}
+		}
+
+		isMember = chatDetail.IsMember(userID)
+		chatDetail.AddMemberSafely(userID)
+		chat.ChatDetail = chatDetail
+	default:
+		return nil, &vali.Varror{Error: ErrJoinDirectChat}
+	}
+
+	if !isMember {
+		err := s.chatRepo.JoinChat(ctx, userID, chatID)
+		if err != nil {
+			return nil, &vali.Varror{Error: err}
+		}
+
+		user, err := s.userRepo.FindByUserID(ctx, userID)
+		if err != nil {
+			return nil, &vali.Varror{Error: err}
+		}
+
+		chatGetter := model.NewChatGetter(chat)
+		chatGetter.LastMessage = lastMessage
+
+		return &JoinChatResult{
+			Joined:      user.IncludesChatID(chatID),
+			UpdatedChat: chatGetter,
+		}, nil
+	}
+
+	return nil, &vali.Varror{Error: ErrUserJoinedBefore}
 }
