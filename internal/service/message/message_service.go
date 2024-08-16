@@ -21,7 +21,7 @@ type MessageService interface {
 	DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror
 }
 
-type MessageManager struct {
+type service struct {
 	logger         *log.SubLogger
 	messageRepo    repository.MessageRepository
 	chatRepo       repository.ChatRepository
@@ -31,10 +31,10 @@ type MessageManager struct {
 }
 
 func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepository, chatRepo repository.ChatRepository, userRepo repository.UserRepository, eventPublisher stream.StreamPublisher) MessageService {
-	return &MessageManager{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
+	return &service{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
 }
 
-func (s *MessageManager) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
+func (s *service) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
 	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: err}
@@ -43,7 +43,7 @@ func (s *MessageManager) FetchMessages(ctx context.Context, chatID model.ChatID)
 	return messages, nil
 }
 
-func (s *MessageManager) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
+func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
 	validationErrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
 	if len(validationErrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: validationErrors}
@@ -80,45 +80,43 @@ func (s *MessageManager) SendTextMessage(ctx context.Context, chatID model.ChatI
 		Message: m,
 	}
 
-	if s.eventPublisher != nil {
-		go func() {
-			eventReceivers, receiversErr := ReceiversIDs(c)
-			if receiversErr != nil {
-				s.logger.Error(receiversErr.Error())
-				return
-			}
+	go func() {
+		eventReceivers, receiversErr := ReceiversIDs(c)
+		if receiversErr != nil {
+			s.logger.Error(receiversErr.Error())
+			return
+		}
 
-			payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
-				Name: "add-message",
-				Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_MESSAGE,
-				Payload: &eventsv1.SubscribeEventsStreamResponse_AddMessage{
-					AddMessage: &eventsv1.AddMessage{
-						ChatId:  chatID.Hex(),
-						Message: proto_model_transformer.MessageToProto(messageGetter),
-					},
+		payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
+			Name: "add-message",
+			Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_MESSAGE,
+			Payload: &eventsv1.SubscribeEventsStreamResponse_AddMessage{
+				AddMessage: &eventsv1.AddMessage{
+					ChatId:  chatID.Hex(),
+					Message: proto_model_transformer.MessageToProto(messageGetter),
 				},
 			},
-			)
-			if marshalErr != nil {
-				s.logger.Error("proto marshal error: " + marshalErr.Error())
-				return
-			}
+		},
+		)
+		if marshalErr != nil {
+			s.logger.Error("proto marshal error: " + marshalErr.Error())
+			return
+		}
 
-			publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
-				SenderUserId:    userID,
-				ReceiversUserId: eventReceivers,
-				Payload:         payloadProtoBuf,
-			})
-			if publishErr != nil {
-				s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
-			}
-		}()
-	}
+		publishErr := s.eventPublisher.Publish(&eventsv1.StreamEvent{
+			SenderUserId:    userID,
+			ReceiversUserId: eventReceivers,
+			Payload:         payloadProtoBuf,
+		})
+		if publishErr != nil {
+			s.logger.Error("unable to publish add-chat event in eventPublisher: " + publishErr.Error())
+		}
+	}()
 
 	return messageGetter, nil
 }
 
-func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
+func (s *service) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
 	validationErrors := s.validator.Validate(DeleteMessageValidation{chatID, userID, messageID})
 	if len(validationErrors) > 0 {
 		return &vali.Varror{ValidationErrors: validationErrors}
@@ -147,6 +145,6 @@ func (s *MessageManager) DeleteMessage(ctx context.Context, chatID model.ChatID,
 }
 
 // TODO - Implement UpdateTextMessage Method For MessageService
-func (s *MessageManager) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.Varror {
+func (s *service) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.Varror {
 	panic("unimplemented")
 }

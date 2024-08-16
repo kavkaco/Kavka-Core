@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
+	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	service "github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/utils"
@@ -29,7 +30,10 @@ func (s *MessageTestSuite) SetupSuite() {
 	chatRepo := repository_mongo.NewChatMongoRepository(db)
 	messageRepo := repository_mongo.NewMessageMongoRepository(db)
 	userRepo := repository_mongo.NewUserMongoRepository(db)
-	s.service = service.NewMessageService(nil, messageRepo, chatRepo, userRepo, nil)
+	streamPublisher, err := stream.NewStreamPublisher(natsClient)
+	require.NoError(s.T(), err)
+
+	s.service = service.NewMessageService(nil, messageRepo, chatRepo, userRepo, streamPublisher)
 
 	user, err := userRepo.Create(ctx, &model.User{
 		UserID:       fmt.Sprintf("%d", random.GenerateUserID()),

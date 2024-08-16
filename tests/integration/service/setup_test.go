@@ -13,16 +13,16 @@ import (
 var (
 	db          *mongo.Database
 	redisClient *redis.Client
-	natsConn    *nats.Conn
+	natsClient  *nats.Conn
 )
 
 func TestMain(m *testing.M) {
 	database.GetMongoDBTestInstance(func(_db *mongo.Database) {
 		database.GetRedisTestInstance(func(_redisClient *redis.Client) {
-			stream.GetNATSTestInstance(func(_natsConn *nats.Conn) {
+			stream.GetNATSTestInstance(func(_natsClient *nats.Conn) {
 				db = _db
 				redisClient = _redisClient
-				natsConn = _natsConn
+				natsClient = _natsClient
 
 				m.Run()
 			})
