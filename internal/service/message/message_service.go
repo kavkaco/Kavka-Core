@@ -15,7 +15,7 @@ import (
 )
 
 type MessageService interface {
-	FetchMessages(ctx context.Context, chatID model.ChatID) (*model.ChatMessages, *vali.Varror)
+	FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror)
 	UpdateTextMessage(ctx context.Context, chatID model.ChatID, newMessageContent string) *vali.Varror
 	SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror)
 	DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror
@@ -34,13 +34,13 @@ func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepo
 	return &MessageManager{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
 }
 
-func (s *MessageManager) FetchMessages(ctx context.Context, chatID model.ChatID) (*model.ChatMessages, *vali.Varror) {
-	chatMessages, err := s.messageRepo.FetchMessages(ctx, chatID)
+func (s *MessageManager) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
+	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: err}
 	}
 
-	return chatMessages, nil
+	return messages, nil
 }
 
 func (s *MessageManager) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {

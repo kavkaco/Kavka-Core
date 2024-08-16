@@ -2,6 +2,7 @@ package grpc_handlers
 
 import (
 	"context"
+	"errors"
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
@@ -68,10 +69,7 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 
 	chat, varror := h.chatService.CreateGroup(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
-		connectErr := connect.NewError(connect.CodeUnavailable, varror.Error)
-		varrorDetail, _ := grpc_helpers.VarrorAsGrpcErrDetails(varror)
-		connectErr.AddDetail(varrorDetail)
-		return nil, connectErr
+		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_INTERNAL))
 	}
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
@@ -133,6 +131,38 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 			Chats: chatsProto,
 		},
 	)
+
+	return res, nil
+}
+
+func (h chatHandler) JoinChat(ctx context.Context, req *connect.Request[chatv1.JoinChatRequest]) (*connect.Response[chatv1.JoinChatResponse], error) {
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
+	chatID, err := model.ParseChatID(req.Msg.ChatId)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	joinResult, varror := h.chatService.JoinChat(ctx, chatID, userID)
+	if varror != nil {
+		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_INTERNAL))
+	}
+
+	if !joinResult.Joined {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("joining chat failed"))
+	}
+
+	protoChat, err := proto_model_transformer.ChatToProto(*joinResult.UpdatedChat)
+	if err != nil {
+		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(code.Code_INTERNAL))
+	}
+
+	res := &connect.Response[chatv1.JoinChatResponse]{Msg: &chatv1.JoinChatResponse{
+		Chat: protoChat,
+	}}
 
 	return res, nil
 }

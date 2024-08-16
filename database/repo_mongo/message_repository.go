@@ -12,12 +12,61 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type messagesDoc struct {
+	ChatID   model.ChatID           `bson:"chat_id"`
+	Messages []*model.MessageGetter `bson:"messages"`
+}
+
 type messageRepository struct {
 	messagesCollection *mongo.Collection
 }
 
 func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository {
 	return &messageRepository{db.Collection(database.MessagesCollection)}
+}
+
+func (repo *messageRepository) FetchLastMessage(ctx context.Context, chatID model.ChatID) (*model.Message, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"chat_id": chatID,
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"last_message": bson.M{
+					"$last": "$messages",
+				},
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"messages": 0,
+			},
+		},
+	}
+
+	cursor, err := repo.messagesCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	type doc struct {
+		LastMessage *model.Message `bson:"last_message"`
+	}
+
+	var docs []*doc
+
+	decodeErr := cursor.All(ctx, &docs)
+	if decodeErr != nil {
+		return nil, decodeErr
+	}
+
+	if len(docs) > 0 && docs[0] != nil {
+		return docs[0].LastMessage, nil
+	}
+
+	return &model.Message{}, nil
 }
 
 func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
@@ -55,7 +104,7 @@ func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.Cha
 }
 
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {
-	messageStoreModel := model.ChatMessages{
+	messageStoreModel := messagesDoc{
 		ChatID:   chatID,
 		Messages: []*model.MessageGetter{},
 	}
@@ -67,33 +116,44 @@ func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) 
 	return nil
 }
 
-func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.ChatID) (*model.ChatMessages, error) {
+func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, error) {
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{
 				"chat_id": chatID,
 			},
 		},
-		bson.M{"$unwind": bson.M{"path": "$messages"}},
 		bson.M{
 			"$lookup": bson.M{
 				"from":         "users",
 				"localField":   "messages.sender_id",
 				"foreignField": "user_id",
-				"as":           "sender",
+				"as":           "senders",
 			},
 		},
-		bson.M{"$unwind": bson.M{"path": "$sender"}},
 		bson.M{
-			"$group": bson.M{
-				"_id": "$_id",
-				"chat_id": bson.M{
-					"$first": "$chat_id",
-				},
-				"messages": bson.M{
-					"$push": bson.M{
-						"message": "$messages",
-						"sender":  "$sender",
+			"$addFields": bson.M{
+				"fetched_messages": bson.M{
+					"$map": bson.M{
+						"input": "$messages",
+						"as":    "message",
+						"in": bson.M{
+							"sender": bson.M{
+								"$arrayElemAt": bson.A{
+									bson.M{
+										"$filter": bson.M{
+											"input": "$senders",
+											"as":    "sender",
+											"cond": bson.M{
+												"$eq": bson.A{"$$sender.user_id", "$$message.sender_id"},
+											},
+										},
+									},
+									0,
+								},
+							},
+							"message": "$$message",
+						},
 					},
 				},
 			},
@@ -103,23 +163,29 @@ func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.C
 	cursor, err := repo.messagesCollection.Aggregate(ctx, pipeline)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return &model.ChatMessages{}, nil
+			return []*model.MessageGetter{}, nil
 		}
 
 		return nil, err
 	}
 
-	var chatMessages []model.ChatMessages
-	err = cursor.All(ctx, &chatMessages)
+	type doc struct {
+		ChatID   model.ChatID           `bson:"chat_id"`
+		Messages []*model.MessageGetter `bson:"fetched_messages"`
+	}
+
+	var docs []*doc
+
+	err = cursor.All(ctx, &docs)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(chatMessages) > 0 {
-		return &chatMessages[0], nil
+	if len(docs) > 0 {
+		return docs[0].Messages, nil
 	}
 
-	return &model.ChatMessages{}, nil
+	return []*model.MessageGetter{}, nil
 }
 
 func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, message *model.Message) (*model.Message, error) {

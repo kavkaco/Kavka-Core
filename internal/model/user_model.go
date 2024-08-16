@@ -21,6 +21,16 @@ type (
 	}
 )
 
+func (u *User) IncludesChatID(chatID ChatID) bool {
+	for _, v := range u.ChatsListIDs {
+		if v.Hex() == chatID.Hex() {
+			return true
+		}
+	}
+
+	return false
+}
+
 func NewUser(name, lastName, email, username string) *User {
 	user := User{}
 

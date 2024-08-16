@@ -20,12 +20,6 @@ type MessageStore struct {
 	Messages []*Message `bson:"messages"`
 }
 
-// used in external queries that are going to delivery part of the app
-type ChatMessages struct {
-	ChatID   ChatID           `bson:"chat_id"`
-	Messages []*MessageGetter `bson:"messages"`
-}
-
 type Message struct {
 	MessageID MessageID   `bson:"message_id" json:"messageId"`
 	SenderID  UserID      `bson:"sender_id"  json:"senderId"`

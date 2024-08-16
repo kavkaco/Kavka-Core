@@ -46,6 +46,8 @@ const (
 	// ChatServiceCreateChannelProcedure is the fully-qualified name of the ChatService's CreateChannel
 	// RPC.
 	ChatServiceCreateChannelProcedure = "/protobuf.chat.v1.ChatService/CreateChannel"
+	// ChatServiceJoinChatProcedure is the fully-qualified name of the ChatService's JoinChat RPC.
+	ChatServiceJoinChatProcedure = "/protobuf.chat.v1.ChatService/JoinChat"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -56,6 +58,7 @@ var (
 	chatServiceCreateDirectMethodDescriptor  = chatServiceServiceDescriptor.Methods().ByName("CreateDirect")
 	chatServiceCreateGroupMethodDescriptor   = chatServiceServiceDescriptor.Methods().ByName("CreateGroup")
 	chatServiceCreateChannelMethodDescriptor = chatServiceServiceDescriptor.Methods().ByName("CreateChannel")
+	chatServiceJoinChatMethodDescriptor      = chatServiceServiceDescriptor.Methods().ByName("JoinChat")
 )
 
 // ChatServiceClient is a client for the protobuf.chat.v1.ChatService service.
@@ -65,6 +68,7 @@ type ChatServiceClient interface {
 	CreateDirect(context.Context, *connect.Request[v1.CreateDirectRequest]) (*connect.Response[v1.CreateDirectResponse], error)
 	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
 	CreateChannel(context.Context, *connect.Request[v1.CreateChannelRequest]) (*connect.Response[v1.CreateChannelResponse], error)
+	JoinChat(context.Context, *connect.Request[v1.JoinChatRequest]) (*connect.Response[v1.JoinChatResponse], error)
 }
 
 // NewChatServiceClient constructs a client for the protobuf.chat.v1.ChatService service. By
@@ -107,6 +111,12 @@ func NewChatServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(chatServiceCreateChannelMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		joinChat: connect.NewClient[v1.JoinChatRequest, v1.JoinChatResponse](
+			httpClient,
+			baseURL+ChatServiceJoinChatProcedure,
+			connect.WithSchema(chatServiceJoinChatMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -117,6 +127,7 @@ type chatServiceClient struct {
 	createDirect  *connect.Client[v1.CreateDirectRequest, v1.CreateDirectResponse]
 	createGroup   *connect.Client[v1.CreateGroupRequest, v1.CreateGroupResponse]
 	createChannel *connect.Client[v1.CreateChannelRequest, v1.CreateChannelResponse]
+	joinChat      *connect.Client[v1.JoinChatRequest, v1.JoinChatResponse]
 }
 
 // GetChat calls protobuf.chat.v1.ChatService.GetChat.
@@ -144,6 +155,11 @@ func (c *chatServiceClient) CreateChannel(ctx context.Context, req *connect.Requ
 	return c.createChannel.CallUnary(ctx, req)
 }
 
+// JoinChat calls protobuf.chat.v1.ChatService.JoinChat.
+func (c *chatServiceClient) JoinChat(ctx context.Context, req *connect.Request[v1.JoinChatRequest]) (*connect.Response[v1.JoinChatResponse], error) {
+	return c.joinChat.CallUnary(ctx, req)
+}
+
 // ChatServiceHandler is an implementation of the protobuf.chat.v1.ChatService service.
 type ChatServiceHandler interface {
 	GetChat(context.Context, *connect.Request[v1.GetChatRequest]) (*connect.Response[v1.GetChatResponse], error)
@@ -151,6 +167,7 @@ type ChatServiceHandler interface {
 	CreateDirect(context.Context, *connect.Request[v1.CreateDirectRequest]) (*connect.Response[v1.CreateDirectResponse], error)
 	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
 	CreateChannel(context.Context, *connect.Request[v1.CreateChannelRequest]) (*connect.Response[v1.CreateChannelResponse], error)
+	JoinChat(context.Context, *connect.Request[v1.JoinChatRequest]) (*connect.Response[v1.JoinChatResponse], error)
 }
 
 // NewChatServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -189,6 +206,12 @@ func NewChatServiceHandler(svc ChatServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(chatServiceCreateChannelMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	chatServiceJoinChatHandler := connect.NewUnaryHandler(
+		ChatServiceJoinChatProcedure,
+		svc.JoinChat,
+		connect.WithSchema(chatServiceJoinChatMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/protobuf.chat.v1.ChatService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ChatServiceGetChatProcedure:
@@ -201,6 +224,8 @@ func NewChatServiceHandler(svc ChatServiceHandler, opts ...connect.HandlerOption
 			chatServiceCreateGroupHandler.ServeHTTP(w, r)
 		case ChatServiceCreateChannelProcedure:
 			chatServiceCreateChannelHandler.ServeHTTP(w, r)
+		case ChatServiceJoinChatProcedure:
+			chatServiceJoinChatHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -228,4 +253,8 @@ func (UnimplementedChatServiceHandler) CreateGroup(context.Context, *connect.Req
 
 func (UnimplementedChatServiceHandler) CreateChannel(context.Context, *connect.Request[v1.CreateChannelRequest]) (*connect.Response[v1.CreateChannelResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.chat.v1.ChatService.CreateChannel is not implemented"))
+}
+
+func (UnimplementedChatServiceHandler) JoinChat(context.Context, *connect.Request[v1.JoinChatRequest]) (*connect.Response[v1.JoinChatResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.chat.v1.ChatService.JoinChat is not implemented"))
 }
