@@ -57,8 +57,7 @@ func (h *HashManager) HashPassword(password string) (hashedPassword string, err 
 }
 
 func (h *HashManager) CheckPasswordHash(password, hashedPassword string) bool {
-	// Extract the parameters, salt and derived key from the encoded password
-	// hash.
+	// Extract the parameters, salt and derived key from the encoded password hash.
 	p, salt, hash, err := h.decodeHash(hashedPassword)
 	if err != nil {
 		return false
@@ -80,13 +79,13 @@ func (h *HashManager) generateRandomBytes(n uint32) ([]byte, error) {
 }
 
 func (h *HashManager) decodeHash(encodedHash string) (params *HashParams, salt, hash []byte, err error) {
-	vals := strings.Split(encodedHash, "$")
-	if len(vals) != 6 {
+	values := strings.Split(encodedHash, "$")
+	if len(values) != 6 {
 		return nil, nil, nil, ErrInvalidHash
 	}
 
 	var version int
-	_, err = fmt.Sscanf(vals[2], "v=%d", &version)
+	_, err = fmt.Sscanf(values[2], "v=%d", &version)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -95,18 +94,18 @@ func (h *HashManager) decodeHash(encodedHash string) (params *HashParams, salt, 
 	}
 
 	p := &HashParams{}
-	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Iterations, &p.Parallelism)
+	_, err = fmt.Sscanf(values[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Iterations, &p.Parallelism)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	salt, err = base64.RawStdEncoding.Strict().DecodeString(vals[4])
+	salt, err = base64.RawStdEncoding.Strict().DecodeString(values[4])
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	p.SaltLength = uint32(len(salt))
 
-	hash, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
+	hash, err = base64.RawStdEncoding.Strict().DecodeString(values[5])
 	if err != nil {
 		return nil, nil, nil, err
 	}
