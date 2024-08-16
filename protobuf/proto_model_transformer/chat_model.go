@@ -10,7 +10,7 @@ import (
 
 var ErrTransformation = errors.New("unable to transform the model")
 
-func ChatToProto(chat model.ChatGetter) (*modelv1.Chat, error) {
+func ChatToProto(chat model.ChatDTO) (*modelv1.Chat, error) {
 	var chatType modelv1.ChatType
 	switch chat.ChatType {
 	case "channel":
@@ -55,7 +55,7 @@ func ChatToProto(chat model.ChatGetter) (*modelv1.Chat, error) {
 
 var transformedChats []*modelv1.Chat
 
-func ChatsToProto(chats []model.ChatGetter) ([]*modelv1.Chat, error) {
+func ChatsToProto(chats []model.ChatDTO) ([]*modelv1.Chat, error) {
 	transformedChats = []*modelv1.Chat{}
 
 	for _, v := range chats {

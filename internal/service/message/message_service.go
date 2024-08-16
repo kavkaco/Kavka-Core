@@ -44,9 +44,9 @@ func (s *service) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*mo
 }
 
 func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
-	validationErrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+	varrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	c, err := s.chatRepo.FindByID(ctx, chatID)
@@ -71,7 +71,7 @@ func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, user
 	}
 
 	messageGetter := &model.MessageGetter{
-		Sender: &model.MessageSender{
+		Sender: &model.MessageSenderDTO{
 			UserID:   u.UserID,
 			Name:     u.Name,
 			LastName: u.LastName,
@@ -117,31 +117,33 @@ func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, user
 }
 
 func (s *service) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
-	validationErrors := s.validator.Validate(DeleteMessageValidation{chatID, userID, messageID})
-	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
-	}
+	panic("unimplemented")
 
-	chat, err := s.chatRepo.FindByID(ctx, chatID)
-	if err != nil {
-		return &vali.Varror{Error: ErrChatNotFound}
-	}
+	// varrors := s.validator.Validate(DeleteMessageValidation{chatID, userID, messageID})
+	// if len(varrors) > 0 {
+	// 	return &vali.Varror{ValidationErrors: varrors}
+	// }
 
-	message, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
-	if err != nil {
-		return &vali.Varror{Error: ErrNotFound}
-	}
+	// chat, err := s.chatRepo.FindByID(ctx, chatID)
+	// if err != nil {
+	// 	return &vali.Varror{Error: ErrChatNotFound}
+	// }
 
-	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {
-		err = s.messageRepo.Delete(ctx, chatID, messageID)
-		if err != nil {
-			return &vali.Varror{Error: ErrDeleteMessage}
-		}
+	// message, err := s.messageRepo.FindMessage(ctx, chatID, messageID)
+	// if err != nil {
+	// 	return &vali.Varror{Error: ErrNotFound}
+	// }
 
-		return nil
-	}
+	// if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {
+	// 	err = s.messageRepo.Delete(ctx, chatID, messageID)
+	// 	if err != nil {
+	// 		return &vali.Varror{Error: ErrDeleteMessage}
+	// 	}
 
-	return &vali.Varror{Error: ErrAccessDenied}
+	// 	return nil
+	// }
+
+	// return &vali.Varror{Error: ErrAccessDenied}
 }
 
 // TODO - Implement UpdateTextMessage Method For MessageService

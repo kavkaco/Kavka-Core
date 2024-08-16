@@ -14,12 +14,6 @@ const (
 	TypeLabelMessage = "label"
 )
 
-// used in internal queries
-type MessageStore struct {
-	ChatID   ChatID     `bson:"chat_id"`
-	Messages []*Message `bson:"messages"`
-}
-
 type Message struct {
 	MessageID MessageID   `bson:"message_id" json:"messageId"`
 	SenderID  UserID      `bson:"sender_id"  json:"senderId"`
@@ -30,16 +24,9 @@ type Message struct {
 	Content   interface{} `bson:"content" json:"content"`
 }
 
-type MessageSender struct {
-	UserID   UserID `bson:"user_id" json:"userID"`
-	Name     string `bson:"name" json:"name"`
-	LastName string `bson:"last_name" json:"lastName"`
-	Username string `bson:"username" json:"username"`
-}
-
 type MessageGetter struct {
-	Sender  *MessageSender `bson:"sender" json:"sender"`
-	Message *Message       `bson:"message" json:"message"`
+	Sender  *MessageSenderDTO `bson:"sender" json:"sender"`
+	Message *Message          `bson:"message" json:"message"`
 }
 
 type TextMessage struct {

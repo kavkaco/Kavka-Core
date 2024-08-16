@@ -79,7 +79,7 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	return nil
 }
 
-func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.ChatGetter, error) {
+func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.ChatDTO, error) {
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{
@@ -116,7 +116,7 @@ func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.Ch
 		return nil, err
 	}
 
-	var chats []model.ChatGetter
+	var chats []model.ChatDTO
 
 	decodeErr := cursor.All(ctx, &chats)
 	if decodeErr != nil {

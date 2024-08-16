@@ -21,7 +21,7 @@ func NewSearchRepository(db *mongo.Database) repository.SearchRepository {
 	return &searchRepository{db.Collection(database.ChatsCollection), db.Collection(database.UsersCollection)}
 }
 
-func (s *searchRepository) Search(ctx context.Context, input string) (*model.SearchResult, error) {
+func (s *searchRepository) Search(ctx context.Context, input string) (*model.SearchResultDTO, error) {
 	// Search in chats collection
 	cursor, err := s.chatRepository.Find(ctx, bson.M{
 		"$text": bson.M{
@@ -32,7 +32,7 @@ func (s *searchRepository) Search(ctx context.Context, input string) (*model.Sea
 		return nil, err
 	}
 
-	var chats []model.ChatGetter
+	var chats []model.ChatDTO
 	err = cursor.All(ctx, &chats)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (s *searchRepository) Search(ctx context.Context, input string) (*model.Sea
 		return nil, err
 	}
 
-	return &model.SearchResult{
+	return &model.SearchResultDTO{
 		Chats: chats,
 		Users: users,
 	}, nil

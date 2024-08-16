@@ -29,7 +29,7 @@ func Benchmark(b *testing.B) {
 		password := "Kavka&1234"
 		hash, err := hashManager.HashPassword(password)
 		if err != nil {
-			panic(err)
+			b.Fatal(err)
 		}
 
 		hashManager.CheckPasswordHash(password, hash)

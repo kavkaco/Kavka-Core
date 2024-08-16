@@ -2,34 +2,25 @@ package random
 
 import (
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/binary"
 	"math"
-	"math/big"
 )
 
-func generateRandomNumber(length int) int {
-	min := int64(math.Pow(10, float64(length)-1))
-	max := int64(math.Pow(10, float64(length))) - 1
+const UserIDLength = 8
 
-	randomNumber, err := rand.Int(rand.Reader, big.NewInt(max-min))
+var min = int64(math.Pow(10, float64(UserIDLength)-1))
+var max = int64(math.Pow(10, float64(UserIDLength))) - 1
+
+func GenerateUserID() int {
+	var randomNumber int64
+	buf := make([]byte, 8)
+
+	_, err := rand.Read(buf)
 	if err != nil {
 		panic(err)
 	}
 
-	number := int(randomNumber.Int64()) + int(min)
+	randomNumber = int64(binary.BigEndian.Uint64(buf))%(max-min+1) + min
 
-	return number
-}
-
-func GenerateUserID() int {
-	return generateRandomNumber(8)
-}
-
-func GenerateRandomFileName(n int) string {
-	bytes := make([]byte, n)
-	if _, err := rand.Read(bytes); err != nil {
-		return ""
-	}
-
-	return hex.EncodeToString(bytes)
+	return int(randomNumber)
 }

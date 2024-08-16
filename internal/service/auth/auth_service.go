@@ -55,9 +55,9 @@ type DetailedValidation struct {
 }
 
 func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (verifyEmailToken string, varror *vali.Varror) {
-	validationErrors := a.validator.Validate(RegisterValidation{name, lastName, username, email, password})
-	if len(validationErrors) > 0 {
-		return "", &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(RegisterValidation{name, lastName, username, email, password})
+	if len(varrors) > 0 {
+		return "", &vali.Varror{ValidationErrors: varrors}
 	}
 
 	// Check uniqueness of indexes
@@ -113,9 +113,9 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 }
 
 func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*model.User, *vali.Varror) {
-	validationErrors := a.validator.Validate(AuthenticateValidation{accessToken})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(AuthenticateValidation{accessToken})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	tokenClaims, err := a.authManager.DecodeAccessToken(ctx, accessToken)
@@ -124,21 +124,21 @@ func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*mo
 	}
 
 	if len(strings.TrimSpace(tokenClaims.Payload.UUID)) == 0 {
-		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
+		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: varrors}
 	}
 
 	user, err := a.userRepo.FindByUserID(ctx, tokenClaims.Payload.UUID)
 	if err != nil {
-		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: validationErrors}
+		return nil, &vali.Varror{Error: ErrAccessDenied, ValidationErrors: varrors}
 	}
 
 	return user, nil
 }
 
 func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror {
-	validationErrors := a.validator.Validate(VerifyEmailValidation{verifyEmailToken})
-	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(VerifyEmailValidation{verifyEmailToken})
+	if len(varrors) > 0 {
+		return &vali.Varror{ValidationErrors: varrors}
 	}
 
 	tokenClaims, err := a.authManager.DecodeToken(ctx, verifyEmailToken, auth_manager.VerifyEmail)
@@ -160,9 +160,9 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 }
 
 func (a *AuthManager) Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror) {
-	validationErrors := a.validator.Validate(LoginValidation{email, password})
-	if len(validationErrors) > 0 {
-		return nil, "", "", &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(LoginValidation{email, password})
+	if len(varrors) > 0 {
+		return nil, "", "", &vali.Varror{ValidationErrors: varrors}
 	}
 
 	user, err := a.userRepo.FindByEmail(ctx, email)
@@ -245,9 +245,9 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 }
 
 func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror {
-	validationErrors := a.validator.Validate(ChangePasswordValidation{oldPassword, newPassword})
-	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(ChangePasswordValidation{oldPassword, newPassword})
+	if len(varrors) > 0 {
+		return &vali.Varror{ValidationErrors: varrors}
 	}
 
 	auth, err := a.authRepo.GetUserAuth(ctx, userID)
@@ -275,9 +275,9 @@ func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, o
 }
 
 func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
-	validationErrors := a.validator.Validate(RefreshTokenValidation{userID, refreshToken})
-	if len(validationErrors) > 0 {
-		return "", &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(RefreshTokenValidation{userID, refreshToken})
+	if len(varrors) > 0 {
+		return "", &vali.Varror{ValidationErrors: varrors}
 	}
 
 	// Let's check that tokens not be invalid or expired
@@ -302,9 +302,9 @@ func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, ref
 }
 
 func (a *AuthManager) SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror) {
-	validationErrors := a.validator.Validate(SendResetPasswordValidation{email})
-	if len(validationErrors) > 0 {
-		return "", 0, &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(SendResetPasswordValidation{email})
+	if len(varrors) > 0 {
+		return "", 0, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	user, err := a.userRepo.FindByEmail(ctx, email)
@@ -342,9 +342,9 @@ func (a *AuthManager) SendResetPassword(ctx context.Context, email string, reset
 }
 
 func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror {
-	validationErrors := a.validator.Validate(SubmitResetPasswordValidation{token, newPassword})
-	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
+	varrors := a.validator.Validate(SubmitResetPasswordValidation{token, newPassword})
+	if len(varrors) > 0 {
+		return &vali.Varror{ValidationErrors: varrors}
 	}
 
 	tokenClaims, err := a.authManager.DecodeToken(ctx, token, auth_manager.ResetPassword)

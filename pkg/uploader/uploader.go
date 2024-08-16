@@ -7,15 +7,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/kavkaco/Kavka-Core/config"
-	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 const (
-	RANDOM_FILENAME_LENGTH = 25
-	UPLOAD_TMP_DIR         = "/tmp/uploads"
+	UPLOAD_TMP_DIR = "/tmp/uploads"
 )
 
 var ErrMaxFileSize = errors.New("maximum file size")
@@ -60,11 +59,16 @@ func (s *Service) UploadFile(bucketName string, filePath string, maxFileSize *in
 		}
 	}
 
-	objectName := random.GenerateRandomFileName(RANDOM_FILENAME_LENGTH)
+	objectNameUUID, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+	objectName := objectNameUUID.String()
+
 	contentType := filepath.Ext(filePath)
 
 	// Upload the file
-	_, err := s.minioClient.FPutObject(context.Background(), bucketName,
+	_, err = s.minioClient.FPutObject(context.Background(), bucketName,
 		objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
 		return nil, err
