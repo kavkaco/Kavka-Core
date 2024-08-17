@@ -8,8 +8,10 @@ import (
 
 const UserIDLength = 8
 
-var min = int64(math.Pow(10, float64(UserIDLength)-1))
-var max = int64(math.Pow(10, float64(UserIDLength))) - 1
+var (
+	min = int64(math.Pow(10, float64(UserIDLength)-1))
+	max = int64(math.Pow(10, float64(UserIDLength))) - 1
+)
 
 func GenerateUserID() int {
 	var randomNumber int64
