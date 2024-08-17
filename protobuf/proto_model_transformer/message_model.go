@@ -40,7 +40,7 @@ func MessageToProto(messageGetter *model.MessageGetter) *messagev1.Message {
 	return result
 }
 
-func MessageSenderToProto(messageSender *model.MessageSender) *messagev1.MessageSender {
+func MessageSenderToProto(messageSender *model.MessageSenderDTO) *messagev1.MessageSender {
 	return &messagev1.MessageSender{
 		UserId:   messageSender.UserID,
 		Name:     messageSender.Name,

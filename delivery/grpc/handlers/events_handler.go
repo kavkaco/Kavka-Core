@@ -44,7 +44,7 @@ func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.
 		case event, ok := <-userCh:
 			if !ok {
 				e.logger.Error("user channel closed in user-subscribe method")
-				return nil
+				continue
 			}
 
 			e.logger.Debug("events-handler", "event-name", event.Name)

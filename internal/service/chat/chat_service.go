@@ -15,15 +15,15 @@ const SubjChats = "chats"
 
 type JoinChatResult struct {
 	Joined      bool
-	UpdatedChat *model.ChatGetter
+	UpdatedChat *model.ChatDTO
 }
 
 type ChatService interface {
 	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror)
-	GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatGetter, *vali.Varror)
-	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatGetter, *vali.Varror)
-	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror)
-	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror)
+	GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror)
+	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror)
+	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror)
+	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror)
 	JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror)
 }
 
@@ -42,9 +42,9 @@ func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, u
 
 // find single chat with chat id
 func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror) {
-	validationErrors := s.validator.Validate(GetChatValidation{chatID})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+	varrors := s.validator.Validate(GetChatValidation{chatID})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	chat, err := s.chatRepo.FindByID(ctx, chatID)
@@ -56,10 +56,10 @@ func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.
 }
 
 // get the chats that belongs to user
-func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatGetter, *vali.Varror) {
-	validationErrors := s.validator.Validate(GetUserChatsValidation{userID})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror) {
+	varrors := s.validator.Validate(GetUserChatsValidation{userID})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	user, err := s.userRepo.FindByUserID(ctx, userID)
@@ -70,7 +70,7 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	userChatsListIDs := user.ChatsListIDs
 
 	if len(userChatsListIDs) == 0 {
-		return []model.ChatGetter{}, nil
+		return []model.ChatDTO{}, nil
 	}
 
 	userChats, err := s.chatRepo.GetUserChats(ctx, userChatsListIDs)
@@ -81,10 +81,10 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	return userChats, nil
 }
 
-func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatGetter, *vali.Varror) {
-	validationErrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
+	varrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	sides := [2]model.UserID{userID, recipientUserID}
@@ -104,13 +104,13 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 		return nil, &vali.Varror{Error: ErrCreateChat}
 	}
 
-	return model.NewChatGetter(saved), nil
+	return model.NewChatDTO(saved), nil
 }
 
-func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror) {
-	validationErrors := s.validator.Validate(CreateGroupValidation{userID, title, username, description})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
+	varrors := s.validator.Validate(CreateGroupValidation{userID, title, username, description})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	chatModel := model.NewChat(model.TypeGroup, &model.GroupChatDetail{
@@ -150,16 +150,16 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
 
-	chatGetter := model.NewChatGetter(chatModel)
+	chatGetter := model.NewChatDTO(chatModel)
 	chatGetter.LastMessage = messageModel
 
 	return chatGetter, nil
 }
 
-func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatGetter, *vali.Varror) {
-	validationErrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
+	varrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	chatModel := model.NewChat(model.TypeChannel, &model.ChannelChatDetail{
@@ -199,7 +199,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
 
-	chatGetter := model.NewChatGetter(chatModel)
+	chatGetter := model.NewChatDTO(chatModel)
 	chatGetter.LastMessage = messageModel
 
 	return chatGetter, nil
@@ -252,7 +252,7 @@ func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 			return nil, &vali.Varror{Error: err}
 		}
 
-		chatGetter := model.NewChatGetter(chat)
+		chatGetter := model.NewChatDTO(chat)
 		chatGetter.LastMessage = lastMessage
 
 		return &JoinChatResult{

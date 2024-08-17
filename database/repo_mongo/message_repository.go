@@ -69,40 +69,6 @@ func (repo *messageRepository) FetchLastMessage(ctx context.Context, chatID mode
 	return &model.Message{}, nil
 }
 
-func (repo *messageRepository) FindMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
-	filter := bson.M{"chat_id": chatID}
-
-	result := repo.messagesCollection.FindOne(ctx, filter)
-	if result.Err() != nil {
-		return nil, result.Err()
-	}
-
-	var message *model.Message
-	var chatMessages *model.MessageStore
-
-	err := result.Decode(&chatMessages)
-	if err != nil {
-		return nil, err
-	}
-
-	if chatMessages != nil {
-		for i, m := range chatMessages.Messages {
-			if m != nil && m.MessageID == messageID {
-				message = m
-				break
-			}
-
-			if i == len(chatMessages.Messages)-1 {
-				return nil, repository.ErrNotFound
-			}
-		}
-
-		return message, nil
-	}
-
-	return nil, repository.ErrNotFound
-}
-
 func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) error {
 	messageStoreModel := messagesDoc{
 		ChatID:   chatID,

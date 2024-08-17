@@ -95,7 +95,7 @@ func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.Ge
 		return nil, varror.Error
 	}
 
-	chatGetter := model.NewChatGetter(chat)
+	chatGetter := model.NewChatDTO(chat)
 	chatProto, err := proto_model_transformer.ChatToProto(*chatGetter)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)

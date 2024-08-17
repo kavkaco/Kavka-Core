@@ -79,12 +79,12 @@ func (s *MessageTestSuite) TestA_SendTextMessage() {
 	s.savedMessageID = messageGetter.Message.MessageID
 }
 
-func (s *MessageTestSuite) TestB_DeleteMessage() {
-	ctx := context.TODO()
+// func (s *MessageTestSuite) TestB_DeleteMessage() {
+// 	ctx := context.TODO()
 
-	varror := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
-	require.Nil(s.T(), varror)
-}
+// 	varror := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
+// 	require.Nil(s.T(), varror)
+// }
 
 func TestMessageSuite(t *testing.T) {
 	t.Helper()

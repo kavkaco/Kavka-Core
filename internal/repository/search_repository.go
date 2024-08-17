@@ -7,6 +7,6 @@ import (
 )
 
 type SearchRepository interface {
-	Search(ctx context.Context, input string) (*model.SearchResult, error)
+	Search(ctx context.Context, input string) (*model.SearchResultDTO, error)
 	SearchInChat(ctx context.Context, input string) (*model.MessageGetter, error)
 }

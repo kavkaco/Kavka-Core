@@ -46,9 +46,9 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 		user.Biography = biography
 	}
 
-	validationErrors := s.validator.Validate(UpdateProfileValidation{name, lastName, username})
-	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
+	varrors := s.validator.Validate(UpdateProfileValidation{name, lastName, username})
+	if len(varrors) > 0 {
+		return &vali.Varror{ValidationErrors: varrors}
 	}
 
 	err = s.userRepo.Update(ctx, userID, user.Name, user.LastName, user.Username, user.Biography)
