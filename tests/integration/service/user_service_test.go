@@ -42,32 +42,85 @@ func (s *UserTestSuite) SetupSuite() {
 func (s *UserTestSuite) TestA_UpdateProfile() {
 	ctx := context.TODO()
 
-	name := "User5:NameChanged"
-	lastName := "User5:LastNameChanged"
-	username := "user5_changed"
-	biography := "User5:Biography changed"
+	testCases := []struct {
+		userID    string
+		name      string
+		lastName  string
+		username  string
+		biography string
+		Valid     bool
+		Error     error
+	}{
+		{
+			userID:    "",
+			name:      "",
+			lastName:  "",
+			username:  "",
+			biography: "User5:Biography changed",
+			Valid:     false,
+		},
+		{
+			userID:    s.userID,
+			name:      "l",
+			lastName:  "Us",
+			username:  "l",
+			biography: "Ul",
+			Valid:     false,
+		},
+		{
+			userID:    "invalid",
+			name:      "User5:NameChanged",
+			lastName:  "User5:LastNameChanged",
+			username:  "user5_changed",
+			biography: "User5:Biography changed",
+			Error:     service.ErrNotFound,
+			Valid:     false,
+		},
+		{
+			userID:    s.userID,
+			name:      "User5:NameChanged",
+			lastName:  "User5:LastNameChanged",
+			username:  "user5_changed",
+			biography: "User5:Biography changed",
+			Valid:     true,
+		},
+	}
 
-	varror := s.service.UpdateProfile(ctx, s.userID, name, lastName, username, biography)
-	require.Nil(s.T(), varror)
+	for _, tc := range testCases {
+		varror := s.service.UpdateProfile(ctx, tc.userID, tc.name, tc.lastName, tc.username, tc.biography)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
-func (s *UserTestSuite) TestB_InvalidInputUpdateProfile() {
-	ctx := context.TODO()
+// func (s *UserTestSuite) TestB_InvalidInputUpdateProfile() {
+// 	ctx := context.TODO()
 
-	varror := s.service.UpdateProfile(ctx, s.userID, "", "", "", "")
-	require.NotNil(s.T(), varror)
-}
-func (s *UserTestSuite) TestC_InvalidUserIDUpdateProfile() {
-	ctx := context.TODO()
+// 	varror := s.service.UpdateProfile(ctx, s.userID, "", "", "", "")
+// 	require.NotNil(s.T(), varror)
+// }
 
-	name := "User5:NameChanged"
-	lastName := "User5:LastNameChanged"
-	username := "user5_changed"
-	biography := "User5:Biography changed"
+// func (s *UserTestSuite) TestC_InvalidUserIDUpdateProfile() {
+// 	ctx := context.TODO()
 
-	varror := s.service.UpdateProfile(ctx, "invalid", name, lastName, username, biography)
-	require.Equal(s.T(), varror.Error, service.ErrNotFound)
-}
+// 	name := "User5:NameChanged"
+// 	lastName := "User5:LastNameChanged"
+// 	username := "user5_changed"
+// 	biography := "User5:Biography changed"
+
+// 	varror := s.service.UpdateProfile(ctx, "invalid", name, lastName, username, biography)
+// 	require.Equal(s.T(), varror.Error, service.ErrNotFound)
+// }
+
 func TestUserSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(UserTestSuite))

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
 	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
@@ -11,9 +10,9 @@ import (
 	service "github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/random"
-	"github.com/kavkaco/Kavka-Core/utils/vali"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MessageTestSuite struct {
@@ -64,31 +63,145 @@ func (s *MessageTestSuite) SetupSuite() {
 func (s *MessageTestSuite) TestA_SendTextMessage() {
 	ctx := context.TODO()
 
-	messageContent := "Hello from kavka's integration tests"
-	messageGetter, varror := s.service.SendTextMessage(ctx, s.chatID, s.userID, messageContent)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		chatID         primitive.ObjectID
+		userID         string
+		messageContent string
+		Valid          bool
+		Error          error
+	}{
+		{
+			chatID:         model.NewChatID(),
+			userID:         "",
+			messageContent: "fail",
+			Valid:          false,
+		},
+		{
+			chatID:         s.chatID,
+			userID:         s.userID,
+			messageContent: "",
+			Valid:          false,
+		},
+		{
+			chatID:         model.NewChatID(),
+			userID:         "invalid",
+			messageContent: "fail",
+			Valid:          false,
+		},
+		{
+			chatID:         model.NewChatID(),
+			userID:         s.userID,
+			messageContent: "fail",
+			Error:          service.ErrChatNotFound,
+			Valid:          false,
+		},
+		{
+			chatID:         s.chatID,
+			userID:         s.userID,
+			messageContent: "pass",
+			Valid:          true,
+		},
+	}
 
-	savedMessageContent, err := utils.TypeConverter[model.TextMessage](messageGetter.Message.Content)
-	require.NoError(s.T(), err)
+	for _, tc := range testCases {
+		messageGetter, varror := s.service.SendTextMessage(ctx, tc.chatID, tc.userID, tc.messageContent)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
 
-	require.Equal(s.T(), messageGetter.Message.SenderID, s.userID)
-	require.Equal(s.T(), savedMessageContent.Text, messageContent)
+			savedMessageContent, err := utils.TypeConverter[model.TextMessage](messageGetter.Message.Content)
+			require.NoError(s.T(), err)
 
-	s.savedMessageID = messageGetter.Message.MessageID
+			require.Equal(s.T(), messageGetter.Message.SenderID, tc.userID)
+			require.Equal(s.T(), savedMessageContent.Text, tc.messageContent)
+
+			s.savedMessageID = messageGetter.Message.MessageID
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
+
+	// messageContent := "Hello from kavka's integration tests"
+	// messageGetter, varror := s.service.SendTextMessage(ctx, s.chatID, s.userID, messageContent)
+	// require.Nil(s.T(), varror)
+
+	// savedMessageContent, err := utils.TypeConverter[model.TextMessage](messageGetter.Message.Content)
+	// require.NoError(s.T(), err)
+
+	// require.Equal(s.T(), messageGetter.Message.SenderID, s.userID)
+	// require.Equal(s.T(), savedMessageContent.Text, messageContent)
+
+	// s.savedMessageID = messageGetter.Message.MessageID
 }
 
 func (s *MessageTestSuite) TestB_DeleteMessage() {
 	ctx := context.TODO()
 
-	varror := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		chatID    primitive.ObjectID
+		userID    string
+		messageID primitive.ObjectID
+		Valid     bool
+		Error     error
+	}{
+		{
+			chatID:    model.NewChatID(),
+			userID:    "",
+			messageID: model.NewChatID(),
+			Valid:     false,
+		},
+		{
+			chatID:    s.chatID,
+			userID:    s.userID,
+			messageID: model.NewChatID(),
+			Error:     service.ErrNotFound,
+			Valid:     false,
+		},
+		{
+			chatID:    model.NewChatID(),
+			userID:    s.userID,
+			messageID: s.savedMessageID,
+			Error:     service.ErrChatNotFound,
+			Valid:     false,
+		},
+		{
+			chatID:    s.chatID,
+			userID:    s.userID,
+			messageID: s.savedMessageID,
+			Valid:     true,
+		},
+	}
+
+	for _, tc := range testCases {
+		varror := s.service.DeleteMessage(ctx, tc.chatID, tc.userID, tc.messageID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
+
+	// varror := s.service.DeleteMessage(ctx, s.chatID, s.userID, s.savedMessageID)
+	// require.Nil(s.T(), varror)
 }
-//ok
+
 func (s *MessageTestSuite) TestC_UpdateMessage() {
 	ctx := context.TODO()
 
 	defer func() {
-		r := recover();if r == nil {
+		r := recover()
+		if r == nil {
 			require.Fail(s.T(), "should panic")
 		}
 	}()
@@ -103,41 +216,44 @@ func (s *MessageTestSuite) TestD_FetchMessage() {
 	require.Nil(s.T(), varror)
 }
 
-func (s *MessageTestSuite) TestE_EmptyContentSendMessage() {
-	ctx := context.TODO()
+// func (s *MessageTestSuite) TestE_EmptyContentSendMessage() {
+// 	ctx := context.TODO()
 
-	_, varror := s.service.SendTextMessage(ctx, s.chatID, s.userID, "")
-	log.Println(varror)
-	require.NotNil(s.T(), varror)
-}
-func (s *MessageTestSuite) TestF_InvalidChatIDSendMessage() {
-	ctx := context.TODO()
+// 	_, varror := s.service.SendTextMessage(ctx, s.chatID, s.userID, "")
+// 	log.Println(varror)
+// 	require.NotNil(s.T(), varror)
+// }
 
-	_, varror := s.service.SendTextMessage(ctx, model.NewChatID(), s.userID, "test")
-	log.Println(varror)
-	require.Equal(s.T(), varror, &vali.Varror{Error: service.ErrChatNotFound})
-}
-func (s *MessageTestSuite) TestG_InvalidUserIDSendMessage() {
-	ctx := context.TODO()
+// func (s *MessageTestSuite) TestF_InvalidChatIDSendMessage() {
+// 	ctx := context.TODO()
 
-	_, varror := s.service.SendTextMessage(ctx, s.chatID, "invalid", "test")
-	log.Println(varror)
-	require.NotNil(s.T(), varror)
-}
-func (s *MessageTestSuite) TestH_InvalidValuesDeleteChat() {
-	ctx := context.TODO()
+// 	_, varror := s.service.SendTextMessage(ctx, model.NewChatID(), s.userID, "test")
+// 	log.Println(varror)
+// 	require.Equal(s.T(), varror, &vali.Varror{Error: service.ErrChatNotFound})
+// }
 
-	varror := s.service.DeleteMessage(ctx, model.NewChatID(), "", model.NewChatID())
-	log.Println(varror)
-	require.NotNil(s.T(), varror)
-}
-func (s *MessageTestSuite) TestI_InvalidChatIDDeleteChat() {
-	ctx := context.TODO()
+// func (s *MessageTestSuite) TestG_InvalidUserIDSendMessage() {
+// 	ctx := context.TODO()
 
-	varror := s.service.DeleteMessage(ctx, model.NewChatID(),s.userID, model.NewChatID())
-	require.Equal(s.T(), varror.Error,service.ErrChatNotFound)
-}
+// 	_, varror := s.service.SendTextMessage(ctx, s.chatID, "invalid", "test")
+// 	log.Println(varror)
+// 	require.NotNil(s.T(), varror)
+// }
 
+// func (s *MessageTestSuite) TestH_InvalidValuesDeleteChat() {
+// 	ctx := context.TODO()
+
+// 	varror := s.service.DeleteMessage(ctx, model.NewChatID(), "", model.NewChatID())
+// 	log.Println(varror)
+// 	require.NotNil(s.T(), varror)
+// }
+
+// func (s *MessageTestSuite) TestI_InvalidChatIDDeleteChat() {
+// 	ctx := context.TODO()
+
+// 	varror := s.service.DeleteMessage(ctx, model.NewChatID(), s.userID, model.NewChatID())
+// 	require.Equal(s.T(), varror.Error, service.ErrChatNotFound)
+// }
 
 func TestMessageSuite(t *testing.T) {
 	t.Helper()

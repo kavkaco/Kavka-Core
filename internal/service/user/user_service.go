@@ -29,7 +29,6 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 	if len(validationErrors) > 0 {
 		return &vali.Varror{ValidationErrors: validationErrors}
 	}
-	
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
 		return &vali.Varror{Error: ErrNotFound}
