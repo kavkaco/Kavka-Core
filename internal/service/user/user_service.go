@@ -57,3 +57,4 @@ func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, na
 
 	return nil
 }
+

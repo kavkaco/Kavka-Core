@@ -10,7 +10,7 @@ import (
 )
 
 type SearchService interface {
-	Search(ctx context.Context, input string) (*model.SearchResult, *vali.Varror)
+	Search(ctx context.Context, input string) (*model.SearchResultDTO, *vali.Varror)
 }
 
 type SearchManager struct {
@@ -22,10 +22,10 @@ func NewSearchService(logger *log.SubLogger, searchRepository repository.SearchR
 	return &SearchManager{searchRepository, vali.Validator()}
 }
 
-func (s *SearchManager) Search(ctx context.Context, input string) (*model.SearchResult, *vali.Varror) {
-	validationErrors := s.validator.Validate(SearchValidation{input})
-	if len(validationErrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: validationErrors}
+func (s *SearchManager) Search(ctx context.Context, input string) (*model.SearchResultDTO, *vali.Varror) {
+	varrors := s.validator.Validate(SearchValidation{input})
+	if len(varrors) > 0 {
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	result, err := s.searchRepository.Search(ctx, input)
