@@ -213,12 +213,12 @@ func (s *MessageTestSuite) TestC_UpdateMessage() {
 	s.service.UpdateTextMessage(ctx, s.chatID, "hello")
 }
 
-// func (s *MessageTestSuite) TestD_FetchMessage() {
-// 	ctx := context.TODO()
+func (s *MessageTestSuite) TestD_FetchMessages() {
+	ctx := context.TODO()
 
-// 	_, varror := s.service.FetchMessages(ctx, s.chatID)
-// 	require.Nil(s.T(), varror)
-// }
+	_, varror := s.service.FetchMessages(ctx, s.chatID)
+	require.Nil(s.T(), varror)
+}
 
 // func (s *MessageTestSuite) TestE_EmptyContentSendMessage() {
 // 	ctx := context.TODO()

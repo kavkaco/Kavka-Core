@@ -95,16 +95,16 @@ func (s *MessageTestSuite) TestC_FetchLastMessage() {
 	require.Equal(s.T(), lastMessage.MessageID, s.savedMessageID)
 }
 
-// func (s *MessageTestSuite) TestC_FindMessage() {
-// 	ctx := context.TODO()
+func (s *MessageTestSuite) TestC_FetchMessage() {
+	ctx := context.TODO()
 
-// 	message, err := s.repo.FindMessage(ctx, s.chatID, s.savedMessageID)
-// 	require.NoError(s.T(), err)
+	message, err := s.repo.FetchMessage(ctx, s.chatID, s.savedMessageID)
+	require.NoError(s.T(), err)
 
-// 	require.NotEmpty(s.T(), message)
-// 	require.Equal(s.T(), message.MessageID, s.savedMessageID)
-// 	require.Equal(s.T(), message.SenderID, s.senderID)
-// }
+	require.NotEmpty(s.T(), message)
+	require.Equal(s.T(), message.MessageID, s.savedMessageID)
+	// require.Equal(s.T(), message.Message.SenderID, s.senderID)
+}
 
 // func (s *MessageTestSuite) TestD_UpdateTextMessage() {
 // 	ctx := context.TODO()
