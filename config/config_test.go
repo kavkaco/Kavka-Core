@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -18,4 +19,23 @@ func TestDevelopmentConfig(t *testing.T) {
 	configs := Read()
 	require.NotEmpty(t, configs)
 	require.Equal(t, CurrentEnv, Development)
+}
+
+func TestTestConfig(t *testing.T) {
+	os.Setenv("KAVKA_ENV", "test")
+
+	Read()
+	require.Equal(t, CurrentEnv, Test)
+}
+
+func TestFunctionPanics(t *testing.T) {
+	os.Setenv("KAVKA_ENV", "panic")
+
+	defer func() {
+		if r := recover(); r == nil {
+			require.Error(t, errors.New("Expected panic but did not panic"))
+		}
+	}()
+
+	Read()
 }

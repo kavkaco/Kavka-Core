@@ -9,6 +9,7 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,10 +20,59 @@ type messagesDoc struct {
 
 type messageRepository struct {
 	messagesCollection *mongo.Collection
+	usersCollection    *mongo.Collection
 }
 
 func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository {
-	return &messageRepository{db.Collection(database.MessagesCollection)}
+	return &messageRepository{db.Collection(database.MessagesCollection), db.Collection(database.UsersCollection)}
+}
+
+func (repo *messageRepository) FetchMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) (*model.Message, error) {
+	cursor, err := repo.messagesCollection.Aggregate(ctx, bson.A{
+		bson.M{
+			"$match": bson.M{
+				"chat_id": chatID,
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"_id":     1,
+				"chat_id": 1,
+				"message": bson.M{
+					"$arrayElemAt": bson.A{
+						bson.M{
+							"$filter": bson.M{
+								"input": "$messages",
+								"as":    "message",
+								"cond": bson.M{"$eq": bson.A{
+									"$$message.message_id", messageID,
+								}},
+							},
+						},
+						0,
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	type docModel struct {
+		ChatID  model.ChatID  `bson:"chat_id"`
+		Message model.Message `bson:"message"`
+	}
+
+	var docs []docModel
+	err = cursor.All(ctx, &docs)
+	if err != nil || len(docs) == 0 {
+		return nil, err
+	}
+
+	message := &docs[0].Message
+
+	return message, nil
 }
 
 func (repo *messageRepository) FetchLastMessage(ctx context.Context, chatID model.ChatID) (*model.Message, error) {

@@ -14,6 +14,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ChatTestSuite struct {
@@ -83,21 +84,59 @@ func (s *ChatTestSuite) TestCreateChannel() {
 		Description: "Channel1:Description",
 	}
 
-	saved, varror := s.service.CreateChannel(ctx, detailModel.Owner, detailModel.Title, detailModel.Username, detailModel.Description)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		userID      string
+		title       string
+		username    string
+		description string
+		Valid       bool
+		Error       error
+	}{
+		{
+			userID:      "",
+			title:       "",
+			username:    "",
+			description: "",
+			Valid:       false,
+		},
+		{
+			userID:      detailModel.Owner,
+			title:       detailModel.Title,
+			username:    detailModel.Username,
+			description: detailModel.Description,
+			Error:       service.ErrUnableToAddChatToUsersList,
+			Valid:       true,
+		},
+	}
 
-	chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](saved.ChatDetail)
-	require.NoError(s.T(), err)
+	for _, tc := range testCases {
+		saved, varror := s.service.CreateChannel(ctx, tc.userID, tc.title, tc.username, tc.description)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
 
-	require.Equal(s.T(), saved.ChatType, model.TypeChannel)
-	require.Equal(s.T(), chatDetail.Title, detailModel.Title)
-	require.Equal(s.T(), chatDetail.Username, detailModel.Username)
-	require.Equal(s.T(), chatDetail.Members, detailModel.Members)
-	require.Equal(s.T(), chatDetail.Admins, detailModel.Admins)
-	require.Equal(s.T(), chatDetail.Owner, detailModel.Owner)
-	require.Equal(s.T(), chatDetail.Description, detailModel.Description)
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
 
-	s.createdChannelChatID = saved.ChatID
+			chatDetail, err := utils.TypeConverter[model.ChannelChatDetail](saved.ChatDetail)
+			require.NoError(s.T(), err)
+
+			require.Equal(s.T(), saved.ChatType, model.TypeChannel)
+			require.Equal(s.T(), chatDetail.Title, tc.title)
+			require.Equal(s.T(), chatDetail.Username, tc.username)
+			require.Equal(s.T(), chatDetail.Members, detailModel.Members)
+			require.Equal(s.T(), chatDetail.Admins, detailModel.Admins)
+			require.Equal(s.T(), chatDetail.Owner, tc.userID)
+			require.Equal(s.T(), chatDetail.Description, tc.description)
+
+			s.createdChannelChatID = saved.ChatID
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func (s *ChatTestSuite) TestCreateGroup() {
@@ -112,21 +151,59 @@ func (s *ChatTestSuite) TestCreateGroup() {
 		Description: "Group1:Description",
 	}
 
-	saved, varror := s.service.CreateGroup(ctx, detailModel.Owner, detailModel.Title, detailModel.Username, detailModel.Description)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		userID      string
+		title       string
+		username    string
+		description string
+		Valid       bool
+		Error       error
+	}{
+		{
+			userID:      "",
+			title:       "",
+			username:    "",
+			description: "",
+			Valid:       false,
+		},
+		{
+			userID:      detailModel.Owner,
+			title:       detailModel.Title,
+			username:    detailModel.Username,
+			description: detailModel.Description,
+			Error:       service.ErrUnableToAddChatToUsersList,
+			Valid:       true,
+		},
+	}
 
-	chatDetail, err := utils.TypeConverter[model.GroupChatDetail](saved.ChatDetail)
-	require.NoError(s.T(), err)
+	for _, tc := range testCases {
+		saved, varror := s.service.CreateGroup(ctx, tc.userID, tc.title, tc.username, tc.description)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
 
-	require.Equal(s.T(), saved.ChatType, model.TypeGroup)
-	require.Equal(s.T(), chatDetail.Title, detailModel.Title)
-	require.Equal(s.T(), chatDetail.Username, detailModel.Username)
-	require.Equal(s.T(), chatDetail.Members, detailModel.Members)
-	require.Equal(s.T(), chatDetail.Admins, detailModel.Admins)
-	require.Equal(s.T(), chatDetail.Owner, detailModel.Owner)
-	require.Equal(s.T(), chatDetail.Description, detailModel.Description)
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
 
-	s.createdGroupChatID = saved.ChatID
+			chatDetail, err := utils.TypeConverter[model.GroupChatDetail](saved.ChatDetail)
+			require.NoError(s.T(), err)
+
+			require.Equal(s.T(), saved.ChatType, model.TypeGroup)
+			require.Equal(s.T(), chatDetail.Title, tc.title)
+			require.Equal(s.T(), chatDetail.Username, tc.username)
+			require.Equal(s.T(), chatDetail.Members, detailModel.Members)
+			require.Equal(s.T(), chatDetail.Admins, detailModel.Admins)
+			require.Equal(s.T(), chatDetail.Owner, tc.userID)
+			require.Equal(s.T(), chatDetail.Description, tc.description)
+
+			s.createdGroupChatID = saved.ChatID
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func (s *ChatTestSuite) TestCreateDirect() {
@@ -136,66 +213,187 @@ func (s *ChatTestSuite) TestCreateDirect() {
 		Sides: [2]model.UserID{s.users[0].UserID, s.users[1].UserID},
 	}
 
-	saved, varror := s.service.CreateDirect(ctx, detailModel.Sides[0], detailModel.Sides[1])
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		userID          string
+		recipientUserID string
+		Valid           bool
+		Error           error
+	}{
+		{
+			userID:          "",
+			recipientUserID: "",
+			Valid:           false,
+		},
+		{
+			userID:          detailModel.Sides[0],
+			recipientUserID: detailModel.Sides[1],
+			Valid:           true,
+		},
+	}
 
-	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](saved.ChatDetail)
-	require.NoError(s.T(), err)
+	for _, tc := range testCases {
+		saved, varror := s.service.CreateDirect(ctx, tc.userID, tc.recipientUserID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
 
-	require.True(s.T(), chatDetail.HasSide(detailModel.Sides[0]))
-	require.True(s.T(), chatDetail.HasSide(detailModel.Sides[1]))
-	require.False(s.T(), chatDetail.HasSide("invalid-user-id"))
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
 
-	s.createdDirectChatID = saved.ChatID
+			chatDetail, err := utils.TypeConverter[model.DirectChatDetail](saved.ChatDetail)
+			require.NoError(s.T(), err)
+
+			require.True(s.T(), chatDetail.HasSide(tc.userID))
+			require.True(s.T(), chatDetail.HasSide(tc.recipientUserID))
+			require.False(s.T(), chatDetail.HasSide("invalid-user-id"))
+
+			s.createdDirectChatID = saved.ChatID
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func (s *ChatTestSuite) TestGetChat_Channel() {
 	ctx := context.TODO()
 
-	chat, varror := s.service.GetChat(ctx, s.createdChannelChatID)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		chatID primitive.ObjectID
+		Valid  bool
+		Error  error
+	}{
+		{
+			chatID: model.NewChatID(),
+			Error:  service.ErrNotFound,
+			Valid:  false,
+		},
+		{
+			chatID: s.createdChannelChatID,
+			Valid:  true,
+		},
+	}
 
-	require.NotEmpty(s.T(), chat)
-	require.Equal(s.T(), chat.ChatID, s.createdChannelChatID)
+	for _, tc := range testCases {
+		chat, varror := s.service.GetChat(ctx, tc.chatID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
+
+			require.NotEmpty(s.T(), chat)
+			require.Equal(s.T(), chat.ChatID, tc.chatID)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func (s *ChatTestSuite) TestGetChat_Group() {
 	ctx := context.TODO()
 
-	chat, varror := s.service.GetChat(ctx, s.createdGroupChatID)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		chatID primitive.ObjectID
+		Valid  bool
+		Error  error
+	}{
+		{
+			chatID: model.NewChatID(),
+			Error:  service.ErrNotFound,
+			Valid:  false,
+		},
+		{
+			chatID: s.createdGroupChatID,
+			Valid:  true,
+		},
+	}
 
-	require.NotEmpty(s.T(), chat)
-	require.Equal(s.T(), chat.ChatID, s.createdGroupChatID)
+	for _, tc := range testCases {
+		chat, varror := s.service.GetChat(ctx, tc.chatID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
+
+			require.NotEmpty(s.T(), chat)
+			require.Equal(s.T(), chat.ChatID, tc.chatID)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func (s *ChatTestSuite) TestGetUserChats() {
 	ctx := context.TODO()
+	userModel1 := &s.users[0]
 
-	userModel := &s.users[0]
-
-	userModel.ChatsListIDs = []model.ChatID{
+	userModel1.ChatsListIDs = []model.ChatID{
 		s.createdChannelChatID,
 		s.createdGroupChatID,
 		s.createdDirectChatID,
 	}
 
-	userChatsList, varror := s.service.GetUserChats(ctx, userModel.UserID)
-	require.Nil(s.T(), varror)
+	testCases := []struct {
+		userID string
+		Valid  bool
+		Error  error
+	}{
+		{
+			userID: "",
+			Valid:  false,
+		},
+		{
+			userID: "invalid",
+			Error:  service.ErrNotFound,
+			Valid:  false,
+		},
+		{
+			userID: userModel1.UserID,
+			Valid:  true,
+		},
+	}
 
-	for _, v := range userChatsList {
-		switch v.ChatType {
-		case model.TypeChannel:
-			require.Equal(s.T(), v.ChatID, s.createdChannelChatID)
-		case model.TypeGroup:
-			require.Equal(s.T(), v.ChatID, s.createdGroupChatID)
-		case model.TypeDirect:
-			require.Equal(s.T(), v.ChatID, s.createdDirectChatID)
+	for _, tc := range testCases {
+		userChatsList, varror := s.service.GetUserChats(ctx, tc.userID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
+
+			for _, v := range userChatsList {
+				switch v.ChatType {
+				case model.TypeChannel:
+					require.Equal(s.T(), v.ChatID, s.createdChannelChatID)
+				case model.TypeGroup:
+					require.Equal(s.T(), v.ChatID, s.createdGroupChatID)
+				case model.TypeDirect:
+					require.Equal(s.T(), v.ChatID, s.createdDirectChatID)
+				}
+			}
+		} else {
+			require.Fail(s.T(), "not specific")
 		}
 	}
 }
 
-func (s *ChatTestSuite) TestJoinChat() {
+func (s *ChatTestSuite) TestJoinChat_channel() {
 	ctx := context.TODO()
 
 	// Create a plain channel chat
@@ -216,13 +414,117 @@ func (s *ChatTestSuite) TestJoinChat() {
 
 	userID := s.users[1].UserID
 
-	joinResult, varror := s.service.JoinChat(ctx, channelChat.ChatID, userID)
-	if varror != nil {
-		s.T().Log(varror.Error)
+	testCases := []struct {
+		chatID primitive.ObjectID
+		userID string
+		Valid  bool
+		Error  error
+	}{
+		{
+			chatID: model.NewChatID(),
+			userID: "invalid",
+			Valid:  false,
+		},
+		{
+			chatID: channelChat.ChatID,
+			userID: "invalid",
+			Valid:  false,
+		},
+		{
+			chatID: channelChat.ChatID,
+			userID: userID,
+			Valid:  true,
+		},
 	}
-	require.Nil(s.T(), varror)
-	require.True(s.T(), joinResult.Joined)
-	require.NotEmpty(s.T(), joinResult.UpdatedChat)
+
+	for _, tc := range testCases {
+		joinResult, varror := s.service.JoinChat(ctx, tc.chatID, tc.userID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			if varror != nil {
+				s.T().Log(varror.Error)
+			}
+
+			require.Nil(s.T(), varror)
+			require.True(s.T(), joinResult.Joined)
+			require.NotEmpty(s.T(), joinResult.UpdatedChat)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
+}
+
+func (s *ChatTestSuite) TestJoinChat_group() {
+	ctx := context.TODO()
+
+	// Create a plain channel chat
+	detailModel := model.GroupChatDetail{
+		Title:       "Group3",
+		Username:    "Group3",
+		Owner:       s.users[0].UserID,
+		Members:     []model.UserID{},
+		Admins:      []model.UserID{},
+		Description: "Group3:Description",
+	}
+	groupChat, err := s.chatRepo.Create(ctx, model.Chat{
+		ChatID:     model.NewChatID(),
+		ChatType:   model.TypeGroup,
+		ChatDetail: detailModel,
+	})
+	require.NoError(s.T(), err)
+
+	userID := s.users[1].UserID
+
+	testCases := []struct {
+		chatID primitive.ObjectID
+		userID string
+		Valid  bool
+		Error  error
+	}{
+		{
+			chatID: model.NewChatID(),
+			userID: "invalid",
+			Valid:  false,
+		},
+		{
+			chatID: groupChat.ChatID,
+			userID: "invalid",
+			Valid:  false,
+		},
+		{
+			chatID: groupChat.ChatID,
+			userID: userID,
+			Valid:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		joinResult, varror := s.service.JoinChat(ctx, tc.chatID, tc.userID)
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			if varror != nil {
+				s.T().Log(varror.Error)
+			}
+
+			require.Nil(s.T(), varror)
+			require.True(s.T(), joinResult.Joined)
+			require.NotEmpty(s.T(), joinResult.UpdatedChat)
+		} else {
+			require.Fail(s.T(), "not specific")
+		}
+	}
 }
 
 func TestChatSuite(t *testing.T) {
