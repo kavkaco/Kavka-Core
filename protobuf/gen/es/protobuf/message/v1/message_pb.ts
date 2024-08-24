@@ -133,11 +133,6 @@ export class SendTextMessageResponse extends Message<SendTextMessageResponse> {
    */
   message?: Message$1;
 
-  /**
-   * @generated from field: string ack_id = 2;
-   */
-  ackId = "";
-
   constructor(data?: PartialMessage<SendTextMessageResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -147,7 +142,6 @@ export class SendTextMessageResponse extends Message<SendTextMessageResponse> {
   static readonly typeName = "protobuf.message.v1.SendTextMessageResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "message", kind: "message", T: Message$1 },
-    { no: 2, name: "ack_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendTextMessageResponse {

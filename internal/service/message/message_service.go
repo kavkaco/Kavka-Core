@@ -9,7 +9,6 @@ import (
 	"github.com/kavkaco/Kavka-Core/log"
 	eventsv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1"
 	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
-	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
@@ -37,31 +36,31 @@ func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID)
 	return messages, nil
 }
 
-func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, string, *vali.Varror) {
+func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
 	varrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
 	if len(varrors) > 0 {
-		return nil, "", &vali.Varror{ValidationErrors: varrors}
+		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
 	c, err := s.chatRepo.FindByID(ctx, chatID)
 	if err != nil {
-		return nil, "", &vali.Varror{Error: ErrChatNotFound}
+		return nil, &vali.Varror{Error: ErrChatNotFound}
 	}
 
 	if !HasAccessToSendMessage(c.ChatType, c.ChatDetail, userID) {
-		return nil, "", &vali.Varror{Error: ErrAccessDenied}
+		return nil, &vali.Varror{Error: ErrAccessDenied}
 	}
 
 	m, err := s.messageRepo.Insert(ctx, chatID, model.NewMessage(model.TypeTextMessage, model.TextMessage{
 		Text: messageContent,
 	}, userID))
 	if err != nil {
-		return nil, "", &vali.Varror{Error: ErrInsertMessage}
+		return nil, &vali.Varror{Error: ErrInsertMessage}
 	}
 
 	u, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return nil, "", &vali.Varror{Error: err}
+		return nil, &vali.Varror{Error: err}
 	}
 
 	messageGetter := &model.MessageGetter{
@@ -73,8 +72,6 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 		},
 		Message: m,
 	}
-
-	ackID := random.GenerateAckID()
 
 	go func() {
 		eventReceivers, receiversErr := ReceiversIDs(c)
@@ -90,7 +87,6 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 				AddMessage: &eventsv1.AddMessage{
 					ChatId:  chatID.Hex(),
 					Message: proto_model_transformer.MessageToProto(messageGetter),
-					AckId:   ackID,
 				},
 			},
 		},
@@ -110,7 +106,7 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 		}
 	}()
 
-	return messageGetter, ackID, nil
+	return messageGetter, nil
 }
 
 func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {

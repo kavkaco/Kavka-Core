@@ -25,5 +25,4 @@ message SendTextMessageRequest {
 
 message SendTextMessageResponse {
   protobuf.model.message.v1.Message message = 1;
-  string ack_id = 2;
 }

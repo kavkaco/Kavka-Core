@@ -263,11 +263,6 @@ export class AddMessage extends Message<AddMessage> {
    */
   message?: Message$1;
 
-  /**
-   * @generated from field: string ack_id = 3;
-   */
-  ackId = "";
-
   constructor(data?: PartialMessage<AddMessage>) {
     super();
     proto3.util.initPartial(data, this);
@@ -278,7 +273,6 @@ export class AddMessage extends Message<AddMessage> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "chat_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "message", kind: "message", T: Message$1 },
-    { no: 3, name: "ack_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddMessage {
