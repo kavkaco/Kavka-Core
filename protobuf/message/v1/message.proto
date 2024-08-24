@@ -21,9 +21,9 @@ message FetchMessagesResponse {
 message SendTextMessageRequest {
   string chat_id = 1;
   string text = 2;
-  string ack_id = 3;
 }
 
 message SendTextMessageResponse {
   protobuf.model.message.v1.Message message = 1;
+  string ack_id = 2;
 }

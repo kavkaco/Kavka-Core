@@ -57,7 +57,7 @@ func (h MessageGrpcServer) SendTextMessage(ctx context.Context, req *connect.Req
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	msg, varror := h.messageService.SendTextMessage(ctx, chatID, userID, req.Msg.AckId, req.Msg.Text)
+	msg, ackID, varror := h.messageService.SendTextMessage(ctx, chatID, userID, req.Msg.Text)
 	if varror != nil {
 		return nil, grpc_helpers.GrpcVarror(varror, connect.CodePermissionDenied)
 	}
@@ -65,6 +65,7 @@ func (h MessageGrpcServer) SendTextMessage(ctx context.Context, req *connect.Req
 	res := connect.Response[messagev1.SendTextMessageResponse]{
 		Msg: &messagev1.SendTextMessageResponse{
 			Message: proto_model_transformer.MessageToProto(msg),
+			AckId:   ackID,
 		},
 	}
 

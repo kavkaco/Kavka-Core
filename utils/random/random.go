@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"math"
+
+	"github.com/google/uuid"
 )
 
 const UserIDLength = 8
@@ -25,4 +27,13 @@ func GenerateUserID() int {
 	randomNumber = int64(binary.BigEndian.Uint64(buf))%(max-min+1) + min
 
 	return int(randomNumber)
+}
+
+func GenerateAckID() string {
+	u, err := uuid.NewV7()
+	if err != nil {
+		return GenerateAckID()
+	}
+
+	return u.String()
 }
