@@ -14,14 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type MessageService interface {
-	FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror)
-	UpdateTextMessage(ctx context.Context, chatID model.ChatID, newMessageContent string) *vali.Varror
-	SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror)
-	DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror
-}
-
-type service struct {
+type MessageService struct {
 	logger         *log.SubLogger
 	messageRepo    repository.MessageRepository
 	chatRepo       repository.ChatRepository
@@ -30,11 +23,11 @@ type service struct {
 	eventPublisher stream.StreamPublisher
 }
 
-func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepository, chatRepo repository.ChatRepository, userRepo repository.UserRepository, eventPublisher stream.StreamPublisher) MessageService {
-	return &service{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
+func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepository, chatRepo repository.ChatRepository, userRepo repository.UserRepository, eventPublisher stream.StreamPublisher) *MessageService {
+	return &MessageService{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
 }
 
-func (s *service) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
+func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
 	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: err}
@@ -43,7 +36,7 @@ func (s *service) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*mo
 	return messages, nil
 }
 
-func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
+func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, ackID string, messageContent string) (*model.MessageGetter, *vali.Varror) {
 	varrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -94,6 +87,7 @@ func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, user
 				AddMessage: &eventsv1.AddMessage{
 					ChatId:  chatID.Hex(),
 					Message: proto_model_transformer.MessageToProto(messageGetter),
+					AckId:   ackID,
 				},
 			},
 		},
@@ -116,7 +110,7 @@ func (s *service) SendTextMessage(ctx context.Context, chatID model.ChatID, user
 	return messageGetter, nil
 }
 
-func (s *service) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
+func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
 	varrors := s.validator.Validate(DeleteMessageValidation{chatID, userID, messageID})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
@@ -145,6 +139,6 @@ func (s *service) DeleteMessage(ctx context.Context, chatID model.ChatID, userID
 }
 
 // TODO - Implement UpdateTextMessage Method For MessageService
-func (s *service) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.Varror {
+func (s *MessageService) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.Varror {
 	panic("unimplemented")
 }

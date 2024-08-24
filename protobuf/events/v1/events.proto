@@ -47,4 +47,5 @@ message AddChat {
 message AddMessage {
   string chat_id = 1;
   model.message.v1.Message message = 2;
+  string ack_id = 3;
 }

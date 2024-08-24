@@ -18,7 +18,7 @@ import (
 
 type MessageTestSuite struct {
 	suite.Suite
-	service service.MessageService
+	service *service.MessageService
 
 	userID         model.UserID
 	chatID         model.ChatID
@@ -108,7 +108,7 @@ func (s *MessageTestSuite) TestA_SendTextMessage() {
 	}
 
 	for _, tc := range testCases {
-		messageGetter, varror := s.service.SendTextMessage(ctx, tc.chatID, tc.userID, tc.messageContent)
+		messageGetter, varror := s.service.SendTextMessage(ctx, tc.chatID, tc.userID, "", tc.messageContent)
 		if !tc.Valid {
 			if tc.Error != nil {
 				require.Equal(s.T(), tc.Error, varror.Error)
