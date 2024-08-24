@@ -24,7 +24,7 @@ func NewSearchGrpcHandler(logger *log.SubLogger, searchService search.SearchServ
 func (s *searchHandler) Search(ctx context.Context, req *connect.Request[searchv1.SearchRequest]) (*connect.Response[searchv1.SearchResponse], error) {
 	result, varror := s.searchService.Search(ctx, req.Msg.Input)
 	if varror != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(connect.CodeUnavailable))
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
 	}
 
 	chats, err := proto_model_transformer.ChatsToProto(result.Chats)

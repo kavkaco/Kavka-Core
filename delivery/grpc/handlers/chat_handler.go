@@ -33,7 +33,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 
 	chat, varror := h.chatService.CreateChannel(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(connect.CodeUnavailable))
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
 	}
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
@@ -68,7 +68,7 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 
 	chat, varror := h.chatService.CreateGroup(ctx, userID, req.Msg.Title, req.Msg.Username, req.Msg.Description)
 	if varror != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(connect.CodeUnavailable))
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
 	}
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
@@ -147,7 +147,7 @@ func (h chatHandler) JoinChat(ctx context.Context, req *connect.Request[chatv1.J
 
 	joinResult, varror := h.chatService.JoinChat(ctx, chatID, userID)
 	if varror != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(connect.CodeInternal))
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeInternal)
 	}
 
 	if !joinResult.Joined {
@@ -156,7 +156,7 @@ func (h chatHandler) JoinChat(ctx context.Context, req *connect.Request[chatv1.J
 
 	protoChat, err := proto_model_transformer.ChatToProto(*joinResult.UpdatedChat)
 	if err != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.Code(connect.CodeInternal))
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeInternal)
 	}
 
 	res := &connect.Response[chatv1.JoinChatResponse]{Msg: &chatv1.JoinChatResponse{
