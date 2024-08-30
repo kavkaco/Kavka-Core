@@ -2,8 +2,10 @@ package grpc_handlers
 
 import (
 	"context"
+	"time"
 
 	"connectrpc.com/connect"
+	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -45,6 +47,10 @@ func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.
 			if !ok {
 				e.logger.Error("user channel closed in user-subscribe method")
 				continue
+			}
+
+			if config.CurrentEnv == config.Development {
+				time.Sleep(500 * time.Millisecond)
 			}
 
 			err := stream.Send(event)
