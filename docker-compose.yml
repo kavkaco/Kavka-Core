@@ -51,6 +51,7 @@ services:
     image: nats
     ports:
       - "4222:4222"
+    restart: always
 
 networks:
   default_network:

@@ -102,25 +102,6 @@ func (s *UserTestSuite) TestA_UpdateProfile() {
 	}
 }
 
-// func (s *UserTestSuite) TestB_InvalidInputUpdateProfile() {
-// 	ctx := context.TODO()
-
-// 	varror := s.service.UpdateProfile(ctx, s.userID, "", "", "", "")
-// 	require.NotNil(s.T(), varror)
-// }
-
-// func (s *UserTestSuite) TestC_InvalidUserIDUpdateProfile() {
-// 	ctx := context.TODO()
-
-// 	name := "User5:NameChanged"
-// 	lastName := "User5:LastNameChanged"
-// 	username := "user5_changed"
-// 	biography := "User5:Biography changed"
-
-// 	varror := s.service.UpdateProfile(ctx, "invalid", name, lastName, username, biography)
-// 	require.Equal(s.T(), varror.Error, service.ErrNotFound)
-// }
-
 func TestUserSuite(t *testing.T) {
 	t.Helper()
 	suite.Run(t, new(UserTestSuite))

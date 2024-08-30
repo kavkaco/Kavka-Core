@@ -9,8 +9,9 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/log"
-	messagev1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/messagev1connect"
+
+	messagev1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/v1"
+	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/v1/messagev1connect"
 	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	"google.golang.org/genproto/googleapis/rpc/code"
@@ -18,10 +19,10 @@ import (
 
 type MessageGrpcServer struct {
 	logger         *log.SubLogger
-	messageService message.MessageService
+	messageService *message.MessageService
 }
 
-func NewMessageGrpcHandler(logger *log.SubLogger, messageService message.MessageService) messagev1connect.MessageServiceHandler {
+func NewMessageGrpcHandler(logger *log.SubLogger, messageService *message.MessageService) messagev1connect.MessageServiceHandler {
 	return MessageGrpcServer{logger, messageService}
 }
 

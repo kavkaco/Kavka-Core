@@ -7,4 +7,4 @@ vendor/
 minio_data/*
 logs/logs*.json
 coverage.out*
-./protobuf/gen/es/protobuf/node_modules
+protobuf/gen/es/protobuf/node_modules

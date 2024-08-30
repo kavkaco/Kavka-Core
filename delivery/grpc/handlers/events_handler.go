@@ -2,8 +2,10 @@ package grpc_handlers
 
 import (
 	"context"
+	"time"
 
 	"connectrpc.com/connect"
+	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -21,24 +23,24 @@ func NewEventsGrpcHandler(logger *log.SubLogger, streamer stream.StreamSubscribe
 	return &eventsHandler{logger, streamer}
 }
 
-func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.SubscribeEventsStreamRequest], str *connect.ServerStream[eventsv1.SubscribeEventsStreamResponse]) error {
+func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.Request[eventsv1.SubscribeEventsStreamRequest], stream *connect.ServerStream[eventsv1.SubscribeEventsStreamResponse]) error {
 	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
 
 	done := ctx.Done()
 	userCh := make(chan *eventsv1.SubscribeEventsStreamResponse)
 	e.streamer.UserSubscribe(userID, userCh)
 
-	e.logger.Debug("user stream established")
+	e.logger.Trace("user stream established")
 
 	for {
-		if str == nil {
+		if stream == nil {
 			e.logger.Error("user stream is closed")
 			return nil
 		}
 
 		select {
 		case <-done:
-			e.logger.Debug("user disconnected!")
+			e.logger.Trace("user disconnected!")
 			e.streamer.UserUnsubscribe(userID)
 			return nil
 		case event, ok := <-userCh:
@@ -47,9 +49,11 @@ func (e *eventsHandler) SubscribeEventsStream(ctx context.Context, req *connect.
 				continue
 			}
 
-			e.logger.Debug("events-handler", "event-name", event.Name)
+			if config.CurrentEnv == config.Development {
+				time.Sleep(500 * time.Millisecond)
+			}
 
-			err := str.Send(event)
+			err := stream.Send(event)
 			if err != nil {
 				log.Error("unable to send message with grpc: " + err.Error())
 				continue

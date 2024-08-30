@@ -23,7 +23,10 @@ func VarrorAsGrpcErrDetails(varror *vali.Varror) (*connect.ErrorDetail, error) {
 
 func GrpcVarror(varror *vali.Varror, code connect.Code) error {
 	connectErr := connect.NewError(code, varror.Error)
-	varrorDetail, _ := VarrorAsGrpcErrDetails(varror)
+	varrorDetail, err := VarrorAsGrpcErrDetails(varror)
+	if err != nil {
+		return err
+	}
 
 	if len(varror.ValidationErrors) > 0 {
 		connectErr.AddDetail(varrorDetail)

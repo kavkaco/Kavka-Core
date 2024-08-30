@@ -18,7 +18,7 @@ import (
 
 type MessageTestSuite struct {
 	suite.Suite
-	service service.MessageService
+	service *service.MessageService
 
 	userID         model.UserID
 	chatID         model.ChatID
