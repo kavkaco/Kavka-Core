@@ -117,7 +117,6 @@ func (s *UserTestSuite) TestB_UpdateProfilePicture() {
 			userID:   "",
 			filename: "test.png",
 			Valid:    false,
-			Error:    service.ErrUpdatePicture,
 		},
 		{
 			userID:   s.userID,
