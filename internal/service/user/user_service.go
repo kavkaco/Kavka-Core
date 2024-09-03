@@ -71,7 +71,7 @@ func (s *UserManager) UpdateProfilePicture(ctx context.Context, userID model.Use
 	if len(validationErrors) > 0 {
 		return &vali.Varror{ValidationErrors: validationErrors}
 	}
-	
+
 	err := s.fileManager.SetFile(filename, filepath.Join(config.ProjectRootPath, uploadDir, userID))
 	if err != nil {
 		return &vali.Varror{Error: ErrPlacePicture}

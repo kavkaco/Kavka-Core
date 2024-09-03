@@ -7,7 +7,6 @@ type UpdateProfileValidation struct {
 }
 
 type UpdateProfilePictureValidation struct {
-	UserID     string `validate:"required"`
+	UserID   string `validate:"required"`
 	FileName string `validate:"required"`
 }
-
