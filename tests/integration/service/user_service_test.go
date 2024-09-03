@@ -8,6 +8,7 @@ import (
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	service "github.com/kavkaco/Kavka-Core/internal/service/user"
+	"github.com/kavkaco/Kavka-Core/pkg/file_manager"
 	"github.com/kavkaco/Kavka-Core/utils/random"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -24,7 +25,8 @@ func (s *UserTestSuite) SetupSuite() {
 	ctx := context.TODO()
 
 	userRepo := repository_mongo.NewUserMongoRepository(db)
-	s.service = service.NewUserService(userRepo)
+	fileManager := file_manager.NewFileManager()
+	s.service = service.NewUserService(userRepo, fileManager)
 
 	user, err := userRepo.Create(ctx, &model.User{
 		UserID:    fmt.Sprintf("%d", random.GenerateUserID()),
@@ -98,6 +100,47 @@ func (s *UserTestSuite) TestA_UpdateProfile() {
 			require.Nil(s.T(), varror)
 		} else {
 			require.Fail(s.T(), "not specific")
+		}
+	}
+}
+
+func (s *UserTestSuite) TestB_UpdateProfilePicture() {
+	ctx := context.TODO()
+
+	testCases := []struct {
+		userID   string
+		filename string
+		Valid    bool
+		Error    error
+	}{
+		{
+			userID:   "",
+			filename: "test.png",
+			Valid:    false,
+		},
+		{
+			userID:   s.userID,
+			filename: "test.txt",
+			Valid:    false,
+			Error:    service.ErrPlacePicture,
+		},
+		{
+			userID:   s.userID,
+			filename: "test.png",
+			Valid:    true,
+		},
+	}
+
+	for _, tc := range testCases {
+		varror := s.service.UpdateProfilePicture(ctx, tc.userID, tc.filename, []byte("test"))
+		if !tc.Valid {
+			if tc.Error != nil {
+				require.Equal(s.T(), tc.Error, varror.Error)
+				continue
+			}
+			require.NotNil(s.T(), varror)
+		} else if tc.Valid {
+			require.Nil(s.T(), varror)
 		}
 	}
 }
