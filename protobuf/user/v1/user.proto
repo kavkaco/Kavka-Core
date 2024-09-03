@@ -1,0 +1,14 @@
+syntax = "proto3";
+package protobuf.user.v1;
+
+option go_package = "protobuf/user/v1";
+
+service UserService {
+    rpc UploadProfile(stream UploadProfileRequest)returns(UploadProfileResponse){}
+}
+
+message UploadProfileRequest{
+    bytes bytes = 1;
+}
+
+message UploadProfileResponse{}
