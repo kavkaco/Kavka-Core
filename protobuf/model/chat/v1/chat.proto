@@ -52,7 +52,7 @@ message GroupChatDetail {
 }
 
 message DirectChatDetail {
-  model.user.v1.User user_info = 1;
+  model.user.v1.User recipient = 1;
 }
 
 message Chat {

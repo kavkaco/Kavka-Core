@@ -48,15 +48,30 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 	return res, nil
 }
 
-// FIXME - Later we will work on this, no problem at the moment!
-//
-// I think we must call 2 diff methods for peer to peer messaging...
-// user first creates the direct chat and then can send messages,
-// or with custom web clients or etc they even can create a direct chat with no any messages included...
 func (h chatHandler) CreateDirect(ctx context.Context, req *connect.Request[chatv1.CreateDirectRequest]) (*connect.Response[chatv1.CreateDirectResponse], error) {
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
+	if req.Msg.RecipientUserId == userID {
+		return nil, connect.NewError(connect.CodePermissionDenied, errors.New("user can't create direct chat with himself"))
+	}
+
+	chat, varror := h.chatService.CreateDirect(ctx, userID, req.Msg.RecipientUserId)
+	if varror != nil {
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
+	}
+
+	chatProto, err := proto_model_transformer.ChatToProto(*chat)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
 	res := connect.NewResponse(&chatv1.CreateDirectResponse{
-		Chat: nil,
+		Chat: chatProto,
 	})
+
 	return res, nil
 }
 

@@ -119,7 +119,7 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					UserInfo: UserToProto(cd.UserInfo),
+					Recipient: UserToProto(cd.UserInfo),
 				},
 			},
 		}, nil
