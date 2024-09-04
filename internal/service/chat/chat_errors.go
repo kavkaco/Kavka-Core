@@ -12,4 +12,5 @@ var (
 	ErrUnableToAddChatToUsersList = errors.New("unable to add add chat to users list")
 	ErrUserJoinedBefore           = errors.New("user already is a member of the chat")
 	ErrJoinDirectChat             = errors.New("joining direct chat is not possible")
+	ErrRecipientNotFound          = errors.New("recipient not found")
 )

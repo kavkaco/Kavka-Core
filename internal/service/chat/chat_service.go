@@ -2,6 +2,7 @@ package chat
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -89,22 +90,50 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 
 	sides := [2]model.UserID{userID, recipientUserID}
 
-	// Check to do not be duplicated!
-	dup, _ := s.chatRepo.FindBySides(ctx, sides)
-	if dup != nil {
+	// Duplicated direct chats is not allowed!
+	chat, err := s.chatRepo.FindBySides(ctx, sides)
+
+	if errors.Is(err, repository.ErrNotFound) {
+		// Let's create the direct chat, because it's not exists in the database!
+		chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
+			Sides: sides,
+		})
+
+		chat, err := s.chatRepo.Create(ctx, *chatModel)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrCreateChat}
+		}
+
+		recipient, err := s.userRepo.FindByUserID(ctx, recipientUserID)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrRecipientNotFound}
+		}
+
+		go func() {
+			createErr := s.messageRepo.Create(context.TODO(), chat.ChatID)
+			if createErr != nil {
+				s.logger.Error("message store creation failed: " + createErr.Error())
+				return
+			}
+		}()
+
+		err = s.chatRepo.JoinChat(ctx, userID, chat.ChatID)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
+		}
+
+		chatDTO := model.NewChatDTO(chat)
+
+		chatDTO.ChatDetail = &model.DirectChatDetailDTO{
+			Recipient: recipient,
+		}
+
+		return chatDTO, nil
+	} else if chat != nil {
 		return nil, &vali.Varror{Error: ErrChatAlreadyExists}
+	} else {
+		return nil, &vali.Varror{Error: err}
 	}
-
-	chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
-		Sides: sides,
-	})
-
-	saved, err := s.chatRepo.Create(ctx, *chatModel)
-	if err != nil {
-		return nil, &vali.Varror{Error: ErrCreateChat}
-	}
-
-	return model.NewChatDTO(saved), nil
 }
 
 func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {

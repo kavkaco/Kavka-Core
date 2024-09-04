@@ -2,6 +2,7 @@ package repository_mongo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -128,8 +129,11 @@ func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.Ch
 
 func (repo *chatRepository) findOne(ctx context.Context, filter bson.M) (*model.Chat, error) {
 	var model *model.Chat
+
 	result := repo.chatsCollection.FindOne(ctx, filter)
-	if result.Err() != nil {
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return nil, repository.ErrNotFound
+	} else if result.Err() != nil {
 		return nil, result.Err()
 	}
 

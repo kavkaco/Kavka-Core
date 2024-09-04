@@ -111,7 +111,7 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 			},
 		}, nil
 	case "direct":
-		cd, err := utils.TypeConverter[model.DirectChatFetchedDetail](chatDetail)
+		cd, err := utils.TypeConverter[model.DirectChatDetailDTO](chatDetail)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +119,7 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					Recipient: UserToProto(cd.UserInfo),
+					Recipient: UserToProto(*cd.Recipient),
 				},
 			},
 		}, nil
