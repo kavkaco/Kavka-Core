@@ -116,6 +116,10 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 			return nil, err
 		}
 
+		if cd.Recipient == nil {
+			return nil, errors.New("recipient is empty")
+		}
+
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
