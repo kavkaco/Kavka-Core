@@ -1,8 +1,6 @@
 package stream
 
 import (
-	"fmt"
-
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/log"
 	eventsv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1"
@@ -46,7 +44,6 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 			for _, receiverUserID := range event.ReceiversUserId {
 				for _, su := range subInstance.subscribedUsers {
 					if su.UserID == receiverUserID {
-						fmt.Println("pipe found", su.UserID)
 						if su.UserPipe == nil {
 							logger.Error("event stream skipped broken user pipe")
 							continue
@@ -74,9 +71,6 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 
 func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse) {
 	p.subscribedUsers = append(p.subscribedUsers, StreamSubscribedUser{UserID: userID, UserPipe: userCh})
-
-	// FIXME
-	fmt.Println(p.subscribedUsers)
 }
 
 func (p *sub) UserUnsubscribe(userID model.UserID) {

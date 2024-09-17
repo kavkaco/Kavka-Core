@@ -3,6 +3,7 @@ package chat
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -20,7 +21,7 @@ type JoinChatResult struct {
 }
 
 type ChatService interface {
-	GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror)
+	GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror)
 	GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror)
 	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror)
 	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror)
@@ -42,7 +43,7 @@ func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, u
 }
 
 // find single chat with chat id
-func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, *vali.Varror) {
+func (s *ChatManager) GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror) {
 	varrors := s.validator.Validate(GetChatValidation{chatID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -54,10 +55,23 @@ func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.
 	}
 
 	if chat.ChatType == "direct" {
-		// Let's find sides
-		log.Fatal("not implemented yet")
+		chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrNotFound}
+		}
 
-		return nil, nil
+		recipientUserID := chatDetail.GetRecipient(userID)
+
+		recipient, err := s.userRepo.FindByUserID(ctx, recipientUserID)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrNotFound}
+		}
+
+		chat.ChatDetail = &model.DirectChatDetailDTO{
+			Recipient: recipient,
+		}
+
+		return chat, nil
 	}
 
 	return chat, nil
@@ -85,6 +99,8 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrGetUserChats}
 	}
+
+	fmt.Println("use chats", userChats)
 
 	return userChats, nil
 }

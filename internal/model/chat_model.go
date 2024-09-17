@@ -94,6 +94,16 @@ func (d *DirectChatDetail) HasSide(userID UserID) bool {
 	return false
 }
 
+func (d *DirectChatDetail) GetRecipient(userID UserID) UserID {
+	if d.UserID == userID {
+		return d.RecipientUserID
+	} else if d.RecipientUserID == userID {
+		return d.UserID
+	}
+
+	return ""
+}
+
 // Safe means no duplication
 func (d *ChannelChatDetail) AddMemberSafely(userID UserID) {
 	isMember := d.IsMember(userID)

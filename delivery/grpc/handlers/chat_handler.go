@@ -100,12 +100,17 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 }
 
 func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.GetChatRequest]) (*connect.Response[chatv1.GetChatResponse], error) {
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
 	chatID, err := model.ParseChatID(req.Msg.ChatId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	chat, varror := h.chatService.GetChat(ctx, chatID)
+	chat, varror := h.chatService.GetChat(ctx, userID, chatID)
 	if varror != nil {
 		return nil, varror.Error
 	}
@@ -132,12 +137,10 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 	}
 
 	chats, varror := h.chatService.GetUserChats(ctx, userID)
+	fmt.Println(chats)
 	if varror != nil {
 		return nil, varror.Error
 	}
-
-	fmt.Println(len(chats))
-	fmt.Println(chats)
 
 	chatsProto, err := proto_model_transformer.ChatsToProto(chats)
 	if err != nil {

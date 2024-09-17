@@ -278,7 +278,7 @@ func (s *ChatTestSuite) TestGetChat_Channel() {
 	}
 
 	for _, tc := range testCases {
-		chat, varror := s.service.GetChat(ctx, tc.chatID)
+		chat, varror := s.service.GetChat(ctx, s.users[0].UserID, tc.chatID)
 		if !tc.Valid {
 			if tc.Error != nil {
 				require.Equal(s.T(), tc.Error, varror.Error)
@@ -317,7 +317,7 @@ func (s *ChatTestSuite) TestGetChat_Group() {
 	}
 
 	for _, tc := range testCases {
-		chat, varror := s.service.GetChat(ctx, tc.chatID)
+		chat, varror := s.service.GetChat(ctx, s.users[0].UserID, tc.chatID)
 		if !tc.Valid {
 			if tc.Error != nil {
 				require.Equal(s.T(), tc.Error, varror.Error)
