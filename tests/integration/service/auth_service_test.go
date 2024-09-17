@@ -17,7 +17,7 @@ import (
 
 type AuthTestSuite struct {
 	suite.Suite
-	service service.AuthService
+	service *service.AuthService
 
 	// User
 	user            *model.User

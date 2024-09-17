@@ -19,10 +19,10 @@ import (
 
 type chatHandler struct {
 	logger      *log.SubLogger
-	chatService chat.ChatService
+	chatService *chat.ChatService
 }
 
-func NewChatGrpcHandler(logger *log.SubLogger, chatService chat.ChatService) chatv1connect.ChatServiceHandler {
+func NewChatGrpcHandler(logger *log.SubLogger, chatService *chat.ChatService) chatv1connect.ChatServiceHandler {
 	return chatHandler{logger, chatService}
 }
 

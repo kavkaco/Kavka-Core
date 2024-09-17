@@ -15,7 +15,7 @@ type UserID struct{}
 var ErrEmptyUserID = errors.New("empty user id after passing auth interceptor")
 
 type authInterceptor struct {
-	authService auth.AuthService
+	authService *auth.AuthService
 }
 
 func (i *authInterceptor) WrapStreamingClient(connect.StreamingClientFunc) connect.StreamingClientFunc {
@@ -63,6 +63,6 @@ func (i *authInterceptor) authRequired(ctx context.Context, accessToken string) 
 	return ctx, nil
 }
 
-func NewAuthInterceptor(authService auth.AuthService) connect.Interceptor {
+func NewAuthInterceptor(authService *auth.AuthService) connect.Interceptor {
 	return &authInterceptor{authService}
 }

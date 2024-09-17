@@ -24,29 +24,17 @@ const (
 	MaximumFailedLoginAttempts = 5
 )
 
-type AuthService interface {
-	Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (verifyEmailToken string, varror *vali.Varror)
-	Authenticate(ctx context.Context, accessToken string) (*model.User, *vali.Varror)
-	VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror
-	Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror)
-	ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror
-	RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror)
-	SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror)
-	SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror
-	DeleteAccount(ctx context.Context, userID model.UserID, password string) *vali.Varror
-}
-
-type AuthManager struct {
+type AuthService struct {
 	authRepo     repository.AuthRepository
 	userRepo     repository.UserRepository
-	authManager  auth_manager.AuthManager
+	AuthService  auth_manager.AuthManager
 	validator    *vali.Vali
 	hashManager  *hash.HashManager
 	emailService email.EmailService
 }
 
-func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailService email.EmailService) AuthService {
-	return &AuthManager{authRepo, userRepo, authManager, vali.Validator(), hashManager, emailService}
+func NewAuthService(authRepo repository.AuthRepository, userRepo repository.UserRepository, authManager auth_manager.AuthManager, hashManager *hash.HashManager, emailService email.EmailService) *AuthService {
+	return &AuthService{authRepo, userRepo, authManager, vali.Validator(), hashManager, emailService}
 }
 
 type DetailedValidation struct {
@@ -54,7 +42,7 @@ type DetailedValidation struct {
 	Detail []string
 }
 
-func (a *AuthManager) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (verifyEmailToken string, varror *vali.Varror) {
+func (a *AuthService) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (verifyEmailToken string, varror *vali.Varror) {
 	varrors := a.validator.Validate(RegisterValidation{name, lastName, username, email, password})
 	if len(varrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: varrors}
@@ -91,7 +79,7 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 		return "", &vali.Varror{Error: ErrCreateAuthStore}
 	}
 
-	verifyEmailToken, err = a.authManager.GenerateToken(
+	verifyEmailToken, err = a.AuthService.GenerateToken(
 		ctx, auth_manager.VerifyEmail,
 		&auth_manager.TokenPayload{
 			UUID:      savedUser.UserID,
@@ -112,13 +100,13 @@ func (a *AuthManager) Register(ctx context.Context, name string, lastName string
 	return verifyEmailToken, nil
 }
 
-func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*model.User, *vali.Varror) {
+func (a *AuthService) Authenticate(ctx context.Context, accessToken string) (*model.User, *vali.Varror) {
 	varrors := a.validator.Validate(AuthenticateValidation{accessToken})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
-	tokenClaims, err := a.authManager.DecodeAccessToken(ctx, accessToken)
+	tokenClaims, err := a.AuthService.DecodeAccessToken(ctx, accessToken)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrAccessDenied}
 	}
@@ -135,13 +123,13 @@ func (a *AuthManager) Authenticate(ctx context.Context, accessToken string) (*mo
 	return user, nil
 }
 
-func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror {
+func (a *AuthService) VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror {
 	varrors := a.validator.Validate(VerifyEmailValidation{verifyEmailToken})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}
 
-	tokenClaims, err := a.authManager.DecodeToken(ctx, verifyEmailToken, auth_manager.VerifyEmail)
+	tokenClaims, err := a.AuthService.DecodeToken(ctx, verifyEmailToken, auth_manager.VerifyEmail)
 	if err != nil {
 		return &vali.Varror{Error: ErrAccessDenied}
 	}
@@ -151,7 +139,7 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 		return &vali.Varror{Error: ErrVerifyEmail}
 	}
 
-	err = a.authManager.DestroyToken(ctx, verifyEmailToken)
+	err = a.AuthService.DestroyToken(ctx, verifyEmailToken)
 	if err != nil {
 		return &vali.Varror{Error: ErrDestroyToken}
 	}
@@ -159,7 +147,7 @@ func (a *AuthManager) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 	return nil
 }
 
-func (a *AuthManager) Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror) {
+func (a *AuthService) Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror) {
 	varrors := a.validator.Validate(LoginValidation{email, password})
 	if len(varrors) > 0 {
 		return nil, "", "", &vali.Varror{ValidationErrors: varrors}
@@ -225,12 +213,12 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 	}
 
 	// Generate refresh token and access token
-	accessToken, err := a.authManager.GenerateAccessToken(ctx, user.UserID, AccessTokenExpr)
+	accessToken, err := a.AuthService.GenerateAccessToken(ctx, user.UserID, AccessTokenExpr)
 	if err != nil {
 		return nil, "", "", &vali.Varror{Error: ErrGenerateToken}
 	}
 
-	refreshToken, err := a.authManager.GenerateRefreshToken(ctx, user.UserID, &auth_manager.RefreshTokenPayload{
+	refreshToken, err := a.AuthService.GenerateRefreshToken(ctx, user.UserID, &auth_manager.RefreshTokenPayload{
 		IPAddress:  "not implemented yet",
 		UserAgent:  "not implemented yet",
 		LoggedInAt: time.Duration(time.Now().UnixMilli()),
@@ -244,7 +232,7 @@ func (a *AuthManager) Login(ctx context.Context, email string, password string) 
 	return user, accessToken, refreshToken, nil
 }
 
-func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror {
+func (a *AuthService) ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror {
 	varrors := a.validator.Validate(ChangePasswordValidation{oldPassword, newPassword})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
@@ -274,14 +262,14 @@ func (a *AuthManager) ChangePassword(ctx context.Context, userID model.UserID, o
 	return nil
 }
 
-func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
+func (a *AuthService) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
 	varrors := a.validator.Validate(RefreshTokenValidation{userID, refreshToken})
 	if len(varrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: varrors}
 	}
 
 	// Let's check that tokens not be invalid or expired
-	_, err := a.authManager.DecodeRefreshToken(ctx, userID, refreshToken)
+	_, err := a.AuthService.DecodeRefreshToken(ctx, userID, refreshToken)
 	if err != nil {
 		return "", &vali.Varror{Error: ErrAccessDenied}
 	}
@@ -293,7 +281,7 @@ func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, ref
 	}
 
 	// Generate new access token
-	newAccessToken, err := a.authManager.GenerateAccessToken(ctx, userID, AccessTokenExpr)
+	newAccessToken, err := a.AuthService.GenerateAccessToken(ctx, userID, AccessTokenExpr)
 	if err != nil {
 		return "", &vali.Varror{Error: ErrGenerateToken}
 	}
@@ -301,7 +289,7 @@ func (a *AuthManager) RefreshToken(ctx context.Context, userID model.UserID, ref
 	return newAccessToken, nil
 }
 
-func (a *AuthManager) SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror) {
+func (a *AuthService) SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror) {
 	varrors := a.validator.Validate(SendResetPasswordValidation{email})
 	if len(varrors) > 0 {
 		return "", 0, &vali.Varror{ValidationErrors: varrors}
@@ -325,7 +313,7 @@ func (a *AuthManager) SendResetPassword(ctx context.Context, email string, reset
 		return "", 0, &vali.Varror{Error: fmt.Errorf("%w until: %v", ErrAccountLocked, auth.AccountLockedUntil)}
 	}
 
-	resetPasswordToken, err := a.authManager.GenerateToken(ctx, auth_manager.ResetPassword, &auth_manager.TokenPayload{
+	resetPasswordToken, err := a.AuthService.GenerateToken(ctx, auth_manager.ResetPassword, &auth_manager.TokenPayload{
 		UUID:      auth.UserID,
 		TokenType: auth_manager.ResetPassword,
 		CreatedAt: time.Now(),
@@ -341,13 +329,13 @@ func (a *AuthManager) SendResetPassword(ctx context.Context, email string, reset
 	return resetPasswordToken, ResetPasswordTokenExpr, nil
 }
 
-func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror {
+func (a *AuthService) SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror {
 	varrors := a.validator.Validate(SubmitResetPasswordValidation{token, newPassword})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}
 
-	tokenClaims, err := a.authManager.DecodeToken(ctx, token, auth_manager.ResetPassword)
+	tokenClaims, err := a.AuthService.DecodeToken(ctx, token, auth_manager.ResetPassword)
 	if err != nil {
 		return &vali.Varror{Error: ErrAccessDenied}
 	}
@@ -370,7 +358,7 @@ func (a *AuthManager) SubmitResetPassword(ctx context.Context, token string, new
 	return nil
 }
 
-func (s *AuthManager) DeleteAccount(ctx context.Context, userID model.UserID, password string) *vali.Varror {
+func (s *AuthService) DeleteAccount(ctx context.Context, userID model.UserID, password string) *vali.Varror {
 	auth, err := s.authRepo.GetUserAuth(ctx, userID)
 	if err != nil {
 		return &vali.Varror{Error: ErrNotFound}

@@ -8,23 +8,19 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
 
-type UserService interface {
-	UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror
-}
-
-type UserManager struct {
+type UserService struct {
 	userRepo  repository.UserRepository
 	validator *vali.Vali
 }
 
-func NewUserService(userRepo repository.UserRepository) UserService {
-	return &UserManager{
+func NewUserService(userRepo repository.UserRepository) *UserService {
+	return &UserService{
 		userRepo:  userRepo,
 		validator: vali.Validator(),
 	}
 }
 
-func (s *UserManager) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror {
+func (s *UserService) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror {
 	validationErrors := s.validator.Validate(UpdateProfileValidation{name, lastName, username})
 	if len(validationErrors) > 0 {
 		return &vali.Varror{ValidationErrors: validationErrors}

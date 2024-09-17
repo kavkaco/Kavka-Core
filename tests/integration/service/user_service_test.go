@@ -15,7 +15,7 @@ import (
 
 type UserTestSuite struct {
 	suite.Suite
-	service service.UserService
+	service *service.UserService
 
 	userID model.UserID
 }

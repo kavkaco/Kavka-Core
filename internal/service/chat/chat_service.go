@@ -20,16 +20,7 @@ type JoinChatResult struct {
 	UpdatedChat *model.ChatDTO
 }
 
-type ChatService interface {
-	GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror)
-	GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror)
-	CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror)
-	CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror)
-	CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror)
-	JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror)
-}
-
-type ChatManager struct {
+type ChatService struct {
 	logger         *log.SubLogger
 	chatRepo       repository.ChatRepository
 	userRepo       repository.UserRepository
@@ -38,12 +29,12 @@ type ChatManager struct {
 	eventPublisher stream.StreamPublisher
 }
 
-func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, userRepo repository.UserRepository, messageRepo repository.MessageRepository, eventPublisher stream.StreamPublisher) ChatService {
-	return &ChatManager{logger, chatRepo, userRepo, messageRepo, vali.Validator(), eventPublisher}
+func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, userRepo repository.UserRepository, messageRepo repository.MessageRepository, eventPublisher stream.StreamPublisher) *ChatService {
+	return &ChatService{logger, chatRepo, userRepo, messageRepo, vali.Validator(), eventPublisher}
 }
 
 // find single chat with chat id
-func (s *ChatManager) GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror) {
+func (s *ChatService) GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror) {
 	varrors := s.validator.Validate(GetChatValidation{chatID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -78,7 +69,7 @@ func (s *ChatManager) GetChat(ctx context.Context, userID model.UserID, chatID m
 }
 
 // get the chats that belongs to user
-func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror) {
+func (s *ChatService) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(GetUserChatsValidation{userID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -105,7 +96,7 @@ func (s *ChatManager) GetUserChats(ctx context.Context, userID model.UserID) ([]
 	return userChats, nil
 }
 
-func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
+func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -149,7 +140,7 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 	}
 }
 
-func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
+func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(CreateGroupValidation{userID, title, username, description})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -198,7 +189,7 @@ func (s *ChatManager) CreateGroup(ctx context.Context, userID model.UserID, titl
 	return chatGetter, nil
 }
 
-func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
+func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
@@ -247,7 +238,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 	return chatGetter, nil
 }
 
-func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror) {
+func (s *ChatService) JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror) {
 	chat, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: err}

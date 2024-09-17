@@ -21,7 +21,7 @@ type ChatTestSuite struct {
 	suite.Suite
 	userRepo repository.UserRepository
 	chatRepo repository.ChatRepository
-	service  service.ChatService
+	service  *service.ChatService
 
 	// Created chats
 	createdChannelChatID model.ChatID
