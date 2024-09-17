@@ -3,6 +3,7 @@ package grpc_handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
@@ -134,6 +135,9 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 	if varror != nil {
 		return nil, varror.Error
 	}
+
+	fmt.Println(len(chats))
+	fmt.Println(chats)
 
 	chatsProto, err := proto_model_transformer.ChatsToProto(chats)
 	if err != nil {

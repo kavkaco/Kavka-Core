@@ -1,8 +1,6 @@
 syntax = "proto3";
 package protobuf.model.chat.v1;
 
-import "protobuf/model/user/v1/user.proto";
-
 option go_package = "protobuf/model/chat/v1";
 
 enum ChatType {
@@ -52,7 +50,8 @@ message GroupChatDetail {
 }
 
 message DirectChatDetail {
-  model.user.v1.User recipient = 1;
+  string user_id =1;
+  string recipient_user_id = 2;
 }
 
 message Chat {

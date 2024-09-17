@@ -42,7 +42,7 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
-	c, err := s.chatRepo.FindByID(ctx, chatID)
+	c, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrChatNotFound}
 	}
@@ -115,7 +115,7 @@ func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID,
 		return &vali.Varror{ValidationErrors: varrors}
 	}
 
-	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	chat, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
 		return &vali.Varror{Error: ErrChatNotFound}
 	}

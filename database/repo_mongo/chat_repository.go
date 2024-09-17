@@ -96,12 +96,20 @@ func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.Ch
 			},
 		},
 		bson.M{
-			"$unwind": "$chat_messages",
-		},
-		bson.M{
 			"$addFields": bson.M{
 				"last_message": bson.M{
-					"$last": "$chat_messages.messages",
+					"$arrayElemAt": bson.A{
+						bson.M{
+							"$arrayElemAt": bson.A{
+								"$chat_messages.messages",
+								bson.M{"$subtract": bson.A{
+									bson.M{"$size": "$chat_messages.messages"},
+									1,
+								}},
+							},
+						},
+						0,
+					},
 				},
 			},
 		},
@@ -145,14 +153,35 @@ func (repo *chatRepository) findOne(ctx context.Context, filter bson.M) (*model.
 	return model, nil
 }
 
-func (repo *chatRepository) FindByID(ctx context.Context, chatID model.ChatID) (*model.Chat, error) {
-	filter := bson.M{"_id": chatID}
-	return repo.findOne(ctx, filter)
+func (repo *chatRepository) GetChat(ctx context.Context, chatID model.ChatID) (*model.Chat, error) {
+	result := repo.chatsCollection.FindOne(ctx, bson.M{
+		"_id": chatID,
+	})
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var chat *model.Chat
+	err := result.Decode(&chat)
+	if err != nil {
+		return nil, err
+	}
+
+	return chat, nil
 }
 
-func (repo *chatRepository) FindBySides(ctx context.Context, sides [2]model.UserID) (*model.Chat, error) {
+func (repo *chatRepository) FindBySides(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error) {
 	filter := bson.M{
-		"chat_detail.sides":     sides,
+		"$or": bson.A{
+			bson.M{"$and": bson.A{
+				bson.M{"chat_detail.user_id": userID},
+				bson.M{"chat_detail.recipient_user_id": recipientUserID},
+			}},
+			bson.M{"$and": bson.A{
+				bson.M{"chat_detail.user_id": recipientUserID},
+				bson.M{"chat_detail.recipient_user_id": userID},
+			}},
+		},
 		"chat_detail.chat_type": bson.M{"$ne": "direct"},
 	}
 

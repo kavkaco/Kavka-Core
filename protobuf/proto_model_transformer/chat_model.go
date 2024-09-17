@@ -111,19 +111,16 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 			},
 		}, nil
 	case "direct":
-		cd, err := utils.TypeConverter[model.DirectChatDetailDTO](chatDetail)
+		cd, err := utils.TypeConverter[model.DirectChatDetail](chatDetail)
 		if err != nil {
 			return nil, err
-		}
-
-		if cd.Recipient == nil {
-			return nil, errors.New("recipient is empty")
 		}
 
 		return &modelv1.ChatDetail{
 			ChatDetailType: &modelv1.ChatDetail_DirectDetail{
 				DirectDetail: &modelv1.DirectChatDetail{
-					Recipient: UserToProto(*cd.Recipient),
+					UserId:          cd.UserID,
+					RecipientUserId: cd.RecipientUserID,
 				},
 			},
 		}, nil

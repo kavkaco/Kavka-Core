@@ -48,9 +48,16 @@ func (s *ChatManager) GetChat(ctx context.Context, chatID model.ChatID) (*model.
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
-	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	chat, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrNotFound}
+	}
+
+	if chat.ChatType == "direct" {
+		// Let's find sides
+		log.Fatal("not implemented yet")
+
+		return nil, nil
 	}
 
 	return chat, nil
@@ -88,25 +95,19 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
 
-	sides := [2]model.UserID{userID, recipientUserID}
-
 	// Duplicated direct chats is not allowed!
-	chat, err := s.chatRepo.FindBySides(ctx, sides)
+	chat, err := s.chatRepo.FindBySides(ctx, userID, recipientUserID)
 
 	if errors.Is(err, repository.ErrNotFound) {
 		// Let's create the direct chat, because it's not exists in the database!
 		chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
-			Sides: sides,
+			UserID:          userID,
+			RecipientUserID: recipientUserID,
 		})
 
 		chat, err := s.chatRepo.Create(ctx, *chatModel)
 		if err != nil {
 			return nil, &vali.Varror{Error: ErrCreateChat}
-		}
-
-		recipient, err := s.userRepo.FindByUserID(ctx, recipientUserID)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrRecipientNotFound}
 		}
 
 		go func() {
@@ -123,10 +124,6 @@ func (s *ChatManager) CreateDirect(ctx context.Context, userID model.UserID, rec
 		}
 
 		chatDTO := model.NewChatDTO(chat)
-
-		chatDTO.ChatDetail = &model.DirectChatDetailDTO{
-			Recipient: recipient,
-		}
 
 		return chatDTO, nil
 	} else if chat != nil {
@@ -235,7 +232,7 @@ func (s *ChatManager) CreateChannel(ctx context.Context, userID model.UserID, ti
 }
 
 func (s *ChatManager) JoinChat(ctx context.Context, chatID model.ChatID, userID model.UserID) (*JoinChatResult, *vali.Varror) {
-	chat, err := s.chatRepo.FindByID(ctx, chatID)
+	chat, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: err}
 	}

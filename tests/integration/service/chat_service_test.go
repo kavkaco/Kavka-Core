@@ -210,7 +210,8 @@ func (s *ChatTestSuite) TestCreateDirect() {
 	ctx := context.TODO()
 
 	detailModel := &model.DirectChatDetail{
-		Sides: [2]model.UserID{s.users[0].UserID, s.users[1].UserID},
+		UserID:          s.users[0].UserID,
+		RecipientUserID: s.users[1].UserID,
 	}
 
 	testCases := []struct {
@@ -225,8 +226,8 @@ func (s *ChatTestSuite) TestCreateDirect() {
 			Valid:           false,
 		},
 		{
-			userID:          detailModel.Sides[0],
-			recipientUserID: detailModel.Sides[1],
+			userID:          detailModel.UserID,
+			recipientUserID: detailModel.RecipientUserID,
 			Valid:           true,
 		},
 	}

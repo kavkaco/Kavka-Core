@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"testing"
 
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -34,7 +35,7 @@ func (s *ChatTestSuite) SetupSuite() {
 	s.recipientUserID = fmt.Sprintf("%d", random.GenerateUserID())
 }
 
-func (s *ChatTestSuite) TestCreateChannel() {
+func (s *ChatTestSuite) TestA_CreateChannel() {
 	ctx := context.TODO()
 
 	chatDetail := model.ChannelChatDetail{
@@ -64,7 +65,7 @@ func (s *ChatTestSuite) TestCreateChannel() {
 	s.createdChannelChatID = saved.ChatID
 }
 
-func (s *ChatTestSuite) TestCreateGroup() {
+func (s *ChatTestSuite) TestB_CreateGroup() {
 	ctx := context.TODO()
 
 	chatDetail := model.GroupChatDetail{
@@ -94,11 +95,12 @@ func (s *ChatTestSuite) TestCreateGroup() {
 	s.createdGroupChatID = saved.ChatID
 }
 
-func (s *ChatTestSuite) TestCreateDirect() {
+func (s *ChatTestSuite) TestC_CreateDirect() {
 	ctx := context.TODO()
 
 	chatDetail := model.DirectChatDetail{
-		Sides: [2]model.UserID{s.userID, s.recipientUserID},
+		UserID:          s.userID,
+		RecipientUserID: s.recipientUserID,
 	}
 	chatModel := model.NewChat(model.TypeDirect, chatDetail)
 
@@ -115,20 +117,34 @@ func (s *ChatTestSuite) TestCreateDirect() {
 	s.createdDirectChatID = saved.ChatID
 }
 
-func (s *ChatTestSuite) TestFindBySides() {
+func (s *ChatTestSuite) TestD_FindBySides() {
 	ctx := context.TODO()
 
-	sides := [2]model.UserID{s.userID, s.recipientUserID}
-	chat, err := s.repo.FindBySides(ctx, sides)
+	chat, err := s.repo.FindBySides(ctx, s.recipientUserID, s.userID)
 	require.NoError(s.T(), err)
 
 	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
 	require.NoError(s.T(), err)
 
-	require.True(s.T(), chatDetail.HasSide(s.userID))
-	require.True(s.T(), chatDetail.HasSide(s.recipientUserID))
 	require.Equal(s.T(), chat.ChatType, model.TypeDirect)
 	require.Equal(s.T(), chat.ChatID, s.createdDirectChatID)
+	require.True(s.T(), chatDetail.HasSide(s.userID))
+	require.True(s.T(), chatDetail.HasSide(s.recipientUserID))
+}
+
+func (s *ChatTestSuite) TestE_GetChat() {
+	ctx := context.TODO()
+
+	chat, err := s.repo.GetChat(ctx, s.createdDirectChatID)
+	require.NoError(s.T(), err)
+
+	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
+	require.NoError(s.T(), err)
+
+	require.Equal(s.T(), chat.ChatType, model.TypeDirect)
+	require.Equal(s.T(), chat.ChatID, s.createdDirectChatID)
+	require.True(s.T(), chatDetail.HasSide(s.userID))
+	require.True(s.T(), chatDetail.HasSide(s.recipientUserID))
 }
 
 func (s *ChatTestSuite) TestGetUserChats() {
@@ -141,7 +157,7 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	require.Len(s.T(), chats, 3)
 }
 
-// func TestChatSuite(t *testing.T) {
-// 	t.Helper()
-// 	suite.Run(t, new(ChatTestSuite))
-// }
+func TestChatSuite(t *testing.T) {
+	t.Helper()
+	suite.Run(t, new(ChatTestSuite))
+}
