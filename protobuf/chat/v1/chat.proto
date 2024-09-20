@@ -15,11 +15,11 @@ service ChatService {
   rpc JoinChat(JoinChatRequest) returns (JoinChatResponse) {}
 }
 
-message GetDirectChatRequest{
+message GetDirectChatRequest {
   string recipient_user_id = 1;
 }
 
-message GetDirectChatResponse{
+message GetDirectChatResponse {
   model.chat.v1.Chat chat = 1;
 }
 

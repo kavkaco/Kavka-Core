@@ -102,8 +102,8 @@ func (s *ChatService) GetDirectChat(ctx context.Context, userID, recipientUserID
 	chatDto := model.NewChatDTO(chat)
 
 	return chatDto, nil
-
 }
+
 func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
 	if len(varrors) > 0 {
