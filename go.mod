@@ -3,9 +3,10 @@ module github.com/kavkaco/Kavka-Core
 go 1.22.4
 
 require (
-	connectrpc.com/connect v1.16.2
+	connectrpc.com/connect v1.17.0
 	connectrpc.com/cors v0.1.0
 	github.com/go-playground/validator/v10 v10.22.0
+	github.com/kavkaco/Kavka-ProtoBuf v1.0.4
 	github.com/knadh/koanf v1.5.0
 	github.com/minio/minio-go/v7 v7.0.69
 	github.com/nats-io/nats.go v1.36.0

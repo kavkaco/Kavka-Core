@@ -20,30 +20,20 @@ test:
 # Format
 fmt:
 	gofumpt -l -w .
-	buf format -w 
 
 # Linter
 linter:
 	golangci-lint run --build-tags "${BUILD_TAG}" --timeout=20m0s
 
-buf_linter:
-	buf lint
-
 # Run on development
 dev:
-	# set env
 	export KAVKA_ENV=development
-
-	# run server
-	go run cmd/server/server.go
+	go run cmd/server/main.go
 
 # Build for production
 build:
-	# set env
 	export KAVKA_ENV=production
-
-	# build
-	go build -o ./build/server cmd/server/server.go
+	go build -o ./build/server cmd/server/main.go
 
 gen_protobuf:
 	buf generate --path ./protobuf

@@ -8,12 +8,12 @@ import (
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/log"
-	chatv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
+	chatv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/chat/v1"
+	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/chat/v1/chatv1connect"
 )
 
 type chatHandler struct {
