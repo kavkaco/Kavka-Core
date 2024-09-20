@@ -10,10 +10,10 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/log"
 
-	messagev1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/v1"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/v1/messagev1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
+	messagev1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/message/v1"
+	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/message/v1/messagev1connect"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 

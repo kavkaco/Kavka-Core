@@ -3,13 +3,13 @@ package message
 import (
 	"context"
 
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/log"
-	eventsv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1"
-	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
+	eventsv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/events/v1"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
 )

@@ -5,11 +5,11 @@ import (
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/service/search"
 	"github.com/kavkaco/Kavka-Core/log"
-	searchv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/search/v1"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/search/v1/searchv1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
+	searchv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/search/v1"
+	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/search/v1/searchv1connect"
 )
 
 type searchHandler struct {

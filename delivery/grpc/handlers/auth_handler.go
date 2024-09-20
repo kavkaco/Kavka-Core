@@ -5,10 +5,11 @@ import (
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
-	authv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1"
-	"github.com/kavkaco/Kavka-Core/protobuf/proto_model_transformer"
+
+	authv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/auth/v1"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
