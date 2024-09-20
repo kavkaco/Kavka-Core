@@ -34,6 +34,3 @@ dev:
 build:
 	export KAVKA_ENV=production
 	go build -o ./build/server cmd/server/main.go
-
-gen_protobuf:
-	buf generate --path ./protobuf
