@@ -111,54 +111,52 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 	}
 
 	// Duplicated direct chats is not allowed!
-	chat, err := s.chatRepo.GetDirectChat(ctx, userID, recipientUserID)
+	_, getErr := s.chatRepo.GetDirectChat(ctx, userID, recipientUserID)
 
-	if errors.Is(err, repository.ErrNotFound) {
-		// Let's create the direct chat, because it's not exists in the database!
-		chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
-			UserID:          userID,
-			RecipientUserID: recipientUserID,
-		})
-
-		chat, err := s.chatRepo.Create(ctx, *chatModel)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrCreateChat}
-		}
-
-		err = s.messageRepo.Create(context.TODO(), chat.ChatID)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrMessageStoreCreation}
-		}
-
-		err = s.chatRepo.JoinChat(ctx, chat.ChatType, userID, chat.ChatID)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
-		}
-
-		chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrJoinDirectChat}
-		}
-
-		finalRecipientUserID := chatDetail.GetRecipient(recipientUserID)
-
-		recipient, err := s.userRepo.FindByUserID(ctx, finalRecipientUserID)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrJoinDirectChat}
-		}
-
-		chatDTO := model.NewChatDTO(chat)
-
-		chatDTO.ChatDetail = &model.DirectChatDetailDTO{
-			Recipient: recipient,
-		}
-
-		return chatDTO, nil
-	} else if chat != nil {
-		return nil, &vali.Varror{Error: ErrChatAlreadyExists}
-	} else {
-		return nil, &vali.Varror{Error: err}
+	if !errors.Is(getErr, repository.ErrNotFound) {
+		return nil, &vali.Varror{Error: getErr}
 	}
+
+	// Let's create the direct chat, because it's not exists in the database!
+	chatModel := model.NewChat(model.TypeDirect, &model.DirectChatDetail{
+		UserID:          userID,
+		RecipientUserID: recipientUserID,
+	})
+
+	createdChat, err := s.chatRepo.Create(ctx, *chatModel)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrCreateChat}
+	}
+
+	err = s.messageRepo.Create(context.TODO(), createdChat.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrMessageStoreCreation}
+	}
+
+	err = s.chatRepo.JoinChat(ctx, createdChat.ChatType, userID, createdChat.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
+	}
+
+	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](createdChat.ChatDetail)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrJoinDirectChat}
+	}
+
+	finalRecipientUserID := chatDetail.GetRecipient(recipientUserID)
+
+	recipient, err := s.userRepo.FindByUserID(ctx, finalRecipientUserID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrJoinDirectChat}
+	}
+
+	chatDTO := model.NewChatDTO(createdChat)
+
+	chatDTO.ChatDetail = &model.DirectChatDetailDTO{
+		Recipient: recipient,
+	}
+
+	return chatDTO, nil
 }
 
 func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
