@@ -14,10 +14,10 @@ import (
 
 type searchHandler struct {
 	logger        *log.SubLogger
-	searchService search.SearchService
+	searchService *search.SearchService
 }
 
-func NewSearchGrpcHandler(logger *log.SubLogger, searchService search.SearchService) searchv1connect.SearchServiceHandler {
+func NewSearchGrpcHandler(logger *log.SubLogger, searchService *search.SearchService) searchv1connect.SearchServiceHandler {
 	return &searchHandler{logger, searchService}
 }
 

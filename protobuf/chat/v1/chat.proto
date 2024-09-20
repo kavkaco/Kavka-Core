@@ -7,6 +7,7 @@ option go_package = "protobuf/chat/v1";
 
 service ChatService {
   rpc GetChat(GetChatRequest) returns (GetChatResponse) {}
+  rpc GetDirectChat(GetDirectChatRequest) returns (GetDirectChatResponse) {}
   rpc GetUserChats(GetUserChatsRequest) returns (GetUserChatsResponse) {}
   rpc CreateDirect(CreateDirectRequest) returns (CreateDirectResponse) {}
   rpc CreateGroup(CreateGroupRequest) returns (CreateGroupResponse) {}
@@ -14,10 +15,12 @@ service ChatService {
   rpc JoinChat(JoinChatRequest) returns (JoinChatResponse) {}
 }
 
-message ChatEventRequest {}
+message GetDirectChatRequest {
+  string recipient_user_id = 1;
+}
 
-message ChatEventResponse {
-  bytes data = 2;
+message GetDirectChatResponse {
+  model.chat.v1.Chat chat = 1;
 }
 
 message GetChatRequest {

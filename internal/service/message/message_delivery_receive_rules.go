@@ -31,7 +31,7 @@ func directReceiversIDs(chat *model.Chat) ([]model.UserID, error) {
 		return nil, err
 	}
 
-	return chatDetail.Sides[:], nil
+	return []model.UserID{chatDetail.UserID, chatDetail.RecipientUserID}, nil
 }
 
 func ReceiversIDs(chat *model.Chat) ([]model.UserID, error) {

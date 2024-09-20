@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateChannelRequest, CreateChannelResponse, CreateDirectRequest, CreateDirectResponse, CreateGroupRequest, CreateGroupResponse, GetChatRequest, GetChatResponse, GetUserChatsRequest, GetUserChatsResponse, JoinChatRequest, JoinChatResponse } from "./chat_pb.ts";
+import { CreateChannelRequest, CreateChannelResponse, CreateDirectRequest, CreateDirectResponse, CreateGroupRequest, CreateGroupResponse, GetChatRequest, GetChatResponse, GetDirectChatRequest, GetDirectChatResponse, GetUserChatsRequest, GetUserChatsResponse, JoinChatRequest, JoinChatResponse } from "./chat_pb.ts";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -19,6 +19,15 @@ export const ChatService = {
       name: "GetChat",
       I: GetChatRequest,
       O: GetChatResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc protobuf.chat.v1.ChatService.GetDirectChat
+     */
+    getDirectChat: {
+      name: "GetDirectChat",
+      I: GetDirectChatRequest,
+      O: GetDirectChatResponse,
       kind: MethodKind.Unary,
     },
     /**

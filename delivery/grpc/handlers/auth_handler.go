@@ -13,10 +13,10 @@ import (
 )
 
 type AuthGrpcServer struct {
-	authService auth.AuthService
+	authService *auth.AuthService
 }
 
-func NewAuthGrpcHandler(authService auth.AuthService) AuthGrpcServer {
+func NewAuthGrpcHandler(authService *auth.AuthService) AuthGrpcServer {
 	return AuthGrpcServer{authService}
 }
 

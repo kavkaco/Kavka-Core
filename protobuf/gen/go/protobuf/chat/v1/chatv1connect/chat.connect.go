@@ -35,6 +35,9 @@ const (
 const (
 	// ChatServiceGetChatProcedure is the fully-qualified name of the ChatService's GetChat RPC.
 	ChatServiceGetChatProcedure = "/protobuf.chat.v1.ChatService/GetChat"
+	// ChatServiceGetDirectChatProcedure is the fully-qualified name of the ChatService's GetDirectChat
+	// RPC.
+	ChatServiceGetDirectChatProcedure = "/protobuf.chat.v1.ChatService/GetDirectChat"
 	// ChatServiceGetUserChatsProcedure is the fully-qualified name of the ChatService's GetUserChats
 	// RPC.
 	ChatServiceGetUserChatsProcedure = "/protobuf.chat.v1.ChatService/GetUserChats"
@@ -54,6 +57,7 @@ const (
 var (
 	chatServiceServiceDescriptor             = v1.File_protobuf_chat_v1_chat_proto.Services().ByName("ChatService")
 	chatServiceGetChatMethodDescriptor       = chatServiceServiceDescriptor.Methods().ByName("GetChat")
+	chatServiceGetDirectChatMethodDescriptor = chatServiceServiceDescriptor.Methods().ByName("GetDirectChat")
 	chatServiceGetUserChatsMethodDescriptor  = chatServiceServiceDescriptor.Methods().ByName("GetUserChats")
 	chatServiceCreateDirectMethodDescriptor  = chatServiceServiceDescriptor.Methods().ByName("CreateDirect")
 	chatServiceCreateGroupMethodDescriptor   = chatServiceServiceDescriptor.Methods().ByName("CreateGroup")
@@ -64,6 +68,7 @@ var (
 // ChatServiceClient is a client for the protobuf.chat.v1.ChatService service.
 type ChatServiceClient interface {
 	GetChat(context.Context, *connect.Request[v1.GetChatRequest]) (*connect.Response[v1.GetChatResponse], error)
+	GetDirectChat(context.Context, *connect.Request[v1.GetDirectChatRequest]) (*connect.Response[v1.GetDirectChatResponse], error)
 	GetUserChats(context.Context, *connect.Request[v1.GetUserChatsRequest]) (*connect.Response[v1.GetUserChatsResponse], error)
 	CreateDirect(context.Context, *connect.Request[v1.CreateDirectRequest]) (*connect.Response[v1.CreateDirectResponse], error)
 	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
@@ -85,6 +90,12 @@ func NewChatServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			httpClient,
 			baseURL+ChatServiceGetChatProcedure,
 			connect.WithSchema(chatServiceGetChatMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		getDirectChat: connect.NewClient[v1.GetDirectChatRequest, v1.GetDirectChatResponse](
+			httpClient,
+			baseURL+ChatServiceGetDirectChatProcedure,
+			connect.WithSchema(chatServiceGetDirectChatMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		getUserChats: connect.NewClient[v1.GetUserChatsRequest, v1.GetUserChatsResponse](
@@ -123,6 +134,7 @@ func NewChatServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 // chatServiceClient implements ChatServiceClient.
 type chatServiceClient struct {
 	getChat       *connect.Client[v1.GetChatRequest, v1.GetChatResponse]
+	getDirectChat *connect.Client[v1.GetDirectChatRequest, v1.GetDirectChatResponse]
 	getUserChats  *connect.Client[v1.GetUserChatsRequest, v1.GetUserChatsResponse]
 	createDirect  *connect.Client[v1.CreateDirectRequest, v1.CreateDirectResponse]
 	createGroup   *connect.Client[v1.CreateGroupRequest, v1.CreateGroupResponse]
@@ -133,6 +145,11 @@ type chatServiceClient struct {
 // GetChat calls protobuf.chat.v1.ChatService.GetChat.
 func (c *chatServiceClient) GetChat(ctx context.Context, req *connect.Request[v1.GetChatRequest]) (*connect.Response[v1.GetChatResponse], error) {
 	return c.getChat.CallUnary(ctx, req)
+}
+
+// GetDirectChat calls protobuf.chat.v1.ChatService.GetDirectChat.
+func (c *chatServiceClient) GetDirectChat(ctx context.Context, req *connect.Request[v1.GetDirectChatRequest]) (*connect.Response[v1.GetDirectChatResponse], error) {
+	return c.getDirectChat.CallUnary(ctx, req)
 }
 
 // GetUserChats calls protobuf.chat.v1.ChatService.GetUserChats.
@@ -163,6 +180,7 @@ func (c *chatServiceClient) JoinChat(ctx context.Context, req *connect.Request[v
 // ChatServiceHandler is an implementation of the protobuf.chat.v1.ChatService service.
 type ChatServiceHandler interface {
 	GetChat(context.Context, *connect.Request[v1.GetChatRequest]) (*connect.Response[v1.GetChatResponse], error)
+	GetDirectChat(context.Context, *connect.Request[v1.GetDirectChatRequest]) (*connect.Response[v1.GetDirectChatResponse], error)
 	GetUserChats(context.Context, *connect.Request[v1.GetUserChatsRequest]) (*connect.Response[v1.GetUserChatsResponse], error)
 	CreateDirect(context.Context, *connect.Request[v1.CreateDirectRequest]) (*connect.Response[v1.CreateDirectResponse], error)
 	CreateGroup(context.Context, *connect.Request[v1.CreateGroupRequest]) (*connect.Response[v1.CreateGroupResponse], error)
@@ -180,6 +198,12 @@ func NewChatServiceHandler(svc ChatServiceHandler, opts ...connect.HandlerOption
 		ChatServiceGetChatProcedure,
 		svc.GetChat,
 		connect.WithSchema(chatServiceGetChatMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	chatServiceGetDirectChatHandler := connect.NewUnaryHandler(
+		ChatServiceGetDirectChatProcedure,
+		svc.GetDirectChat,
+		connect.WithSchema(chatServiceGetDirectChatMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	chatServiceGetUserChatsHandler := connect.NewUnaryHandler(
@@ -216,6 +240,8 @@ func NewChatServiceHandler(svc ChatServiceHandler, opts ...connect.HandlerOption
 		switch r.URL.Path {
 		case ChatServiceGetChatProcedure:
 			chatServiceGetChatHandler.ServeHTTP(w, r)
+		case ChatServiceGetDirectChatProcedure:
+			chatServiceGetDirectChatHandler.ServeHTTP(w, r)
 		case ChatServiceGetUserChatsProcedure:
 			chatServiceGetUserChatsHandler.ServeHTTP(w, r)
 		case ChatServiceCreateDirectProcedure:
@@ -237,6 +263,10 @@ type UnimplementedChatServiceHandler struct{}
 
 func (UnimplementedChatServiceHandler) GetChat(context.Context, *connect.Request[v1.GetChatRequest]) (*connect.Response[v1.GetChatResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.chat.v1.ChatService.GetChat is not implemented"))
+}
+
+func (UnimplementedChatServiceHandler) GetDirectChat(context.Context, *connect.Request[v1.GetDirectChatRequest]) (*connect.Response[v1.GetDirectChatResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("protobuf.chat.v1.ChatService.GetDirectChat is not implemented"))
 }
 
 func (UnimplementedChatServiceHandler) GetUserChats(context.Context, *connect.Request[v1.GetUserChatsRequest]) (*connect.Response[v1.GetUserChatsResponse], error) {

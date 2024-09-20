@@ -66,8 +66,12 @@ func (repo *messageRepository) FetchMessage(ctx context.Context, chatID primitiv
 
 	var docs []docModel
 	err = cursor.All(ctx, &docs)
-	if err != nil || len(docs) == 0 {
+	if err != nil {
 		return nil, err
+	}
+
+	if len(docs) == 0 {
+		return nil, repository.ErrNotFound
 	}
 
 	message := &docs[0].Message

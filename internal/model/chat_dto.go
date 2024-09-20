@@ -7,6 +7,10 @@ type ChatDTO struct {
 	LastMessage *Message    `bson:"last_message" json:"lastMessage"`
 }
 
+type DirectChatDetailDTO struct {
+	Recipient *User `bson:"recipient" json:"recipient"`
+}
+
 type Member struct {
 	UserID   UserID `bson:"user_id" json:"userID"`
 	Name     string `bson:"name" json:"name"`

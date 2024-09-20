@@ -40,11 +40,8 @@ type GroupChatDetail struct {
 
 type DirectChatDetail struct {
 	// Chat partners
-	Sides [2]UserID `bson:"sides" json:"sides"`
-}
-
-type DirectChatFetchedDetail struct {
-	UserInfo User
+	UserID          UserID `bson:"user_id" json:"userId"`
+	RecipientUserID UserID `bson:"recipient_user_id" json:"recipientUserId"`
 }
 
 func (c *ChannelChatDetail) IsMember(userID UserID) bool {
@@ -88,22 +85,23 @@ func (c *GroupChatDetail) IsAdmin(userID UserID) bool {
 }
 
 func (d *DirectChatDetail) HasSide(userID UserID) bool {
-	has := false
-	for _, v := range d.Sides {
-		if v == userID {
-			has = true
-			break
-		}
+	if d.RecipientUserID == userID {
+		return true
+	} else if d.UserID == userID {
+		return true
 	}
-	return has
+
+	return false
 }
 
-func DetectRecipient(userIDs [2]UserID, currentUserID UserID) *UserID {
-	if userIDs[0] == currentUserID {
-		return &userIDs[1]
+func (d *DirectChatDetail) GetRecipient(userID UserID) UserID {
+	if d.UserID == userID {
+		return d.RecipientUserID
+	} else if d.RecipientUserID == userID {
+		return d.UserID
 	}
 
-	return &userIDs[0]
+	return ""
 }
 
 // Safe means no duplication
