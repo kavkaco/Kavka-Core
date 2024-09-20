@@ -25,9 +25,6 @@
       <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/code_linter.yml">
         <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/code_linter.yml/badge.svg"
       </a>
-      <a href="https://github.com/kavkaco/Kavka-Core/actions/workflows/buf_linter.yml">
-        <img src="https://github.com/kavkaco/Kavka-Core/actions/workflows/buf_linter.yml/badge.svg"
-      </a>
     </div>
   </p>
 </div>
@@ -42,27 +39,26 @@ Kavka is designed with a focus on privacy at its core. Our goal is to provide a 
 
 ### 🔑 Key Features
 
-- **Open-Source**: Kavka's source code is freely available for anyone to inspect, modify, and contribute to.
+-   **Open-Source**: Kavka's source code is freely available for anyone to inspect, modify, and contribute to.
 
-- **GoLang and Clean Architecture**: The application leverages the power and efficiency of GoLang, while adhering to the Clean Architecture principles for maintainability and scalability.
+-   **GoLang and Clean Architecture**: The application leverages the power and efficiency of GoLang, while adhering to the Clean Architecture principles for maintainability and scalability.
 
-- **Strong Encryption**: Kavka utilizes strong encryption algorithms to safeguard message confidentiality and anonymity.
+-   **Strong Encryption**: Kavka utilizes strong encryption algorithms to safeguard message confidentiality and anonymity.
 
-- **Anonymous Server Deployment**: The application can be deployed on anonymous servers, further enhancing user privacy.
+-   **Anonymous Server Deployment**: The application can be deployed on anonymous servers, further enhancing user privacy.
 
 ## 🪜 Built With
 
 [![My Skills](https://skillicons.dev/icons?i=vscode,golang,docker,nginx,git,github,postman,mongodb,redis,vuejs,nuxtjs,ts,aws)](https://skillicons.dev)
 
 ## ⚙️ Setup Server Guide
+
 The server setup guide is explained in detail here.
 
 [docs/setup_server.md](https://github.com/kavkaco/Kavka-Core/blob/main/docs/setup_server.md)
- 
+
 ## 💎 Contribution!
 
 Kavka welcomes contributions from developers around the world. We are committed to fostering a collaborative and inclusive community where everyone can contribute to the project's growth and development.
 
 We invite you to explore Kavka, join our community, and contribute to building a secure and private communication platform for everyone.💜
-
-
