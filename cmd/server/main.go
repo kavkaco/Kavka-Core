@@ -5,13 +5,11 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
 	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	repository_mongo "github.com/kavkaco/Kavka-Core/database/repo_mongo"
-	grpc_handlers "github.com/kavkaco/Kavka-Core/delivery/grpc/handlers"
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
+	"github.com/kavkaco/Kavka-Core/delivery/grpc"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
@@ -19,12 +17,7 @@ import (
 	"github.com/kavkaco/Kavka-Core/internal/service/search"
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/pkg/email"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/auth/v1/authv1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/chat/v1/chatv1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/events/v1/eventsv1connect"
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/message/v1/messagev1connect"
 
-	"github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/search/v1/searchv1connect"
 	"github.com/kavkaco/Kavka-Core/utils/hash"
 	"github.com/rs/cors"
 	auth_manager "github.com/tahadostifam/go-auth-manager"
@@ -70,7 +63,6 @@ func main() {
 	redisClient := database.GetRedisDBInstance(cfg.Redis)
 
 	// [=== Init Auth Manager Service ===]
-	// Repo: github.com/tahadostifam/go-auth-manager
 	authManager := auth_manager.NewAuthManager(redisClient, auth_manager.AuthManagerOpts{
 		PrivateKey: cfg.Auth.SecretKey,
 	})
@@ -113,44 +105,28 @@ func main() {
 
 	searchService := search.NewSearchService(log.NewSubLogger("search-service"), searchRepo)
 
-	// [=== Init Grpc Server ===]
-	grpcListenAddr := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
-	gRPCRouter := http.NewServeMux()
-
-	authInterceptor := interceptor.NewAuthInterceptor(authService)
-	interceptors := connect.WithInterceptors(authInterceptor)
-
-	authGrpcHandler := grpc_handlers.NewAuthGrpcHandler(authService)
-	authGrpcRoute, authGrpcRouter := authv1connect.NewAuthServiceHandler(authGrpcHandler)
-
-	chatGrpcHandler := grpc_handlers.NewChatGrpcHandler(log.NewSubLogger("chats-handler"), chatService)
-	chatGrpcRoute, chatGrpcRouter := chatv1connect.NewChatServiceHandler(chatGrpcHandler, interceptors)
-
-	eventsGrpcHandler := grpc_handlers.NewEventsGrpcHandler(log.NewSubLogger("events-handler"), streamSubscriber)
-	eventsGrpcRoute, eventsGrpcRouter := eventsv1connect.NewEventsServiceHandler(eventsGrpcHandler, interceptors)
-
-	messageGrpcHandler := grpc_handlers.NewMessageGrpcHandler(log.NewSubLogger("message-handler"), messageService)
-	messageGrpcRoute, messageGrpcRouter := messagev1connect.NewMessageServiceHandler(messageGrpcHandler, interceptors)
-
-	searchGrpcHandler := grpc_handlers.NewSearchGrpcHandler(log.NewSubLogger("message-handler"), searchService)
-	searchGrpcRoute, searchGrpcRouter := searchv1connect.NewSearchServiceHandler(searchGrpcHandler, interceptors)
-
-	gRPCRouter.Handle(authGrpcRoute, authGrpcRouter)
-	gRPCRouter.Handle(chatGrpcRoute, chatGrpcRouter)
-	gRPCRouter.Handle(eventsGrpcRoute, eventsGrpcRouter)
-	gRPCRouter.Handle(messageGrpcRoute, messageGrpcRouter)
-	gRPCRouter.Handle(searchGrpcRoute, searchGrpcRouter)
+	// [=== Init HTTP Server ===]
+	router := http.NewServeMux()
 
 	// [=== PPROF Memory Profiling Tool ===]
 	if config.CurrentEnv == config.Development {
-		gRPCRouter.HandleFunc("/debug/pprof/*", pprof.Index)
-		gRPCRouter.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		router.HandleFunc("/debug/pprof/*", pprof.Index)
+		router.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
-	// [=== Init HTTP Server ===]
-	handler := handleCORS(cfg.HTTP.Cors.AllowOrigins, gRPCRouter)
+	// [=== Init Grpc Server ===]
+	grpc.NewGrpcServer(router, &grpc.Services{
+		AuthService:      authService,
+		ChatService:      chatService,
+		MessageService:   messageService,
+		SearchService:    searchService,
+		StreamSubscriber: streamSubscriber,
+	})
+
+	// [=== Serve HTTP Server ===]
+	handler := handleCORS(cfg.HTTP.Cors.AllowOrigins, router)
 	server := &http.Server{
-		Addr:         grpcListenAddr,
+		Addr:         fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port),
 		Handler:      h2c.NewHandler(handler, &http2.Server{}),
 		ReadTimeout:  0,
 		WriteTimeout: 0,
