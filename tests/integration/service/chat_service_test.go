@@ -233,7 +233,7 @@ func (s *ChatTestSuite) TestC_CreateDirect() {
 	}
 
 	for _, tc := range testCases {
-		saved, varror := s.service.CreateDirect(ctx, tc.userID, tc.recipientUserID)
+		chat, varror := s.service.CreateDirect(ctx, tc.userID, tc.recipientUserID)
 		if !tc.Valid {
 			if tc.Error != nil {
 				require.Equal(s.T(), tc.Error, varror.Error)
@@ -244,14 +244,12 @@ func (s *ChatTestSuite) TestC_CreateDirect() {
 		} else if tc.Valid {
 			require.Nil(s.T(), varror)
 
-			chatDetail, err := utils.TypeConverter[model.DirectChatDetail](saved.ChatDetail)
+			chatDetail, err := utils.TypeConverter[model.DirectChatDetailDTO](chat.ChatDetail)
 			require.NoError(s.T(), err)
 
-			require.True(s.T(), chatDetail.HasSide(tc.userID))
-			require.True(s.T(), chatDetail.HasSide(tc.recipientUserID))
-			require.False(s.T(), chatDetail.HasSide("invalid-user-id"))
+			require.Equal(s.T(), chatDetail.Recipient.UserID, tc.userID)
 
-			s.createdDirectChatID = saved.ChatID
+			s.createdDirectChatID = chat.ChatID
 		} else {
 			require.Fail(s.T(), "not specific")
 		}

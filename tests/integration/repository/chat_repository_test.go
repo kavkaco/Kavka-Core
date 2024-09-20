@@ -151,7 +151,7 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	ctx := context.TODO()
 
 	chatIDs := []model.ChatID{s.createdChannelChatID, s.createdGroupChatID, s.createdDirectChatID}
-	chats, err := s.repo.GetUserChats(ctx, chatIDs)
+	chats, err := s.repo.GetUserChats(ctx, s.userID, chatIDs)
 	require.NoError(s.T(), err)
 
 	require.Len(s.T(), chats, 3)
