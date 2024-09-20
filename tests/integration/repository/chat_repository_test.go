@@ -117,10 +117,10 @@ func (s *ChatTestSuite) TestC_CreateDirect() {
 	s.createdDirectChatID = saved.ChatID
 }
 
-func (s *ChatTestSuite) TestD_FindBySides() {
+func (s *ChatTestSuite) TestD_GetDirectChat() {
 	ctx := context.TODO()
 
-	chat, err := s.repo.FindBySides(ctx, s.recipientUserID, s.userID)
+	chat, err := s.repo.GetDirectChat(ctx, s.recipientUserID, s.userID)
 	require.NoError(s.T(), err)
 
 	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)

@@ -2,7 +2,6 @@ package proto_model_transformer
 
 import (
 	"errors"
-	"log"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	modelv1 "github.com/kavkaco/Kavka-Core/protobuf/gen/go/protobuf/model/chat/v1"
@@ -116,8 +115,6 @@ func ChatDetailToProto(chatType string, chatDetail interface{}) (*modelv1.ChatDe
 		if err != nil {
 			return nil, err
 		}
-
-		log.Println(cd)
 
 		if cd == nil || cd.Recipient == nil {
 			return nil, errors.New("unable to transform direct chat detail to DirectChatDetailDTO model")

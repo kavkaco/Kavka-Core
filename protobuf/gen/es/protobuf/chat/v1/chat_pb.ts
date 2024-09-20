@@ -8,70 +8,76 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { Chat } from "../../model/chat/v1/chat_pb.ts";
 
 /**
- * @generated from message protobuf.chat.v1.ChatEventRequest
+ * @generated from message protobuf.chat.v1.GetDirectChatRequest
  */
-export class ChatEventRequest extends Message<ChatEventRequest> {
-  constructor(data?: PartialMessage<ChatEventRequest>) {
+export class GetDirectChatRequest extends Message<GetDirectChatRequest> {
+  /**
+   * @generated from field: string recipient_user_id = 1;
+   */
+  recipientUserId = "";
+
+  constructor(data?: PartialMessage<GetDirectChatRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.chat.v1.ChatEventRequest";
+  static readonly typeName = "protobuf.chat.v1.GetDirectChatRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "recipient_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ChatEventRequest {
-    return new ChatEventRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDirectChatRequest {
+    return new GetDirectChatRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ChatEventRequest {
-    return new ChatEventRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDirectChatRequest {
+    return new GetDirectChatRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ChatEventRequest {
-    return new ChatEventRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDirectChatRequest {
+    return new GetDirectChatRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ChatEventRequest | PlainMessage<ChatEventRequest> | undefined, b: ChatEventRequest | PlainMessage<ChatEventRequest> | undefined): boolean {
-    return proto3.util.equals(ChatEventRequest, a, b);
+  static equals(a: GetDirectChatRequest | PlainMessage<GetDirectChatRequest> | undefined, b: GetDirectChatRequest | PlainMessage<GetDirectChatRequest> | undefined): boolean {
+    return proto3.util.equals(GetDirectChatRequest, a, b);
   }
 }
 
 /**
- * @generated from message protobuf.chat.v1.ChatEventResponse
+ * @generated from message protobuf.chat.v1.GetDirectChatResponse
  */
-export class ChatEventResponse extends Message<ChatEventResponse> {
+export class GetDirectChatResponse extends Message<GetDirectChatResponse> {
   /**
-   * @generated from field: bytes data = 2;
+   * @generated from field: protobuf.model.chat.v1.Chat chat = 1;
    */
-  data = new Uint8Array(0);
+  chat?: Chat;
 
-  constructor(data?: PartialMessage<ChatEventResponse>) {
+  constructor(data?: PartialMessage<GetDirectChatResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "protobuf.chat.v1.ChatEventResponse";
+  static readonly typeName = "protobuf.chat.v1.GetDirectChatResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "data", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: "chat", kind: "message", T: Chat },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ChatEventResponse {
-    return new ChatEventResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDirectChatResponse {
+    return new GetDirectChatResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ChatEventResponse {
-    return new ChatEventResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDirectChatResponse {
+    return new GetDirectChatResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ChatEventResponse {
-    return new ChatEventResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDirectChatResponse {
+    return new GetDirectChatResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ChatEventResponse | PlainMessage<ChatEventResponse> | undefined, b: ChatEventResponse | PlainMessage<ChatEventResponse> | undefined): boolean {
-    return proto3.util.equals(ChatEventResponse, a, b);
+  static equals(a: GetDirectChatResponse | PlainMessage<GetDirectChatResponse> | undefined, b: GetDirectChatResponse | PlainMessage<GetDirectChatResponse> | undefined): boolean {
+    return proto3.util.equals(GetDirectChatResponse, a, b);
   }
 }
 

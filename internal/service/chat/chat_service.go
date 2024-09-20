@@ -3,7 +3,6 @@ package chat
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
@@ -46,23 +45,7 @@ func (s *ChatService) GetChat(ctx context.Context, userID model.UserID, chatID m
 	}
 
 	if chat.ChatType == "direct" {
-		chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrNotFound}
-		}
-
-		recipientUserID := chatDetail.GetRecipient(userID)
-
-		recipient, err := s.userRepo.FindByUserID(ctx, recipientUserID)
-		if err != nil {
-			return nil, &vali.Varror{Error: ErrNotFound}
-		}
-
-		chat.ChatDetail = &model.DirectChatDetailDTO{
-			Recipient: recipient,
-		}
-
-		return chat, nil
+		return nil, &vali.Varror{Error: errors.New("get direct chat is not supported in this method")}
 	}
 
 	return chat, nil
@@ -86,16 +69,41 @@ func (s *ChatService) GetUserChats(ctx context.Context, userID model.UserID) ([]
 		return []model.ChatDTO{}, nil
 	}
 
-	userChats, err := s.chatRepo.GetUserChats(ctx, userChatsListIDs)
+	userChats, err := s.chatRepo.GetUserChats(ctx, userID, userChatsListIDs)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrGetUserChats}
 	}
 
-	fmt.Println("use chats", userChats)
-
 	return userChats, nil
 }
 
+func (s *ChatService) GetDirectChat(ctx context.Context, userID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
+	chat, err := s.chatRepo.GetDirectChat(ctx, userID, recipientUserID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrNotFound}
+	}
+
+	chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrNotFound}
+	}
+
+	finalUserID := chatDetail.GetRecipient(userID)
+
+	recipient, err := s.userRepo.FindByUserID(ctx, finalUserID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrNotFound}
+	}
+
+	chat.ChatDetail = &model.DirectChatDetailDTO{
+		Recipient: recipient,
+	}
+
+	chatDto := model.NewChatDTO(chat)
+
+	return chatDto, nil
+
+}
 func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
 	varrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
 	if len(varrors) > 0 {
@@ -103,7 +111,7 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 	}
 
 	// Duplicated direct chats is not allowed!
-	chat, err := s.chatRepo.FindBySides(ctx, userID, recipientUserID)
+	chat, err := s.chatRepo.GetDirectChat(ctx, userID, recipientUserID)
 
 	if errors.Is(err, repository.ErrNotFound) {
 		// Let's create the direct chat, because it's not exists in the database!
@@ -117,20 +125,33 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 			return nil, &vali.Varror{Error: ErrCreateChat}
 		}
 
-		go func() {
-			createErr := s.messageRepo.Create(context.TODO(), chat.ChatID)
-			if createErr != nil {
-				s.logger.Error("message store creation failed: " + createErr.Error())
-				return
-			}
-		}()
+		err = s.messageRepo.Create(context.TODO(), chat.ChatID)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrMessageStoreCreation}
+		}
 
-		err = s.chatRepo.JoinChat(ctx, userID, chat.ChatID)
+		err = s.chatRepo.JoinChat(ctx, chat.ChatType, userID, chat.ChatID)
 		if err != nil {
 			return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 		}
 
+		chatDetail, err := utils.TypeConverter[model.DirectChatDetail](chat.ChatDetail)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrJoinDirectChat}
+		}
+
+		finalRecipientUserID := chatDetail.GetRecipient(recipientUserID)
+
+		recipient, err := s.userRepo.FindByUserID(ctx, finalRecipientUserID)
+		if err != nil {
+			return nil, &vali.Varror{Error: ErrJoinDirectChat}
+		}
+
 		chatDTO := model.NewChatDTO(chat)
+
+		chatDTO.ChatDetail = &model.DirectChatDetailDTO{
+			Recipient: recipient,
+		}
 
 		return chatDTO, nil
 	} else if chat != nil {
@@ -178,7 +199,7 @@ func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, titl
 		}
 	}()
 
-	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -227,7 +248,7 @@ func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, ti
 		}
 	}()
 
-	err = s.chatRepo.JoinChat(ctx, userID, savedChat.ChatID)
+	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -275,7 +296,7 @@ func (s *ChatService) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 	}
 
 	if !isMember {
-		err := s.chatRepo.JoinChat(ctx, userID, chatID)
+		err := s.chatRepo.JoinChat(ctx, chat.ChatType, userID, chatID)
 		if err != nil {
 			return nil, &vali.Varror{Error: err}
 		}

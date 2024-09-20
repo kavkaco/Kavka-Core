@@ -21,7 +21,7 @@ func NewChatMongoRepository(db *mongo.Database) repository.ChatRepository {
 	return &chatRepository{db.Collection(database.UsersCollection), db.Collection(database.ChatsCollection)}
 }
 
-func (repo *chatRepository) JoinChat(ctx context.Context, userID string, chatID primitive.ObjectID) error {
+func (repo *chatRepository) JoinChat(ctx context.Context, chatType string, userID string, chatID primitive.ObjectID) error {
 	userFilter := bson.M{"user_id": userID}
 	userUpdate := bson.M{
 		"$addToSet": bson.M{
@@ -33,16 +33,18 @@ func (repo *chatRepository) JoinChat(ctx context.Context, userID string, chatID 
 		return err
 	}
 
-	chatFilter := bson.M{"_id": chatID}
-	chatUpdate := bson.M{
-		"$addToSet": bson.M{
-			"chat_detail.members": userID,
-		},
-	}
+	if chatType != "direct" {
+		chatFilter := bson.M{"_id": chatID}
+		chatUpdate := bson.M{
+			"$addToSet": bson.M{
+				"chat_detail.members": userID,
+			},
+		}
 
-	_, err = repo.chatsCollection.UpdateOne(ctx, chatFilter, chatUpdate)
-	if err != nil {
-		return err
+		_, err = repo.chatsCollection.UpdateOne(ctx, chatFilter, chatUpdate)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -80,7 +82,7 @@ func (repo *chatRepository) Destroy(ctx context.Context, chatID model.ChatID) er
 	return nil
 }
 
-func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.ChatID) ([]model.ChatDTO, error) {
+func (repo *chatRepository) GetUserChats(ctx context.Context, userID model.UserID, chatIDs []model.ChatID) ([]model.ChatDTO, error) {
 	pipeline := bson.A{
 		bson.M{
 			"$match": bson.M{
@@ -89,7 +91,8 @@ func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.Ch
 		},
 		bson.M{
 			"$lookup": bson.M{
-				"from":         "messages",
+				"from": "messages",
+
 				"localField":   "_id",
 				"foreignField": "chat_id",
 				"as":           "chat_messages",
@@ -114,8 +117,62 @@ func (repo *chatRepository) GetUserChats(ctx context.Context, chatIDs []model.Ch
 			},
 		},
 		bson.M{
+			"$lookup": bson.M{
+				"from": "users",
+				"as":   "users",
+				"let": bson.M{
+					"user_id":           "$chat_detail.user_id",
+					"recipient_user_id": "$chat_detail.recipient_user_id",
+				},
+				"pipeline": bson.A{
+					bson.M{
+						"$match": bson.M{
+							"$expr": bson.M{
+								"$or": bson.A{
+									bson.M{
+										"$eq": bson.A{"$user_id", "$$user_id"},
+									},
+									bson.M{
+										"$eq": bson.A{"$user_id", "$$recipient_user_id"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"chat_detail.recipient": bson.M{
+					"$arrayElemAt": bson.A{
+						bson.M{
+							"$filter": bson.M{
+								"input": "$users",
+								"as":    "recipient",
+								"cond": bson.M{
+									"$eq": bson.A{
+										"$$recipient.user_id",
+										bson.M{
+											"$cond": bson.M{
+												"if":   bson.M{"$eq": bson.A{"$chat_detail.recipient_user_id", userID}},
+												"then": "$chat_detail.user_id",
+												"else": "$chat_detail.recipient_user_id",
+											},
+										},
+									},
+								},
+							},
+						},
+						0,
+					},
+				},
+			},
+		},
+		bson.M{
 			"$project": bson.M{
 				"chat_messages": 0,
+				"users":         0,
 			},
 		},
 	}
@@ -170,7 +227,7 @@ func (repo *chatRepository) GetChat(ctx context.Context, chatID model.ChatID) (*
 	return chat, nil
 }
 
-func (repo *chatRepository) FindBySides(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error) {
+func (repo *chatRepository) GetDirectChat(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error) {
 	filter := bson.M{
 		"$or": bson.A{
 			bson.M{"$and": bson.A{

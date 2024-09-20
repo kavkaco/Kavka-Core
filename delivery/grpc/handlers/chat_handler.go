@@ -3,7 +3,6 @@ package grpc_handlers
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
@@ -24,6 +23,29 @@ type chatHandler struct {
 
 func NewChatGrpcHandler(logger *log.SubLogger, chatService *chat.ChatService) chatv1connect.ChatServiceHandler {
 	return chatHandler{logger, chatService}
+}
+
+func (h chatHandler) GetDirectChat(ctx context.Context, req *connect.Request[chatv1.GetDirectChatRequest]) (*connect.Response[chatv1.GetDirectChatResponse], error) {
+	userID := ctx.Value(interceptor.UserID{}).(model.UserID)
+	if userID == "" {
+		return nil, connect.NewError(connect.CodeDataLoss, interceptor.ErrEmptyUserID)
+	}
+
+	chatDto, varror := h.chatService.GetDirectChat(ctx, userID, req.Msg.RecipientUserId)
+	if varror != nil {
+		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeNotFound)
+	}
+
+	chatProto, err := proto_model_transformer.ChatToProto(*chatDto)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	res := connect.NewResponse(&chatv1.GetDirectChatResponse{
+		Chat: chatProto,
+	})
+
+	return res, nil
 }
 
 func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[chatv1.CreateChannelRequest]) (*connect.Response[chatv1.CreateChannelResponse], error) {
@@ -137,7 +159,6 @@ func (h chatHandler) GetUserChats(ctx context.Context, req *connect.Request[chat
 	}
 
 	chats, varror := h.chatService.GetUserChats(ctx, userID)
-	fmt.Println(chats)
 	if varror != nil {
 		return nil, varror.Error
 	}

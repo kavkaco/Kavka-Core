@@ -72,7 +72,7 @@ func (s *ChatTestSuite) SetupSuite() {
 	require.NoError(s.T(), err)
 }
 
-func (s *ChatTestSuite) TestCreateChannel() {
+func (s *ChatTestSuite) TestA_CreateChannel() {
 	ctx := context.TODO()
 
 	detailModel := model.ChannelChatDetail{
@@ -139,7 +139,7 @@ func (s *ChatTestSuite) TestCreateChannel() {
 	}
 }
 
-func (s *ChatTestSuite) TestCreateGroup() {
+func (s *ChatTestSuite) TestB_CreateGroup() {
 	ctx := context.TODO()
 
 	detailModel := model.GroupChatDetail{
@@ -206,7 +206,7 @@ func (s *ChatTestSuite) TestCreateGroup() {
 	}
 }
 
-func (s *ChatTestSuite) TestCreateDirect() {
+func (s *ChatTestSuite) TestC_CreateDirect() {
 	ctx := context.TODO()
 
 	detailModel := &model.DirectChatDetail{
@@ -258,7 +258,7 @@ func (s *ChatTestSuite) TestCreateDirect() {
 	}
 }
 
-func (s *ChatTestSuite) TestGetChat_Channel() {
+func (s *ChatTestSuite) TestD_GetChat_Channel() {
 	ctx := context.TODO()
 
 	testCases := []struct {
@@ -297,7 +297,7 @@ func (s *ChatTestSuite) TestGetChat_Channel() {
 	}
 }
 
-func (s *ChatTestSuite) TestGetChat_Group() {
+func (s *ChatTestSuite) TestE_GetChat_Group() {
 	ctx := context.TODO()
 
 	testCases := []struct {
@@ -336,7 +336,7 @@ func (s *ChatTestSuite) TestGetChat_Group() {
 	}
 }
 
-func (s *ChatTestSuite) TestGetUserChats() {
+func (s *ChatTestSuite) TestF_GetUserChats() {
 	ctx := context.TODO()
 	userModel1 := &s.users[0]
 
@@ -394,7 +394,7 @@ func (s *ChatTestSuite) TestGetUserChats() {
 	}
 }
 
-func (s *ChatTestSuite) TestJoinChat_channel() {
+func (s *ChatTestSuite) TestG_JoinChat_Channel() {
 	ctx := context.TODO()
 
 	// Create a plain channel chat
@@ -461,7 +461,7 @@ func (s *ChatTestSuite) TestJoinChat_channel() {
 	}
 }
 
-func (s *ChatTestSuite) TestJoinChat_group() {
+func (s *ChatTestSuite) TestH_JoinChat_Group() {
 	ctx := context.TODO()
 
 	// Create a plain channel chat
@@ -526,6 +526,14 @@ func (s *ChatTestSuite) TestJoinChat_group() {
 			require.Fail(s.T(), "not specific")
 		}
 	}
+}
+
+func (s *ChatTestSuite) TestI_GetDirectChat() {
+	ctx := context.TODO()
+
+	chat, varror := s.service.GetDirectChat(ctx, s.users[0].UserID, s.users[1].UserID)
+	require.Empty(s.T(), varror)
+	require.NotEmpty(s.T(), chat)
 }
 
 func TestChatSuite(t *testing.T) {
