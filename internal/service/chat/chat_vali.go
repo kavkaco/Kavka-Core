@@ -2,26 +2,26 @@ package chat
 
 import "github.com/kavkaco/Kavka-Core/internal/model"
 
-type GetChatValidation struct {
+type getChatValidation struct {
 	ChatID model.ChatID `validate:"required"`
 }
 
-type GetUserChatsValidation struct {
+type getUserChatsValidation struct {
 	UserID model.UserID `validate:"required"`
 }
 
-type CreateDirectValidation struct {
+type createDirectValidation struct {
 	UserID          model.UserID `validate:"required"`
 	RecipientUserID model.UserID `validate:"required"`
 }
 
-type CreateChannelValidation struct {
+type createChannelValidation struct {
 	UserID      model.UserID `validate:"required"`
 	Title       string       `validate:"required,min=1"`
 	Username    string       `validate:"required,min=3"`
 	Description string
 }
-type CreateGroupValidation struct {
+type createGroupValidation struct {
 	UserID      model.UserID `validate:"required"`
 	Title       string       `validate:"required,min=1"`
 	Username    string       `validate:"required,min=3"`

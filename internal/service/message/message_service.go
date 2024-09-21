@@ -37,7 +37,7 @@ func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID)
 }
 
 func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
-	varrors := s.validator.Validate(InsertTextMessageValidation{chatID, userID, messageContent})
+	varrors := s.validator.Validate(insertTextMessageValidation{chatID, userID, messageContent})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -110,7 +110,7 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 }
 
 func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
-	varrors := s.validator.Validate(DeleteMessageValidation{chatID, userID, messageID})
+	varrors := s.validator.Validate(deleteMessageValidation{chatID, userID, messageID})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}

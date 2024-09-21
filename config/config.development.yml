@@ -25,8 +25,6 @@ minio:
     access_key: uD3h2W3CONpYe8Tb4nbp
     secret_key: fKF98iAk1eDSpdtdJWcJHgivjpF4Su4HCdgkpYvQ
 
-sms:
-
 logger:
     file_name: kavka.logs
     level: debug

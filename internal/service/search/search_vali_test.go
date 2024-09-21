@@ -19,19 +19,19 @@ func (s *ValiTestSuite) SetupSuite() {
 
 func (s *ValiTestSuite) TestSearchValidation() {
 	testCases := []struct {
-		Input *SearchValidation
+		Input *searchValidation
 		Valid bool
 	}{
 		{
-			Input: &SearchValidation{Input: ""},
+			Input: &searchValidation{Input: ""},
 			Valid: false,
 		},
 		{
-			Input: &SearchValidation{Input: " "},
+			Input: &searchValidation{Input: " "},
 			Valid: false,
 		},
 		{
-			Input: &SearchValidation{Input: "Sample"},
+			Input: &searchValidation{Input: "Sample"},
 			Valid: true,
 		},
 	}
