@@ -34,7 +34,7 @@ func NewChatService(logger *log.SubLogger, chatRepo repository.ChatRepository, u
 
 // find single chat with chat id
 func (s *ChatService) GetChat(ctx context.Context, userID model.UserID, chatID model.ChatID) (*model.Chat, *vali.Varror) {
-	varrors := s.validator.Validate(GetChatValidation{chatID})
+	varrors := s.validator.Validate(getChatValidation{chatID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -53,7 +53,7 @@ func (s *ChatService) GetChat(ctx context.Context, userID model.UserID, chatID m
 
 // get the chats that belongs to user
 func (s *ChatService) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.Varror) {
-	varrors := s.validator.Validate(GetUserChatsValidation{userID})
+	varrors := s.validator.Validate(getUserChatsValidation{userID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -105,7 +105,7 @@ func (s *ChatService) GetDirectChat(ctx context.Context, userID, recipientUserID
 }
 
 func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.ChatDTO, *vali.Varror) {
-	varrors := s.validator.Validate(CreateDirectValidation{userID, recipientUserID})
+	varrors := s.validator.Validate(createDirectValidation{userID, recipientUserID})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -160,7 +160,7 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 }
 
 func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
-	varrors := s.validator.Validate(CreateGroupValidation{userID, title, username, description})
+	varrors := s.validator.Validate(createGroupValidation{userID, title, username, description})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -209,7 +209,7 @@ func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, titl
 }
 
 func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, title string, username string, description string) (*model.ChatDTO, *vali.Varror) {
-	varrors := s.validator.Validate(CreateChannelValidation{userID, title, username, description})
+	varrors := s.validator.Validate(createChannelValidation{userID, title, username, description})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}

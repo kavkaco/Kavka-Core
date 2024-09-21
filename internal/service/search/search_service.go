@@ -19,7 +19,7 @@ func NewSearchService(logger *log.SubLogger, searchRepository repository.SearchR
 }
 
 func (s *SearchService) Search(ctx context.Context, input string) (*model.SearchResultDTO, *vali.Varror) {
-	varrors := s.validator.Validate(SearchValidation{input})
+	varrors := s.validator.Validate(searchValidation{input})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}

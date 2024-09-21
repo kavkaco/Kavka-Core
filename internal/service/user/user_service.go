@@ -21,7 +21,7 @@ func NewUserService(userRepo repository.UserRepository) *UserService {
 }
 
 func (s *UserService) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror {
-	validationErrors := s.validator.Validate(UpdateProfileValidation{name, lastName, username})
+	validationErrors := s.validator.Validate(updateProfileValidation{name, lastName, username})
 	if len(validationErrors) > 0 {
 		return &vali.Varror{ValidationErrors: validationErrors}
 	}

@@ -43,7 +43,7 @@ type DetailedValidation struct {
 }
 
 func (a *AuthService) Register(ctx context.Context, name string, lastName string, username string, email string, password string, verifyEmailRedirectUrl string) (verifyEmailToken string, varror *vali.Varror) {
-	varrors := a.validator.Validate(RegisterValidation{name, lastName, username, email, password})
+	varrors := a.validator.Validate(registerValidation{name, lastName, username, email, password})
 	if len(varrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: varrors}
 	}
@@ -101,7 +101,7 @@ func (a *AuthService) Register(ctx context.Context, name string, lastName string
 }
 
 func (a *AuthService) Authenticate(ctx context.Context, accessToken string) (*model.User, *vali.Varror) {
-	varrors := a.validator.Validate(AuthenticateValidation{accessToken})
+	varrors := a.validator.Validate(authenticateValidation{accessToken})
 	if len(varrors) > 0 {
 		return nil, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -124,7 +124,7 @@ func (a *AuthService) Authenticate(ctx context.Context, accessToken string) (*mo
 }
 
 func (a *AuthService) VerifyEmail(ctx context.Context, verifyEmailToken string) *vali.Varror {
-	varrors := a.validator.Validate(VerifyEmailValidation{verifyEmailToken})
+	varrors := a.validator.Validate(verifyEmailValidation{verifyEmailToken})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}
@@ -148,7 +148,7 @@ func (a *AuthService) VerifyEmail(ctx context.Context, verifyEmailToken string) 
 }
 
 func (a *AuthService) Login(ctx context.Context, email string, password string) (_ *model.User, act string, rft string, varror *vali.Varror) {
-	varrors := a.validator.Validate(LoginValidation{email, password})
+	varrors := a.validator.Validate(loginValidation{email, password})
 	if len(varrors) > 0 {
 		return nil, "", "", &vali.Varror{ValidationErrors: varrors}
 	}
@@ -233,7 +233,7 @@ func (a *AuthService) Login(ctx context.Context, email string, password string) 
 }
 
 func (a *AuthService) ChangePassword(ctx context.Context, userID model.UserID, oldPassword string, newPassword string) *vali.Varror {
-	varrors := a.validator.Validate(ChangePasswordValidation{oldPassword, newPassword})
+	varrors := a.validator.Validate(changePasswordValidation{oldPassword, newPassword})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}
@@ -263,7 +263,7 @@ func (a *AuthService) ChangePassword(ctx context.Context, userID model.UserID, o
 }
 
 func (a *AuthService) RefreshToken(ctx context.Context, userID model.UserID, refreshToken string) (string, *vali.Varror) {
-	varrors := a.validator.Validate(RefreshTokenValidation{userID, refreshToken})
+	varrors := a.validator.Validate(refreshTokenValidation{userID, refreshToken})
 	if len(varrors) > 0 {
 		return "", &vali.Varror{ValidationErrors: varrors}
 	}
@@ -290,7 +290,7 @@ func (a *AuthService) RefreshToken(ctx context.Context, userID model.UserID, ref
 }
 
 func (a *AuthService) SendResetPassword(ctx context.Context, email string, resetPasswordRedirectUrl string) (token string, timeout time.Duration, varror *vali.Varror) {
-	varrors := a.validator.Validate(SendResetPasswordValidation{email})
+	varrors := a.validator.Validate(sendResetPasswordValidation{email})
 	if len(varrors) > 0 {
 		return "", 0, &vali.Varror{ValidationErrors: varrors}
 	}
@@ -330,7 +330,7 @@ func (a *AuthService) SendResetPassword(ctx context.Context, email string, reset
 }
 
 func (a *AuthService) SubmitResetPassword(ctx context.Context, token string, newPassword string) *vali.Varror {
-	varrors := a.validator.Validate(SubmitResetPasswordValidation{token, newPassword})
+	varrors := a.validator.Validate(submitResetPasswordValidation{token, newPassword})
 	if len(varrors) > 0 {
 		return &vali.Varror{ValidationErrors: varrors}
 	}
