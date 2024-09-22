@@ -2,9 +2,9 @@ FROM golang:alpine as builder
 
 RUN apk add make
 
-WORKDIR /build
+WORKDIR /app
 
-COPY . /build
+WORKDIR /build
 
 RUN go mod tidy
 
@@ -12,10 +12,8 @@ RUN make build
 
 FROM golang:alpine as runtime
 
-WORKDIR /server
-
-COPY --from=builder ./build/server /server/server
+COPY --from=builder /app/build/server /usr/bin/server
 
 EXPOSE 8000
 
-CMD ["./build/server"]
+CMD ["/usr/bin/server"]
