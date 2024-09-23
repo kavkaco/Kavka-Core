@@ -5,8 +5,8 @@ import (
 
 	"connectrpc.com/connect"
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 
+	"github.com/kavkaco/Kavka-Core/internal/model/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/service/auth"
 
 	authv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/auth/v1"

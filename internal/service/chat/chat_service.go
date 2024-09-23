@@ -6,10 +6,14 @@ import (
 
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/model/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
+	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/utils"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
+	eventsv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/events/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 const SubjChats = "chats"
@@ -133,7 +137,12 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 		return nil, &vali.Varror{Error: ErrMessageStoreCreation}
 	}
 
-	err = s.chatRepo.JoinChat(ctx, createdChat.ChatType, userID, createdChat.ChatID)
+	err = s.chatRepo.AddToUsersChatsList(ctx, userID, createdChat.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
+	}
+
+	err = s.chatRepo.AddToUsersChatsList(ctx, recipientUserID, createdChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
@@ -155,6 +164,34 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 	chatDTO.ChatDetail = &model.DirectChatDetailDTO{
 		Recipient: recipient,
 	}
+
+	chatProto, err := proto_model_transformer.ChatToProto(*chatDTO)
+	if err != nil {
+		return nil, &vali.Varror{Error: service.ErrProtoMarshaling}
+	}
+
+	// Let's tell the recipient that this user created a direct chat with you
+	payloadProtoBuf, marshalErr := proto.Marshal(&eventsv1.SubscribeEventsStreamResponse{
+		Name: "add-chat",
+		Type: eventsv1.SubscribeEventsStreamResponse_TYPE_ADD_CHAT,
+		Payload: &eventsv1.SubscribeEventsStreamResponse_AddChat{
+			AddChat: &eventsv1.AddChat{
+				Chat: chatProto,
+			},
+		},
+	},
+	)
+	if marshalErr != nil {
+		return nil, &vali.Varror{Error: service.ErrProtoMarshaling}
+	}
+
+	s.eventPublisher.Publish(&eventsv1.StreamEvent{
+		SenderUserId: userID,
+		ReceiversUserId: []model.UserID{
+			finalRecipientUserID,
+		},
+		Payload: payloadProtoBuf,
+	})
 
 	return chatDTO, nil
 }
@@ -183,19 +220,15 @@ func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, titl
 		Text: "Group created",
 	}, userID)
 
-	go func() {
-		createErr := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
-		if createErr != nil {
-			s.logger.Error("message store creation failed: " + createErr.Error())
-			return
-		}
+	err = s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrJoinDirectChat}
+	}
 
-		_, createErr = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
-		if createErr != nil {
-			s.logger.Error("failed to insert message in group creation: " + createErr.Error())
-			return
-		}
-	}()
+	_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrJoinDirectChat}
+	}
 
 	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
 	if err != nil {
@@ -232,19 +265,15 @@ func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, ti
 		Text: "Channel created",
 	}, userID)
 
-	go func() {
-		createError := s.messageRepo.Create(context.TODO(), savedChat.ChatID)
-		if createError != nil {
-			s.logger.Error("message store creation failed: " + createError.Error())
-			return
-		}
+	err = s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrMessageStoreCreation}
+	}
 
-		_, createError = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
-		if createError != nil {
-			s.logger.Error("failed to insert message in channel creation: " + createError.Error())
-			return
-		}
-	}()
+	_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrMessageStoreCreation}
+	}
 
 	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
 	if err != nil {

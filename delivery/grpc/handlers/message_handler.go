@@ -7,10 +7,10 @@ import (
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/model/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/service/message"
 	"github.com/kavkaco/Kavka-Core/log"
 
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	messagev1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/message/v1"
 	"github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/message/v1/messagev1connect"

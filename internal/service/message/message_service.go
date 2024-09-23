@@ -3,9 +3,9 @@ package message
 import (
 	"context"
 
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/infra/stream"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/model/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/utils/vali"

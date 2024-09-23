@@ -21,7 +21,7 @@ func NewChatMongoRepository(db *mongo.Database) repository.ChatRepository {
 	return &chatRepository{db.Collection(database.UsersCollection), db.Collection(database.ChatsCollection)}
 }
 
-func (repo *chatRepository) JoinChat(ctx context.Context, chatType string, userID string, chatID primitive.ObjectID) error {
+func (repo *chatRepository) AddToUsersChatsList(ctx context.Context, userID string, chatID primitive.ObjectID) error {
 	userFilter := bson.M{"user_id": userID}
 	userUpdate := bson.M{
 		"$addToSet": bson.M{
@@ -33,18 +33,20 @@ func (repo *chatRepository) JoinChat(ctx context.Context, chatType string, userI
 		return err
 	}
 
-	if chatType != "direct" {
-		chatFilter := bson.M{"_id": chatID}
-		chatUpdate := bson.M{
-			"$addToSet": bson.M{
-				"chat_detail.members": userID,
-			},
-		}
+	return nil
+}
 
-		_, err = repo.chatsCollection.UpdateOne(ctx, chatFilter, chatUpdate)
-		if err != nil {
-			return err
-		}
+func (repo *chatRepository) JoinChat(ctx context.Context, chatType string, userID string, chatID primitive.ObjectID) error {
+	chatFilter := bson.M{"_id": chatID}
+	chatUpdate := bson.M{
+		"$addToSet": bson.M{
+			"chat_detail.members": userID,
+		},
+	}
+
+	_, err := repo.chatsCollection.UpdateOne(ctx, chatFilter, chatUpdate)
+	if err != nil {
+		return err
 	}
 
 	return nil

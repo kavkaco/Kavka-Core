@@ -8,8 +8,9 @@ import (
 	grpc_helpers "github.com/kavkaco/Kavka-Core/delivery/grpc/helpers"
 	"github.com/kavkaco/Kavka-Core/delivery/grpc/interceptor"
 
-	"github.com/kavkaco/Kavka-Core/delivery/grpc/proto_model_transformer"
 	"github.com/kavkaco/Kavka-Core/internal/model"
+	"github.com/kavkaco/Kavka-Core/internal/model/proto_model_transformer"
+	"github.com/kavkaco/Kavka-Core/internal/service"
 	"github.com/kavkaco/Kavka-Core/internal/service/chat"
 	"github.com/kavkaco/Kavka-Core/log"
 	chatv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/chat/v1"
@@ -38,7 +39,7 @@ func (h chatHandler) GetDirectChat(ctx context.Context, req *connect.Request[cha
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chatDto)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := connect.NewResponse(&chatv1.GetDirectChatResponse{
@@ -61,7 +62,7 @@ func (h chatHandler) CreateChannel(ctx context.Context, req *connect.Request[cha
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := connect.NewResponse(&chatv1.CreateChannelResponse{
@@ -88,7 +89,7 @@ func (h chatHandler) CreateDirect(ctx context.Context, req *connect.Request[chat
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := connect.NewResponse(&chatv1.CreateDirectResponse{
@@ -111,7 +112,7 @@ func (h chatHandler) CreateGroup(ctx context.Context, req *connect.Request[chatv
 
 	chatProto, err := proto_model_transformer.ChatToProto(*chat)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := connect.NewResponse(&chatv1.CreateGroupResponse{
@@ -140,7 +141,7 @@ func (h chatHandler) GetChat(ctx context.Context, req *connect.Request[chatv1.Ge
 	chatGetter := model.NewChatDTO(chat)
 	chatProto, err := proto_model_transformer.ChatToProto(*chatGetter)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := &connect.Response[chatv1.GetChatResponse]{
@@ -199,7 +200,7 @@ func (h chatHandler) JoinChat(ctx context.Context, req *connect.Request[chatv1.J
 
 	protoChat, err := proto_model_transformer.ChatToProto(*joinResult.UpdatedChat)
 	if err != nil {
-		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeInternal)
+		return nil, connect.NewError(connect.CodeInternal, service.ErrProtoMarshaling)
 	}
 
 	res := &connect.Response[chatv1.JoinChatResponse]{Msg: &chatv1.JoinChatResponse{
