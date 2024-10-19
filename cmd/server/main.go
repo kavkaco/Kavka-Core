@@ -107,6 +107,6 @@ func main() {
 		MessageService:   messageService,
 		SearchService:    searchService,
 		StreamSubscriber: streamSubscriber,
-	})
+	}).Run()
 	handleError(err)
 }

@@ -1,6 +1,6 @@
 module github.com/kavkaco/Kavka-Core
 
-go 1.22.4
+go 1.23.2
 
 require (
 	connectrpc.com/connect v1.17.0

@@ -42,7 +42,11 @@ type Services struct {
 	StreamSubscriber stream.StreamSubscriber
 }
 
-func NewGrpcServer(cfg *config.HTTP, router *http.ServeMux, services *Services) error {
+type GrpcServer struct {
+	server *http.Server
+}
+
+func NewGrpcServer(cfg *config.HTTP, router *http.ServeMux, services *Services) *GrpcServer {
 	authInterceptor := interceptor.NewAuthInterceptor(services.AuthService)
 	interceptors := connect.WithInterceptors(authInterceptor)
 
@@ -61,24 +65,31 @@ func NewGrpcServer(cfg *config.HTTP, router *http.ServeMux, services *Services) 
 	searchGrpcHandler := grpc_handlers.NewSearchGrpcHandler(log.NewSubLogger("message-handler"), services.SearchService)
 	searchGrpcRoute, searchGrpcRouter := searchv1connect.NewSearchServiceHandler(searchGrpcHandler, interceptors)
 
-	fmt.Println(authGrpcRoute)
 	router.Handle(authGrpcRoute, authGrpcRouter)
 	router.Handle(chatGrpcRoute, chatGrpcRouter)
 	router.Handle(eventsGrpcRoute, eventsGrpcRouter)
 	router.Handle(messageGrpcRoute, messageGrpcRouter)
 	router.Handle(searchGrpcRoute, searchGrpcRouter)
 
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	handler := handleCORS(cfg.Cors.AllowOrigins, router)
-	server := &http.Server{
-		Addr:         addr,
-		Handler:      h2c.NewHandler(handler, &http2.Server{}),
-		ReadTimeout:  0,
-		WriteTimeout: 0,
-		IdleTimeout:  0,
+
+	s := &GrpcServer{
+		server: &http.Server{
+			Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+			Handler:      h2c.NewHandler(handler, &http2.Server{}),
+			ReadTimeout:  0,
+			WriteTimeout: 0,
+			IdleTimeout:  0,
+		},
 	}
-	fmt.Println("Grpc server is listening at ", addr)
-	err := server.ListenAndServe()
+
+	return s
+}
+
+func (s *GrpcServer) Run() error {
+	fmt.Println("Grpc server is listening at ", s.server.Addr)
+
+	err := s.server.ListenAndServe()
 	if err != nil {
 		return err
 	}

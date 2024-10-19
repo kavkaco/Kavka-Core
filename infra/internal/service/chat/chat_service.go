@@ -232,11 +232,6 @@ func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, titl
 
 	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
 	if err != nil {
-		return nil, &vali.Varror{Error: ErrJoinChat}
-	}
-
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
-	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
 
@@ -281,11 +276,6 @@ func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, ti
 	}
 
 	err = s.chatRepo.JoinChat(ctx, savedChat.ChatType, userID, savedChat.ChatID)
-	if err != nil {
-		return nil, &vali.Varror{Error: ErrJoinChat}
-	}
-
-	err = s.chatRepo.AddToUsersChatsList(ctx, userID, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.Varror{Error: ErrUnableToAddChatToUsersList}
 	}
