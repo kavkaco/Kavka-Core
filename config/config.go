@@ -130,7 +130,7 @@ func Read() *Config {
 	}
 
 	// Load Jwt Secret Keys
-	secretData, secretErr := os.ReadFile(ConfigsDirPath() + "/jwt_secret.pem")
+	secretData, secretErr := os.ReadFile(ConfigsDirPath() + "/jwt_secret_key.pem")
 	if secretErr != nil {
 		panic(secretErr)
 	}

@@ -7,3 +7,4 @@ vendor/
 minio_data/*
 logs/logs*.json
 coverage.out*
+config/jwt_secret_key.pem
