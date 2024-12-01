@@ -21,9 +21,11 @@ redis:
     db: 0
 
 minio:
-    endpoint: 127.0.0.1:9000
-    access_key: uD3h2W3CONpYe8Tb4nbp
-    secret_key: fKF98iAk1eDSpdtdJWcJHgivjpF4Su4HCdgkpYvQ
+  url: localhost:9000
+  access_key: tC3RlaTuUcoZDnJS21Tw
+  secret_key: MXwXGlfLABWHHCH8CIqNWxb9UDASLRpm9zpuBale
+  api: s3v4
+  path: aut
 
 logger:
     file_name: kavka.logs

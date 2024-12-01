@@ -72,11 +72,12 @@ type (
 	}
 
 	MinIO struct {
-		Endpoint  string `koanf:"endpoint"`
+		Url       string `koanf:"url"`
 		AccessKey string `koanf:"access_key"`
 		SecretKey string `koanf:"secret_key"`
+		Api       string `koanf:"api"`
+		Path      string `koanf:"path"`
 	}
-
 	Email struct {
 		SenderEmail string `koanf:"sender_email"`
 		Password    string `koanf:"password"`

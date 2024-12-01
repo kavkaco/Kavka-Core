@@ -61,7 +61,6 @@ func NewGrpcServer(cfg *config.HTTP, router *http.ServeMux, services *Services) 
 	searchGrpcHandler := grpc_handlers.NewSearchGrpcHandler(log.NewSubLogger("message-handler"), services.SearchService)
 	searchGrpcRoute, searchGrpcRouter := searchv1connect.NewSearchServiceHandler(searchGrpcHandler, interceptors)
 
-	fmt.Println(authGrpcRoute)
 	router.Handle(authGrpcRoute, authGrpcRouter)
 	router.Handle(chatGrpcRoute, chatGrpcRouter)
 	router.Handle(eventsGrpcRoute, eventsGrpcRouter)
