@@ -417,7 +417,6 @@ func (s *ChatTestSuite) TestG_JoinChat_Channel() {
 		chatID primitive.ObjectID
 		userID string
 		Valid  bool
-		Error  error
 	}{
 		{
 			chatID: model.NewChatID(),
@@ -439,11 +438,6 @@ func (s *ChatTestSuite) TestG_JoinChat_Channel() {
 	for _, tc := range testCases {
 		joinResult, varror := s.service.JoinChat(ctx, tc.chatID, tc.userID)
 		if !tc.Valid {
-			if tc.Error != nil {
-				require.Equal(s.T(), tc.Error, varror.Error)
-				continue
-			}
-
 			require.NotNil(s.T(), varror)
 		} else if tc.Valid {
 			if varror != nil {
@@ -453,6 +447,14 @@ func (s *ChatTestSuite) TestG_JoinChat_Channel() {
 			require.Nil(s.T(), varror)
 			require.True(s.T(), joinResult.Joined)
 			require.NotEmpty(s.T(), joinResult.UpdatedChat)
+
+			chat, err := s.chatRepo.GetChat(ctx, tc.chatID)
+			require.Nil(s.T(), err)
+
+			chatDetail, err := utils.TypeConverter[model.GroupChatDetail](chat.ChatDetail)
+			require.Nil(s.T(), err)
+
+			require.True(s.T(), chatDetail.IsMember(tc.userID))
 		} else {
 			require.Fail(s.T(), "not specific")
 		}
@@ -484,7 +486,6 @@ func (s *ChatTestSuite) TestH_JoinChat_Group() {
 		chatID primitive.ObjectID
 		userID string
 		Valid  bool
-		Error  error
 	}{
 		{
 			chatID: model.NewChatID(),
@@ -506,11 +507,6 @@ func (s *ChatTestSuite) TestH_JoinChat_Group() {
 	for _, tc := range testCases {
 		joinResult, varror := s.service.JoinChat(ctx, tc.chatID, tc.userID)
 		if !tc.Valid {
-			if tc.Error != nil {
-				require.Equal(s.T(), tc.Error, varror.Error)
-				continue
-			}
-
 			require.NotNil(s.T(), varror)
 		} else if tc.Valid {
 			if varror != nil {
@@ -520,6 +516,15 @@ func (s *ChatTestSuite) TestH_JoinChat_Group() {
 			require.Nil(s.T(), varror)
 			require.True(s.T(), joinResult.Joined)
 			require.NotEmpty(s.T(), joinResult.UpdatedChat)
+
+			chat, err := s.chatRepo.GetChat(ctx, tc.chatID)
+			require.Nil(s.T(), err)
+
+			chatDetail, err := utils.TypeConverter[model.GroupChatDetail](chat.ChatDetail)
+			require.Nil(s.T(), err)
+
+			require.True(s.T(), chatDetail.IsMember(tc.userID))
+
 		} else {
 			require.Fail(s.T(), "not specific")
 		}

@@ -326,12 +326,12 @@ func (s *ChatService) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 	}
 
 	if !isMember {
-		err := s.chatRepo.JoinChat(ctx, chat.ChatType, userID, chatID)
+		_, err := s.userRepo.FindByUserID(ctx, userID)
 		if err != nil {
-			return nil, &vali.Varror{Error: err}
+			return nil, &vali.Varror{Error: ErrUserNotFound}
 		}
 
-		user, err := s.userRepo.FindByUserID(ctx, userID)
+		err = s.chatRepo.JoinChat(ctx, chat.ChatType, userID, chatID)
 		if err != nil {
 			return nil, &vali.Varror{Error: err}
 		}
@@ -340,7 +340,7 @@ func (s *ChatService) JoinChat(ctx context.Context, chatID model.ChatID, userID 
 		chatGetter.LastMessage = lastMessage
 
 		return &JoinChatResult{
-			Joined:      user.IncludesChatID(chatID),
+			Joined:      true,
 			UpdatedChat: chatGetter,
 		}, nil
 	}
