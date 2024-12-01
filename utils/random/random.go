@@ -9,8 +9,8 @@ import (
 const UserIDLength = 8
 
 var (
-	min = int64(math.Pow(10, float64(UserIDLength)-1))
-	max = int64(math.Pow(10, float64(UserIDLength))) - 1
+	minInt = int64(math.Pow(10, float64(UserIDLength)-1))
+	maxInt = int64(math.Pow(10, float64(UserIDLength))) - 1
 )
 
 func GenerateUserID() int {
@@ -22,7 +22,7 @@ func GenerateUserID() int {
 		panic(err)
 	}
 
-	randomNumber = int64(binary.BigEndian.Uint64(buf))%(max-min+1) + min
+	randomNumber = int64(binary.BigEndian.Uint64(buf))%(maxInt-minInt+1) + minInt
 
 	return int(randomNumber)
 }

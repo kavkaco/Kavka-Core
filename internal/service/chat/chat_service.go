@@ -185,13 +185,16 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 		return nil, &vali.Varror{Error: service.ErrProtoMarshaling}
 	}
 
-	s.eventPublisher.Publish(&eventsv1.StreamEvent{
+	err = s.eventPublisher.Publish(&eventsv1.StreamEvent{
 		SenderUserId: userID,
 		ReceiversUserId: []model.UserID{
 			finalRecipientUserID,
 		},
 		Payload: payloadProtoBuf,
 	})
+	if err != nil {
+		return nil, &vali.Varror{Error: ErrPublishEvent}
+	}
 
 	return chatDTO, nil
 }

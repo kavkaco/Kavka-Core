@@ -14,4 +14,5 @@ var (
 	ErrJoinDirectChat             = errors.New("joining direct chat is not possible")
 	ErrRecipientNotFound          = errors.New("recipient not found")
 	ErrMessageStoreCreation       = errors.New("failed to create message store for chat")
+	ErrPublishEvent               = errors.New("failed to publish event to streamer")
 )
