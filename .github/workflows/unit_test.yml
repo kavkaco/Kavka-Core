@@ -17,5 +17,7 @@ jobs:
         go-version: '1.22.4'
     - name: Installing dependencies
       run: go mod tidy
+    - name: Create a mock jwt secret
+      run: echo "key" >> jwt_secret_key.pem
     - name: Run tests
       run: make unit_test
