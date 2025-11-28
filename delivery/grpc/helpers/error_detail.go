@@ -6,7 +6,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 )
 
-func VarrorAsGrpcErrDetails(varror *vali.Varror) (*connect.ErrorDetail, error) {
+func VarrorAsGrpcErrDetails(varror *vali.ValiErr) (*connect.ErrorDetail, error) {
 	fieldViolations := []*errdetails.BadRequest_FieldViolation{}
 
 	for _, ve := range varror.ValidationErrors {
@@ -21,7 +21,7 @@ func VarrorAsGrpcErrDetails(varror *vali.Varror) (*connect.ErrorDetail, error) {
 	})
 }
 
-func GrpcVarror(varror *vali.Varror, code connect.Code) error {
+func GrpcVarror(varror *vali.ValiErr, code connect.Code) error {
 	connectErr := connect.NewError(code, varror.Error)
 	varrorDetail, err := VarrorAsGrpcErrDetails(varror)
 	if err != nil {

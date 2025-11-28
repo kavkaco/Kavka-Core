@@ -2,7 +2,7 @@ package vali
 
 import "github.com/go-playground/validator/v10"
 
-type Varror struct {
+type ValiErr struct {
 	Error            error
 	ValidationErrors validator.ValidationErrors
 }

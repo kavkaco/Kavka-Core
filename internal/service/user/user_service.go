@@ -20,14 +20,14 @@ func NewUserService(userRepo repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.Varror {
+func (s *UserService) UpdateProfile(ctx context.Context, userID model.UserID, name, lastName, username, biography string) *vali.ValiErr {
 	validationErrors := s.validator.Validate(updateProfileValidation{name, lastName, username})
 	if len(validationErrors) > 0 {
-		return &vali.Varror{ValidationErrors: validationErrors}
+		return &vali.ValiErr{ValidationErrors: validationErrors}
 	}
 	user, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return &vali.Varror{Error: ErrNotFound}
+		return &vali.ValiErr{Error: ErrNotFound}
 	}
 
 	if name != user.Name {
@@ -48,7 +48,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID model.UserID, na
 
 	err = s.userRepo.Update(ctx, userID, user.Name, user.LastName, user.Username, user.Biography)
 	if err != nil {
-		return &vali.Varror{Error: ErrUpdateUser}
+		return &vali.ValiErr{Error: ErrUpdateUser}
 	}
 
 	return nil

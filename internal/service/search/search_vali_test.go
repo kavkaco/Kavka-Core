@@ -37,13 +37,13 @@ func (s *ValiTestSuite) TestSearchValidation() {
 	}
 
 	for _, tc := range testCases {
-		varrors := s.validator.Validate(tc.Input)
+		errs := s.validator.Validate(tc.Input)
 		if !tc.Valid {
-			require.NotEqual(s.T(), len(varrors), 0, "It seems test case is valid actually")
+			require.NotEqual(s.T(), len(errs), 0, "It seems test case is valid actually")
 			continue
 		}
 
-		require.Len(s.T(), varrors, 0)
+		require.Len(s.T(), errs, 0)
 	}
 }
 
