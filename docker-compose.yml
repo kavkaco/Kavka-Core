@@ -48,7 +48,7 @@ services:
   nats:
     networks:
       - default_network
-    image: nats
+    image: "nats:latest"
     ports:
       - "4222:4222"
     restart: always
