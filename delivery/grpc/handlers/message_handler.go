@@ -29,7 +29,7 @@ func NewMessageGrpcHandler(logger *log.SubLogger, messageService *message.Messag
 func (h MessageGrpcServer) FetchMessages(ctx context.Context, req *connect.Request[messagev1.FetchMessagesRequest]) (*connect.Response[messagev1.FetchMessagesResponse], error) {
 	chatID, err := model.ParseChatID(req.Msg.ChatId)
 	if err != nil {
-		return nil, grpc_helpers.GrpcVarror(&vali.Varror{Error: err}, connect.Code(code.Code_INTERNAL))
+		return nil, grpc_helpers.GrpcVarror(&vali.ValiErr{Error: err}, connect.Code(code.Code_INTERNAL))
 	}
 
 	messages, varror := h.messageService.FetchMessages(ctx, chatID)

@@ -40,21 +40,17 @@ type (
 	Nats struct {
 		Url string `koanf:"url"`
 	}
-
 	Auth struct {
 		SecretKey string `koanf:"secret"`
 	}
-
 	HTTP struct {
 		Host string `koanf:"host"`
 		Port int    `koanf:"port"`
 		Cors Cors   `koanf:"cors"`
 	}
-
 	Cors struct {
 		AllowOrigins []string `koanf:"allow_origins"`
 	}
-
 	Redis struct {
 		Host     string `koanf:"host"`
 		Username string `koanf:"username"`
@@ -62,7 +58,6 @@ type (
 		Port     int    `koanf:"port"`
 		DB       int    `koanf:"db"`
 	}
-
 	Mongo struct {
 		Host     string `koanf:"host"`
 		Username string `koanf:"username"`
@@ -70,7 +65,6 @@ type (
 		Port     int    `koanf:"port"`
 		DBName   string `koanf:"db_name"`
 	}
-
 	MinIO struct {
 		Url       string `koanf:"url"`
 		AccessKey string `koanf:"access_key"`
@@ -84,7 +78,6 @@ type (
 		Host        string `koanf:"host"`
 		Port        string `koanf:"port"`
 	}
-
 	Logger struct {
 		Filename   string   `koanf:"filename"`
 		LogLevel   string   `koanf:"level"`

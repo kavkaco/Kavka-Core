@@ -233,7 +233,7 @@ func (s *MessageTestSuite) TestD_FetchMessages() {
 
 // 	_, varror := s.service.SendTextMessage(ctx, model.NewChatID(), s.userID, "test")
 // 	log.Println(varror)
-// 	require.Equal(s.T(), varror, &vali.Varror{Error: service.ErrChatNotFound})
+// 	require.Equal(s.T(), varror, &vali.ValiErr{Error: service.ErrChatNotFound})
 // }
 
 // func (s *MessageTestSuite) TestG_InvalidUserIDSendMessage() {

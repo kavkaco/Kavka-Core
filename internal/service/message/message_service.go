@@ -27,40 +27,40 @@ func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepo
 	return &MessageService{logger, messageRepo, chatRepo, userRepo, vali.Validator(), eventPublisher}
 }
 
-func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.Varror) {
+func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.ValiErr) {
 	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
 	if err != nil {
-		return nil, &vali.Varror{Error: err}
+		return nil, &vali.ValiErr{Error: err}
 	}
 
 	return messages, nil
 }
 
-func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.Varror) {
-	varrors := s.validator.Validate(insertTextMessageValidation{chatID, userID, messageContent})
-	if len(varrors) > 0 {
-		return nil, &vali.Varror{ValidationErrors: varrors}
+func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageContent string) (*model.MessageGetter, *vali.ValiErr) {
+	errs := s.validator.Validate(insertTextMessageValidation{chatID, userID, messageContent})
+	if len(errs) > 0 {
+		return nil, &vali.ValiErr{ValidationErrors: errs}
 	}
 
 	c, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
-		return nil, &vali.Varror{Error: ErrChatNotFound}
+		return nil, &vali.ValiErr{Error: ErrChatNotFound}
 	}
 
 	if !HasAccessToSendMessage(c.ChatType, c.ChatDetail, userID) {
-		return nil, &vali.Varror{Error: ErrAccessDenied}
+		return nil, &vali.ValiErr{Error: ErrAccessDenied}
 	}
 
 	m, err := s.messageRepo.Insert(ctx, chatID, model.NewMessage(model.TypeTextMessage, model.TextMessage{
 		Text: messageContent,
 	}, userID))
 	if err != nil {
-		return nil, &vali.Varror{Error: ErrInsertMessage}
+		return nil, &vali.ValiErr{Error: ErrInsertMessage}
 	}
 
 	u, err := s.userRepo.FindByUserID(ctx, userID)
 	if err != nil {
-		return nil, &vali.Varror{Error: err}
+		return nil, &vali.ValiErr{Error: err}
 	}
 
 	messageGetter := &model.MessageGetter{
@@ -109,35 +109,35 @@ func (s *MessageService) SendTextMessage(ctx context.Context, chatID model.ChatI
 	return messageGetter, nil
 }
 
-func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.Varror {
-	varrors := s.validator.Validate(deleteMessageValidation{chatID, userID, messageID})
-	if len(varrors) > 0 {
-		return &vali.Varror{ValidationErrors: varrors}
+func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID) *vali.ValiErr {
+	errs := s.validator.Validate(deleteMessageValidation{chatID, userID, messageID})
+	if len(errs) > 0 {
+		return &vali.ValiErr{ValidationErrors: errs}
 	}
 
 	chat, err := s.chatRepo.GetChat(ctx, chatID)
 	if err != nil {
-		return &vali.Varror{Error: ErrChatNotFound}
+		return &vali.ValiErr{Error: ErrChatNotFound}
 	}
 
 	message, err := s.messageRepo.FetchMessage(ctx, chatID, messageID)
 	if err != nil {
-		return &vali.Varror{Error: ErrNotFound}
+		return &vali.ValiErr{Error: ErrNotFound}
 	}
 
 	if HasAccessToDeleteMessage(chat.ChatType, chat.ChatDetail, userID, *message) {
 		err = s.messageRepo.Delete(ctx, chatID, messageID)
 		if err != nil {
-			return &vali.Varror{Error: ErrDeleteMessage}
+			return &vali.ValiErr{Error: ErrDeleteMessage}
 		}
 
 		return nil
 	}
 
-	return &vali.Varror{Error: ErrAccessDenied}
+	return &vali.ValiErr{Error: ErrAccessDenied}
 }
 
 // TODO - Implement UpdateTextMessage Method For MessageService
-func (s *MessageService) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.Varror {
+func (s *MessageService) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.ValiErr {
 	panic("unimplemented")
 }
