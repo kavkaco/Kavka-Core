@@ -54,13 +54,14 @@ func main() {
 	})
 
 	// [=== Init Infra ===]
-	natsClient, err := stream.NewNATSAdapter(&cfg.Nats, log.NewSubLogger("infra"))
+	natsAdapter, err := stream.NewNATSAdapter(&cfg.Nats, log.NewSubLogger("infra"), stream.DefaultJetStreamConfig())
+	handleError(err)
+	defer natsAdapter.Close()
+
+	streamPublisher, err := stream.NewStreamPublisher(natsAdapter)
 	handleError(err)
 
-	streamPublisher, err := stream.NewStreamPublisher(natsClient)
-	handleError(err)
-
-	streamSubscriber, err := stream.NewStreamSubscriber(natsClient, log.NewSubLogger("stream-subscriber"))
+	streamSubscriber, err := stream.NewStreamSubscriber(natsAdapter, log.NewSubLogger("stream-subscriber"))
 	handleError(err)
 
 	// [=== Init Internal Services & Repositories ===]

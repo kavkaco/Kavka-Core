@@ -10,9 +10,10 @@ import (
 	"github.com/kavkaco/Kavka-Core/log"
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 	eventsv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/events/v1"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/protobuf/proto"
 )
+
+const DefaultMessagesPerPage = 200
 
 type MessageService struct {
 	logger         *log.SubLogger
@@ -28,7 +29,15 @@ func NewMessageService(logger *log.SubLogger, messageRepo repository.MessageRepo
 }
 
 func (s *MessageService) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, *vali.ValiErr) {
-	messages, err := s.messageRepo.FetchMessages(ctx, chatID)
+	return s.FetchMessagesPaginated(ctx, chatID, 0, DefaultMessagesPerPage)
+}
+
+func (s *MessageService) FetchMessagesPaginated(ctx context.Context, chatID model.ChatID, skip, limit int64) ([]*model.MessageGetter, *vali.ValiErr) {
+	if limit <= 0 || limit > DefaultMessagesPerPage {
+		limit = DefaultMessagesPerPage
+	}
+
+	messages, err := s.messageRepo.FetchMessagesPaginated(ctx, chatID, skip, limit)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: err}
 	}
@@ -137,7 +146,30 @@ func (s *MessageService) DeleteMessage(ctx context.Context, chatID model.ChatID,
 	return &vali.ValiErr{Error: ErrAccessDenied}
 }
 
-// TODO - Implement UpdateTextMessage Method For MessageService
-func (s *MessageService) UpdateTextMessage(ctx context.Context, chatID primitive.ObjectID, newMessageContent string) *vali.ValiErr {
-	panic("unimplemented")
+func (s *MessageService) UpdateTextMessage(ctx context.Context, chatID model.ChatID, userID model.UserID, messageID model.MessageID, newMessageContent string) *vali.ValiErr {
+	errs := s.validator.Validate(updateTextMessageValidation{chatID, userID, messageID, newMessageContent})
+	if len(errs) > 0 {
+		return &vali.ValiErr{ValidationErrors: errs}
+	}
+
+	chat, err := s.chatRepo.GetChat(ctx, chatID)
+	if err != nil {
+		return &vali.ValiErr{Error: ErrChatNotFound}
+	}
+
+	message, err := s.messageRepo.FetchMessage(ctx, chatID, messageID)
+	if err != nil {
+		return &vali.ValiErr{Error: ErrNotFound}
+	}
+
+	if message.SenderID != userID {
+		return &vali.ValiErr{Error: ErrAccessDenied}
+	}
+
+	err = s.messageRepo.UpdateMessageContent(ctx, chatID, messageID, newMessageContent)
+	if err != nil {
+		return &vali.ValiErr{Error: err}
+	}
+
+	return nil
 }

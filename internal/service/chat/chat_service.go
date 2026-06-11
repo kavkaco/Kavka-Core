@@ -55,8 +55,14 @@ func (s *ChatService) GetChat(ctx context.Context, userID model.UserID, chatID m
 	return chat, nil
 }
 
+const DefaultChatsPerPage = 50
+
 // get the chats that belongs to user
 func (s *ChatService) GetUserChats(ctx context.Context, userID model.UserID) ([]model.ChatDTO, *vali.ValiErr) {
+	return s.GetUserChatsPaginated(ctx, userID, 1, DefaultChatsPerPage)
+}
+
+func (s *ChatService) GetUserChatsPaginated(ctx context.Context, userID model.UserID, page, limit int) ([]model.ChatDTO, *vali.ValiErr) {
 	errs := s.validator.Validate(getUserChatsValidation{userID})
 	if len(errs) > 0 {
 		return nil, &vali.ValiErr{ValidationErrors: errs}
@@ -67,13 +73,24 @@ func (s *ChatService) GetUserChats(ctx context.Context, userID model.UserID) ([]
 		return nil, &vali.ValiErr{Error: ErrNotFound}
 	}
 
-	userChatsListIDs := user.ChatsListIDs
-
-	if len(userChatsListIDs) == 0 {
+	totalChatIDs := user.ChatsListIDs
+	if len(totalChatIDs) == 0 {
 		return []model.ChatDTO{}, nil
 	}
 
-	userChats, err := s.chatRepo.GetUserChats(ctx, userID, userChatsListIDs)
+	start := (page - 1) * limit
+	if start >= len(totalChatIDs) {
+		return []model.ChatDTO{}, nil
+	}
+
+	end := start + limit
+	if end > len(totalChatIDs) {
+		end = len(totalChatIDs)
+	}
+
+	pageIDs := totalChatIDs[start:end]
+
+	userChats, err := s.chatRepo.GetUserChats(ctx, userID, pageIDs)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrGetUserChats}
 	}
@@ -132,7 +149,7 @@ func (s *ChatService) CreateDirect(ctx context.Context, userID model.UserID, rec
 		return nil, &vali.ValiErr{Error: ErrCreateChat}
 	}
 
-	err = s.messageRepo.Create(context.TODO(), createdChat.ChatID)
+	err = s.messageRepo.Create(ctx, createdChat.ChatID)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrMessageStoreCreation}
 	}
@@ -223,12 +240,12 @@ func (s *ChatService) CreateGroup(ctx context.Context, userID model.UserID, titl
 		Text: "Group created",
 	}, userID)
 
-	err = s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+	err = s.messageRepo.Create(ctx, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrJoinDirectChat}
 	}
 
-	_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+	_, err = s.messageRepo.Insert(ctx, savedChat.ChatID, messageModel)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrJoinDirectChat}
 	}
@@ -268,12 +285,12 @@ func (s *ChatService) CreateChannel(ctx context.Context, userID model.UserID, ti
 		Text: "Channel created",
 	}, userID)
 
-	err = s.messageRepo.Create(context.TODO(), savedChat.ChatID)
+	err = s.messageRepo.Create(ctx, savedChat.ChatID)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrMessageStoreCreation}
 	}
 
-	_, err = s.messageRepo.Insert(context.TODO(), savedChat.ChatID, messageModel)
+	_, err = s.messageRepo.Insert(ctx, savedChat.ChatID, messageModel)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: ErrMessageStoreCreation}
 	}

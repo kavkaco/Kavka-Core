@@ -53,10 +53,8 @@ func ChatToProto(chat model.ChatDTO) (*modelv1.Chat, error) {
 	}, nil
 }
 
-var transformedChats []*modelv1.Chat
-
 func ChatsToProto(chats []model.ChatDTO) ([]*modelv1.Chat, error) {
-	transformedChats = []*modelv1.Chat{}
+	transformedChats := make([]*modelv1.Chat, 0, len(chats))
 
 	for _, v := range chats {
 		c, err := ChatToProto(v)

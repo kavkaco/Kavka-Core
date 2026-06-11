@@ -49,10 +49,8 @@ func MessageSenderToProto(messageSender *model.MessageSenderDTO) *messagev1.Mess
 	}
 }
 
-var transformedMessages []*messagev1.Message
-
 func MessagesToProto(messageGetters []*model.MessageGetter) []*messagev1.Message {
-	transformedMessages = []*messagev1.Message{}
+	transformedMessages := make([]*messagev1.Message, 0, len(messageGetters))
 
 	for _, v := range messageGetters {
 		transformedMessages = append(transformedMessages, MessageToProto(v))

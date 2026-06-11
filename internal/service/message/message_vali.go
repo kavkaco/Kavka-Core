@@ -13,3 +13,10 @@ type deleteMessageValidation struct {
 	UserID    model.UserID    `validate:"required"`
 	MessageID model.MessageID `validate:"required"`
 }
+
+type updateTextMessageValidation struct {
+	ChatID            model.ChatID    `validate:"required"`
+	UserID            model.UserID    `validate:"required"`
+	MessageID         model.MessageID `validate:"required"`
+	NewMessageContent string          `validate:"required"`
+}

@@ -16,10 +16,8 @@ func UserToProto(user model.User) *modelv1.User {
 	}
 }
 
-var transformedUsers []*modelv1.User
-
 func UsersToProto(users []model.User) []*modelv1.User {
-	transformedUsers = []*modelv1.User{}
+	transformedUsers := make([]*modelv1.User, 0, len(users))
 
 	for _, v := range users {
 		transformedUsers = append(transformedUsers, UserToProto(v))

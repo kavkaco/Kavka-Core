@@ -52,9 +52,64 @@ func (repo *chatRepository) JoinChat(ctx context.Context, chatType string, userI
 	return nil
 }
 
-// FIXME
-func (repo *chatRepository) GetChatMembers(chatID model.ChatID) []model.Member {
-	return []model.Member{}
+func (repo *chatRepository) GetChatMembers(ctx context.Context, chatID model.ChatID) ([]model.Member, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{"_id": chatID},
+		},
+		bson.M{
+			"$project": bson.M{
+				"members": "$chat_detail.members",
+			},
+		},
+		bson.M{
+			"$lookup": bson.M{
+				"from":         "users",
+				"localField":   "members",
+				"foreignField": "user_id",
+				"as":           "member_users",
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"member_users.user_id":   1,
+				"member_users.name":      1,
+				"member_users.last_name": 1,
+				"_id":                    0,
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"members": "$member_users",
+			},
+		},
+		bson.M{
+			"$project": bson.M{
+				"member_users": 0,
+			},
+		},
+	}
+
+	cursor, err := repo.chatsCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	type doc struct {
+		Members []model.Member `bson:"members"`
+	}
+
+	var docs []doc
+	err = cursor.All(ctx, &docs)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(docs) == 0 {
+		return nil, repository.ErrNotFound
+	}
+
+	return docs[0].Members, nil
 }
 
 func (repo *chatRepository) Create(ctx context.Context, chatModel model.Chat) (*model.Chat, error) {
@@ -241,7 +296,7 @@ func (repo *chatRepository) GetDirectChat(ctx context.Context, userID model.User
 				bson.M{"chat_detail.recipient_user_id": userID},
 			}},
 		},
-		"chat_detail.chat_type": bson.M{"$ne": "direct"},
+		"chat_type": "direct",
 	}
 
 	return repo.findOne(ctx, filter)

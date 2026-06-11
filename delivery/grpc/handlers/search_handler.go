@@ -22,7 +22,7 @@ func NewSearchGrpcHandler(logger *log.SubLogger, searchService *search.SearchSer
 }
 
 func (s *searchHandler) Search(ctx context.Context, req *connect.Request[searchv1.SearchRequest]) (*connect.Response[searchv1.SearchResponse], error) {
-	result, varror := s.searchService.Search(ctx, req.Msg.Input)
+	result, varror := s.searchService.Search(ctx, req.Msg.Input, search.DefaultSearchLimit)
 	if varror != nil {
 		return nil, grpc_helpers.GrpcVarror(varror, connect.CodeUnavailable)
 	}

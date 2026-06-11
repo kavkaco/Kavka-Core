@@ -12,7 +12,7 @@ type ChatRepository interface {
 	Destroy(ctx context.Context, chatID model.ChatID) error
 	GetUserChats(ctx context.Context, userID model.UserID, chatIDs []model.ChatID) ([]model.ChatDTO, error)
 	GetDirectChat(ctx context.Context, userID model.UserID, recipientUserID model.UserID) (*model.Chat, error)
-	GetChatMembers(chatID model.ChatID) []model.Member
+	GetChatMembers(ctx context.Context, chatID model.ChatID) ([]model.Member, error)
 	JoinChat(ctx context.Context, chatType string, userID string, chatID model.ChatID) error
 	AddToUsersChatsList(ctx context.Context, userID string, chatID model.ChatID) error
 }

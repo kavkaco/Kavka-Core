@@ -9,22 +9,29 @@ import (
 	"github.com/kavkaco/Kavka-Core/utils/vali"
 )
 
+const DefaultSearchLimit = 20
+
 type SearchService struct {
 	searchRepository repository.SearchRepository
 	validator        *vali.Vali
+	logger           *log.SubLogger
 }
 
 func NewSearchService(logger *log.SubLogger, searchRepository repository.SearchRepository) *SearchService {
-	return &SearchService{searchRepository, vali.Validator()}
+	return &SearchService{searchRepository, vali.Validator(), logger}
 }
 
-func (s *SearchService) Search(ctx context.Context, input string) (*model.SearchResultDTO, *vali.ValiErr) {
+func (s *SearchService) Search(ctx context.Context, input string, limit int) (*model.SearchResultDTO, *vali.ValiErr) {
 	errs := s.validator.Validate(searchValidation{input})
 	if len(errs) > 0 {
 		return nil, &vali.ValiErr{ValidationErrors: errs}
 	}
 
-	result, err := s.searchRepository.Search(ctx, input)
+	if limit <= 0 || limit > DefaultSearchLimit {
+		limit = DefaultSearchLimit
+	}
+
+	result, err := s.searchRepository.Search(ctx, input, limit)
 	if err != nil {
 		return nil, &vali.ValiErr{Error: err}
 	}

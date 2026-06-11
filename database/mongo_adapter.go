@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/ory/dockertest/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -35,14 +36,24 @@ func GetMongoDBInstance(uri, dbName string) (*mongo.Database, error) {
 		mongoLock.Lock()
 		defer mongoLock.Unlock()
 
-		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		clientOpts := options.Client().
+			ApplyURI(uri).
+			SetMaxPoolSize(500).
+			SetMinPoolSize(50).
+			SetMaxConnIdleTime(30 * time.Second).
+			SetMaxConnecting(50).
+			SetSocketTimeout(10 * time.Second).
+			SetConnectTimeout(5 * time.Second).
+			SetHeartbeatInterval(10 * time.Second)
+
+		client, err := mongo.Connect(context.Background(), clientOpts)
 		if err != nil {
 			return nil, err
 		}
 
 		// Send a ping to confirm a successful connection
 		var result bson.M
-		if err := client.Database("test").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
+		if err := client.Database("test").RunCommand(context.Background(), bson.D{{Key: "ping", Value: 1}}).Decode(&result); err != nil {
 			return nil, err
 		}
 
@@ -61,9 +72,15 @@ func ConfigureCollections(db *mongo.Database) {
 		}
 	}
 
+	ctx := context.Background()
+
 	// Users indexes
 
-	_, err := db.Collection(UsersCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+	_, err := db.Collection(UsersCollection).Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys:    bson.M{"user_id": 1},
+			Options: options.Index().SetUnique(true),
+		},
 		{
 			Keys:    bson.M{"email": 1},
 			Options: options.Index().SetUnique(true),
@@ -75,7 +92,7 @@ func ConfigureCollections(db *mongo.Database) {
 	})
 	handleError(err)
 
-	_, err = db.Collection(UsersCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{ //nolint
+	_, err = db.Collection(UsersCollection).Indexes().CreateMany(ctx, []mongo.IndexModel{ //nolint
 		{
 			Keys: bson.D{
 				{Key: "name", Value: "text"},
@@ -89,7 +106,7 @@ func ConfigureCollections(db *mongo.Database) {
 
 	// Chats indexes
 
-	_, err = db.Collection(ChatsCollection).Indexes().CreateMany(context.Background(), []mongo.IndexModel{
+	_, err = db.Collection(ChatsCollection).Indexes().CreateMany(ctx, []mongo.IndexModel{
 		{
 			Keys:    bson.D{{Key: "chat_detail.username", Value: 1}},
 			Options: options.Index().SetUnique(true),
@@ -100,6 +117,52 @@ func ConfigureCollections(db *mongo.Database) {
 				{Key: "chat_detail.username", Value: "text"},
 			},
 			Options: options.Index(),
+		},
+	})
+	handleError(err)
+
+	// Messages indexes
+
+	_, err = db.Collection(MessagesCollection).Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "chat_id", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "chat_id", Value: 1},
+				{Key: "message_id", Value: 1},
+			},
+		},
+	})
+	handleError(err)
+
+	// User auth indexes
+
+	_, err = db.Collection(AuthCollection).Indexes().CreateOne(ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: "user_id", Value: 1}},
+	})
+	handleError(err)
+
+	// Messages V2 indexes
+
+	_, err = db.Collection("messages_v2").Indexes().CreateMany(ctx, []mongo.IndexModel{
+		{
+			Keys: bson.D{
+				{Key: "chat_id", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+		},
+		{
+			Keys: bson.D{
+				{Key: "chat_id", Value: 1},
+				{Key: "_id", Value: 1},
+			},
+		},
+		{
+			Keys: bson.D{{Key: "chat_id", Value: 1}},
 		},
 	})
 	handleError(err)
@@ -166,7 +229,7 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 	}()
 
 	err = pool.Retry(func() error {
-		client, err = mongo.Connect(context.TODO(),
+		client, err = mongo.Connect(context.Background(),
 			options.Client().ApplyURI(
 				fmt.Sprintf("mongodb://test:test@localhost:%s", resource.GetPort("27017/tcp")),
 			),
@@ -175,7 +238,7 @@ func GetMongoDBTestInstance(callback func(db *mongo.Database)) {
 			return err
 		}
 
-		return client.Ping(context.TODO(), nil)
+		return client.Ping(context.Background(), nil)
 	})
 	if err != nil {
 		log.Fatalf("Could not connect to MongoDB: %s", err)

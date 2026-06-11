@@ -1,6 +1,8 @@
 package stream
 
 import (
+	"fmt"
+
 	eventsv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/events/v1"
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
@@ -13,11 +15,15 @@ type StreamPublisher interface {
 }
 
 type pub struct {
-	nc *nats.Conn
+	nc  *nats.Conn
+	js  nats.JetStreamContext
 }
 
-func NewStreamPublisher(nc *nats.Conn) (StreamPublisher, error) {
-	return &pub{nc}, nil
+func NewStreamPublisher(adapter *NATSAdapter) (StreamPublisher, error) {
+	if adapter == nil {
+		return nil, fmt.Errorf("nats adapter is nil")
+	}
+	return &pub{nc: adapter.Conn, js: adapter.JetStream}, nil
 }
 
 func (p *pub) Publish(event *eventsv1.StreamEvent) error {
@@ -26,12 +32,10 @@ func (p *pub) Publish(event *eventsv1.StreamEvent) error {
 		return err
 	}
 
-	err = p.nc.Publish(subjEvent, eventBuf)
-	if err != nil {
+	if p.js != nil {
+		_, err = p.js.Publish(subjEvent, eventBuf)
 		return err
 	}
 
-	p.nc.Flush()
-
-	return nil
+	return p.nc.Publish(subjEvent, eventBuf)
 }

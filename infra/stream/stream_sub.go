@@ -1,6 +1,8 @@
 package stream
 
 import (
+	"sync"
+
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/log"
 	eventsv1 "github.com/kavkaco/Kavka-ProtoBuf/gen/go/protobuf/events/v1"
@@ -17,14 +19,22 @@ type StreamSubscriber interface {
 
 type sub struct {
 	nc              *nats.Conn
+	js              nats.JetStreamContext
 	logger          *log.SubLogger
+	mu              sync.RWMutex
 	subscribedUsers []StreamSubscribedUser
 }
 
-func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber, error) {
-	subInstance := &sub{nc, logger, []StreamSubscribedUser{}}
+func NewStreamSubscriber(adapter *NATSAdapter, logger *log.SubLogger) (StreamSubscriber, error) {
+	subInstance := &sub{
+		nc:              adapter.Conn,
+		js:              adapter.JetStream,
+		logger:          logger,
+		mu:              sync.RWMutex{},
+		subscribedUsers: []StreamSubscribedUser{},
+	}
 
-	_, err := nc.Subscribe(eventStreamSubject, func(msg *nats.Msg) {
+	subscribeFn := func(msg *nats.Msg) {
 		go func() {
 			var event eventsv1.StreamEvent
 			err := proto.Unmarshal(msg.Data, &event)
@@ -40,7 +50,7 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 				return
 			}
 
-			// Broadcast event to receivers by their pipe
+			subInstance.mu.RLock()
 			for _, receiverUserID := range event.ReceiversUserId {
 				for _, su := range subInstance.subscribedUsers {
 					if su.UserID == receiverUserID {
@@ -49,31 +59,49 @@ func NewStreamSubscriber(nc *nats.Conn, logger *log.SubLogger) (StreamSubscriber
 							continue
 						}
 
-						go func() {
-							su.UserPipe <- &payload
-						}()
+						su.UserPipe <- &payload
 					}
 				}
 			}
+			subInstance.mu.RUnlock()
+
+			if msg.HasReply() {
+				msg.Ack()
+			}
 		}()
-	})
-	if err != nil {
-		return nil, err
 	}
 
-	err = nc.Flush()
-	if err != nil {
-		logger.Error("nats flush error: " + err.Error())
+	subOpts := []nats.SubOpt{
+		nats.ManualAck(),
+		nats.DeliverNew(),
+	}
+
+	subOpts = append(subOpts, nats.Durable("kavka-events-subscriber"))
+
+	if subInstance.js != nil {
+		_, err := subInstance.js.QueueSubscribe(eventStreamSubject, "event-workers", subscribeFn, subOpts...)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		_, err := subInstance.nc.Subscribe(eventStreamSubject, subscribeFn)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return subInstance, nil
 }
 
 func (p *sub) UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.subscribedUsers = append(p.subscribedUsers, StreamSubscribedUser{UserID: userID, UserPipe: userCh})
 }
 
 func (p *sub) UserUnsubscribe(userID model.UserID) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	idx := -1
 
 	for i, su := range p.subscribedUsers {

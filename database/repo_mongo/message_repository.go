@@ -3,6 +3,7 @@ package repository_mongo
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/kavkaco/Kavka-Core/database"
 	"github.com/kavkaco/Kavka-Core/internal/repository"
@@ -11,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type messagesDoc struct {
@@ -19,12 +21,17 @@ type messagesDoc struct {
 }
 
 type messageRepository struct {
-	messagesCollection *mongo.Collection
-	usersCollection    *mongo.Collection
+	messagesCollection   *mongo.Collection
+	messagesV2Collection *mongo.Collection
+	usersCollection      *mongo.Collection
 }
 
 func NewMessageMongoRepository(db *mongo.Database) repository.MessageRepository {
-	return &messageRepository{db.Collection(database.MessagesCollection), db.Collection(database.UsersCollection)}
+	return &messageRepository{
+		messagesCollection:   db.Collection(database.MessagesCollection),
+		messagesV2Collection: db.Collection("messages_v2"),
+		usersCollection:      db.Collection(database.UsersCollection),
+	}
 }
 
 func (repo *messageRepository) FetchMessage(ctx context.Context, chatID primitive.ObjectID, messageID primitive.ObjectID) (*model.Message, error) {
@@ -130,10 +137,87 @@ func (repo *messageRepository) Create(ctx context.Context, chatID model.ChatID) 
 	}
 	_, err := repo.messagesCollection.InsertOne(ctx, messageStoreModel)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return nil
+}
+
+func (repo *messageRepository) FetchMessagesPaginated(ctx context.Context, chatID model.ChatID, skip, limit int64) ([]*model.MessageGetter, error) {
+	pipeline := bson.A{
+		bson.M{
+			"$match": bson.M{
+				"chat_id": chatID,
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"messages": bson.M{
+					"$slice": bson.A{"$messages", skip, limit},
+				},
+			},
+		},
+		bson.M{
+			"$lookup": bson.M{
+				"from":         "users",
+				"localField":   "messages.sender_id",
+				"foreignField": "user_id",
+				"as":           "senders",
+			},
+		},
+		bson.M{
+			"$addFields": bson.M{
+				"fetched_messages": bson.M{
+					"$map": bson.M{
+						"input": "$messages",
+						"as":    "message",
+						"in": bson.M{
+							"sender": bson.M{
+								"$arrayElemAt": bson.A{
+									bson.M{
+										"$filter": bson.M{
+											"input": "$senders",
+											"as":    "sender",
+											"cond": bson.M{
+												"$eq": bson.A{"$$sender.user_id", "$$message.sender_id"},
+											},
+										},
+									},
+									0,
+								},
+							},
+							"message": "$$message",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cursor, err := repo.messagesCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return []*model.MessageGetter{}, nil
+		}
+		return nil, err
+	}
+
+	type doc struct {
+		ChatID   model.ChatID           `bson:"chat_id"`
+		Messages []*model.MessageGetter `bson:"fetched_messages"`
+	}
+
+	var docs []*doc
+	err = cursor.All(ctx, &docs)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(docs) > 0 {
+		return docs[0].Messages, nil
+	}
+
+	return []*model.MessageGetter{}, nil
 }
 
 func (repo *messageRepository) FetchMessages(ctx context.Context, chatID model.ChatID) ([]*model.MessageGetter, error) {
@@ -229,7 +313,8 @@ func (repo *messageRepository) Insert(ctx context.Context, chatID model.ChatID, 
 
 func (repo *messageRepository) UpdateMessageContent(ctx context.Context, chatID model.ChatID, messageID model.MessageID, newMessageContent string) error {
 	return repo.updateMessageFields(ctx, chatID, messageID, bson.M{"$set": bson.M{
-		"messages.$.content.data": newMessageContent,
+		"messages.$.content.text": newMessageContent,
+		"messages.$.edited":       true,
 	}})
 }
 
@@ -257,7 +342,7 @@ func (repo *messageRepository) Delete(ctx context.Context, chatID model.ChatID, 
 	update := bson.M{"$pull": bson.M{"messages": bson.M{"message_id": messageID}}}
 
 	result, err := repo.messagesCollection.UpdateOne(ctx, filter, update)
-	if err != nil && result.ModifiedCount != 1 {
+	if err != nil || result.ModifiedCount != 1 {
 		if database.IsRowExistsError(err) {
 			return repository.ErrNotFound
 		}
@@ -266,4 +351,131 @@ func (repo *messageRepository) Delete(ctx context.Context, chatID model.ChatID, 
 	}
 
 	return nil
+}
+
+func (repo *messageRepository) InsertV2(ctx context.Context, doc *model.MessageDocumentV2) (*model.MessageDocumentV2, error) {
+	if doc.ID.IsZero() {
+		doc.ID = primitive.NewObjectID()
+	}
+	if doc.CreatedAt.IsZero() {
+		doc.CreatedAt = time.Now()
+	}
+
+	_, err := repo.messagesV2Collection.InsertOne(ctx, doc)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
+}
+
+func (repo *messageRepository) FetchMessagesV2(ctx context.Context, chatID model.ChatID, skip, limit int64) ([]*model.MessageDocumentV2, error) {
+	filter := bson.M{"chat_id": chatID}
+	opts := options.Find().
+		SetSort(bson.D{{Key: "created_at", Value: -1}}).
+		SetSkip(skip).
+		SetLimit(limit)
+
+	cursor, err := repo.messagesV2Collection.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var messages []*model.MessageDocumentV2
+	err = cursor.All(ctx, &messages)
+	if err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}
+
+func (repo *messageRepository) FetchMessageV2(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.MessageDocumentV2, error) {
+	filter := bson.M{
+		"chat_id": chatID,
+		"_id":     messageID,
+	}
+
+	result := repo.messagesV2Collection.FindOne(ctx, filter)
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return nil, repository.ErrNotFound
+	} else if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var doc model.MessageDocumentV2
+	err := result.Decode(&doc)
+	if err != nil {
+		return nil, err
+	}
+
+	return &doc, nil
+}
+
+func (repo *messageRepository) FetchLastMessageV2(ctx context.Context, chatID model.ChatID) (*model.MessageDocumentV2, error) {
+	filter := bson.M{"chat_id": chatID}
+	opts := options.FindOne().
+		SetSort(bson.D{{Key: "created_at", Value: -1}})
+
+	result := repo.messagesV2Collection.FindOne(ctx, filter, opts)
+	if errors.Is(result.Err(), mongo.ErrNoDocuments) {
+		return nil, repository.ErrNotFound
+	} else if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var doc model.MessageDocumentV2
+	err := result.Decode(&doc)
+	if err != nil {
+		return nil, err
+	}
+
+	return &doc, nil
+}
+
+func (repo *messageRepository) UpdateMessageContentV2(ctx context.Context, chatID model.ChatID, messageID model.MessageID, newMessageContent string) error {
+	filter := bson.M{
+		"chat_id": chatID,
+		"_id":     messageID,
+	}
+	update := bson.M{
+		"$set": bson.M{
+			"content.text": newMessageContent,
+			"edited":       true,
+		},
+	}
+
+	result, err := repo.messagesV2Collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return repository.ErrNotFound
+	}
+
+	return nil
+}
+
+func (repo *messageRepository) DeleteV2(ctx context.Context, chatID model.ChatID, messageID model.MessageID) error {
+	filter := bson.M{
+		"chat_id": chatID,
+		"_id":     messageID,
+	}
+
+	result, err := repo.messagesV2Collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return repository.ErrNotModified
+	}
+
+	return nil
+}
+
+func (repo *messageRepository) CountMessagesV2(ctx context.Context, chatID model.ChatID) (int64, error) {
+	filter := bson.M{"chat_id": chatID}
+	return repo.messagesV2Collection.CountDocuments(ctx, filter)
 }

@@ -42,6 +42,10 @@ type ImageMessage struct {
 	Caption  string `bson:"caption" json:"caption"`
 }
 
+func NewMessageID() MessageID {
+	return primitive.NewObjectID()
+}
+
 func NewMessage(messageType string, content interface{}, senderID UserID) *Message {
 	m := &Message{}
 
