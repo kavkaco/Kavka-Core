@@ -39,7 +39,23 @@ func (r *SQLMessageRepository) Insert(ctx context.Context, chatID model.ChatID, 
 }
 
 func (r *SQLMessageRepository) FetchLastMessage(ctx context.Context, chatID model.ChatID) (*model.Message, error) {
-	return r.fetchLastMessageForChat(ctx, chatID)
+	doc, err := r.FetchLastMessageV2(ctx, chatID)
+	if err == repository.ErrNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Message{
+		MessageID: doc.ID,
+		SenderID:  doc.SenderID,
+		CreatedAt: doc.CreatedAt,
+		Edited:    doc.Edited,
+		Seen:      doc.Seen,
+		Type:      doc.Type,
+		Content:   doc.Content,
+	}, nil
 }
 
 func (r *SQLMessageRepository) FetchMessage(ctx context.Context, chatID model.ChatID, messageID model.MessageID) (*model.Message, error) {
@@ -210,5 +226,3 @@ func (r *SQLMessageRepository) scanMessageV2(row interface{ Scan(...interface{})
 
 	return &doc, nil
 }
-
-

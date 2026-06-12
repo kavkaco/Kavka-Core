@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kavkaco/Kavka-Core/config"
 	"github.com/kavkaco/Kavka-Core/database"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -12,15 +13,15 @@ import (
 
 type SQLAdapter struct {
 	DB     *sql.DB
-	Driver database.DriverType
+	Driver config.DriverType
 }
 
-func NewSQLAdapter(cfg *database.DatabaseConfig) (*SQLAdapter, error) {
+func NewSQLAdapter(cfg *config.DatabaseConfig) (*SQLAdapter, error) {
 	var db *sql.DB
 	var err error
 
 	switch cfg.Driver {
-	case database.DriverPostgres:
+	case config.DriverPostgres:
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
 
@@ -29,7 +30,7 @@ func NewSQLAdapter(cfg *database.DatabaseConfig) (*SQLAdapter, error) {
 			return nil, fmt.Errorf("postgres connection failed: %w", err)
 		}
 
-	case database.DriverSQLite:
+	case config.DriverSQLite:
 		db, err = sql.Open("sqlite3", cfg.SQLitePath)
 		if err != nil {
 			return nil, fmt.Errorf("sqlite connection failed: %w", err)
@@ -62,10 +63,10 @@ func NewSQLAdapter(cfg *database.DatabaseConfig) (*SQLAdapter, error) {
 
 func (a *SQLAdapter) runMigrations() error {
 	switch a.Driver {
-	case database.DriverPostgres:
+	case config.DriverPostgres:
 		_, err := a.DB.Exec(SchemaPostgres)
 		return err
-	case database.DriverSQLite:
+	case config.DriverSQLite:
 		_, err := a.DB.Exec(SchemaSQLite)
 		return err
 	}

@@ -85,6 +85,7 @@ Each task includes `MaxRetries` and `RetryCount` for dead-letter handling.
 Redis provides two distinct functions:
 
 ### Auth Token Storage (`go-auth-manager`)
+
 Access tokens, refresh tokens, and email verification tokens
 are stored in Redis with configurable TTLs.
 
@@ -164,15 +165,18 @@ Run migration: `go run cmd/migration/main.go`
 ## Scaling Considerations
 
 ### Stateless Services
+
 Each service instance is stateless. Session is stored in Redis,
 events flow through NATS, and data persists in the database.
 Add replicas behind a load balancer for horizontal scaling.
 
 ### Database Backend Choice
+
 - **MongoDB**: Best for rapid development, schema flexibility
 - **PostgreSQL**: Best for production at scale, ACID compliance, replication
 - **SQLite**: Best for local dev, single-binary deployment, testing
 
 ### NATS Cluster
+
 For production, run a 3-node NATS cluster with JetStream enabled.
 Configure `nats.MaxReconnects(10)` in `stream_adapter.go` for resilience.

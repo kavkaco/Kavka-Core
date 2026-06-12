@@ -1,7 +1,9 @@
 package stream
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
 	"github.com/kavkaco/Kavka-Core/log"
@@ -11,6 +13,7 @@ import (
 )
 
 const eventStreamSubject = "events"
+const eventStreamName = "KAVKA_EVENTS_STREAM"
 
 type StreamSubscriber interface {
 	UserSubscribe(userID model.UserID, userCh chan *eventsv1.SubscribeEventsStreamResponse)
@@ -32,6 +35,13 @@ func NewStreamSubscriber(adapter *NATSAdapter, logger *log.SubLogger) (StreamSub
 		logger:          logger,
 		mu:              sync.RWMutex{},
 		subscribedUsers: []StreamSubscribedUser{},
+	}
+
+	// create the stream if it doesn't exist
+	if subInstance.js != nil {
+		if err := ensureStreamExists(subInstance.js, logger); err != nil {
+			logger.Error("failed to ensure stream exists: " + err.Error())
+		}
 	}
 
 	subscribeFn := func(msg *nats.Msg) {
@@ -65,7 +75,7 @@ func NewStreamSubscriber(adapter *NATSAdapter, logger *log.SubLogger) (StreamSub
 			}
 			subInstance.mu.RUnlock()
 
-			if msg.HasReply() {
+			if msg.Reply != "" {
 				msg.Ack()
 			}
 		}()
@@ -114,4 +124,43 @@ func (p *sub) UserUnsubscribe(userID model.UserID) {
 	if idx != -1 {
 		p.subscribedUsers = append(p.subscribedUsers[:idx], p.subscribedUsers[idx+1:]...)
 	}
+}
+
+func ensureStreamExists(js nats.JetStreamContext, logger *log.SubLogger) error {
+	streamInfo, err := js.StreamInfo(eventStreamName)
+	if err == nil {
+		logger.Info(fmt.Sprintf("JetStream stream already exists: %s (subjects: %v)", eventStreamName, streamInfo.Config.Subjects))
+		return nil
+	}
+
+	if err != nats.ErrStreamNotFound {
+		return fmt.Errorf("failed to check stream info: %w", err)
+	}
+
+	logger.Info(fmt.Sprintf("Creating JetStream stream: %s for subject: %s", eventStreamName, eventStreamSubject))
+
+	streamConfig := &nats.StreamConfig{
+		Name:      eventStreamName,
+		Subjects:  []string{eventStreamSubject},
+		Storage:   nats.FileStorage,
+		Retention: nats.LimitsPolicy,
+		MaxMsgs:   -1,                 // No limit on number of messages
+		MaxBytes:  -1,                 // No limit on total bytes
+		MaxAge:    7 * 24 * time.Hour, // Keep messages for 7 days
+		Discard:   nats.DiscardOld,
+
+		// FIXME: make this configurable
+		Replicas: 1, // For development, use 1 replica
+
+		Duplicates:  time.Minute, // Duplicate detection window
+		AllowRollup: true,        // Allow rollup messages
+	}
+
+	_, err = js.AddStream(streamConfig)
+	if err != nil {
+		return fmt.Errorf("failed to create stream: %w", err)
+	}
+
+	logger.Info(fmt.Sprintf("JetStream stream created successfully: %s", eventStreamName))
+	return nil
 }

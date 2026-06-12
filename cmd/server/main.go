@@ -58,7 +58,9 @@ func main() {
 	)
 
 	switch cfg.SQL.Driver {
-	case database.DriverMongo:
+	case config.DriverMongo:
+		log.Info("Database: MongoDB")
+
 		mongoDB, err := database.GetMongoDBInstance(
 			database.NewMongoDBConnectionString(
 				cfg.Mongo.Host,
@@ -76,7 +78,9 @@ func main() {
 		messageRepo = repository_mongo.NewMessageMongoRepository(mongoDB)
 		searchRepo = repository_mongo.NewSearchRepository(mongoDB)
 
-	case database.DriverPostgres, database.DriverSQLite:
+	case config.DriverPostgres, config.DriverSQLite:
+		log.Info("Database: SQL")
+
 		sqlAdapter, err := repo_sql.NewSQLAdapter(&cfg.SQL)
 		handleError(err)
 		defer sqlAdapter.Close()

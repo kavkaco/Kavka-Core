@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   redis:
     networks:
@@ -8,6 +9,7 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    
   mongo:
     networks:
       - default_network
@@ -20,6 +22,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
       MONGO_INITDB_DATABASE: kavka
+
   minio:
     networks:
       - default_network
@@ -33,6 +36,7 @@ services:
     environment:
       MINIO_ROOT_USER: minio_admin
       MINIO_ROOT_PASSWORD: minio_password
+
   app:
     network_mode: host
     container_name: "kavka_server"
@@ -45,13 +49,26 @@ services:
       - minio
     ports:
       - "8000:8000"
+
   nats:
     networks:
       - default_network
     image: "nats:latest"
     ports:
       - "4222:4222"
+      - "8222:8222"
+      - "6222:6222"
+    command: >
+      -js 
+      --store_dir /data 
+      --server_name nats-jetstream-server
+    volumes:
+      - nats_data:/data # persist JetStream data
     restart: always
+
+volumes:
+  nats_data: 
+    driver: local
 
 networks:
   default_network:

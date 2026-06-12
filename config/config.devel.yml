@@ -6,12 +6,12 @@ http:
     cors:
         allow_origins: "*"
 
-mongo:
-    host: "127.0.0.1"
-    username: "mongo"
-    password: "mongo"
-    port: 27017
-    db_name: "kavka"
+# mongo:
+#     host: "127.0.0.1"
+#     username: "mongo"
+#     password: "mongo"
+#     port: 27017
+#     db_name: "kavka"
 
 sql:
     driver: "sqlite"

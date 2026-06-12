@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 
 	"github.com/kavkaco/Kavka-Core/internal/model"
-	"github.com/kavkaco/Kavka-Core/internal/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
