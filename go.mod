@@ -8,6 +8,8 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/kavkaco/Kavka-ProtoBuf v1.0.4
 	github.com/knadh/koanf v1.5.0
+	github.com/lib/pq v1.10.9
+	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/minio/minio-go/v7 v7.0.69
 	github.com/nats-io/nats.go v1.36.0
 	github.com/ory/dockertest/v3 v3.10.0

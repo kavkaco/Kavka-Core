@@ -12,6 +12,8 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+
+	"github.com/kavkaco/Kavka-Core/database"
 )
 
 var ProjectRootPath = ConfigsDirPath() + "/../"
@@ -27,18 +29,23 @@ var CurrentEnv Env = Development
 
 type (
 	Config struct {
-		AppName string `koanf:"app_name"`
-		Mongo   Mongo  `koanf:"mongo"`
-		Redis   Redis  `koanf:"redis"`
-		Email   Email  `koanf:"email"`
-		MinIO   MinIO  `koanf:"minio"`
-		HTTP    HTTP   `koanf:"http"`
-		Auth    Auth   `koanf:"auth"`
-		Logger  Logger `koanf:"logger"`
-		Nats    Nats   `koanf:"nats"`
+		AppName string              `koanf:"app_name"`
+		Mongo   Mongo               `koanf:"mongo"`
+		SQL     database.DatabaseConfig `koanf:"sql"`
+		Redis   Redis               `koanf:"redis"`
+		Email   Email               `koanf:"email"`
+		MinIO   MinIO               `koanf:"minio"`
+		HTTP    HTTP                `koanf:"http"`
+		Auth    Auth                `koanf:"auth"`
+		Logger  Logger              `koanf:"logger"`
+		Nats    Nats                `koanf:"nats"`
+		App     App                 `koanf:"app"`
 	}
 	Nats struct {
 		Url string `koanf:"url"`
+	}
+	App struct {
+		UseMessagesV2 bool `koanf:"use_messages_v2"`
 	}
 	Auth struct {
 		SecretKey string `koanf:"secret"`
