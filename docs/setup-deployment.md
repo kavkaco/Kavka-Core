@@ -35,7 +35,7 @@ credentials defined in `docker-compose.yml`.
 
 ### 3. Configure
 
-Edit `config/config.development.yml`:
+Edit `config/config.devel.yml`:
 
 ```yaml
 sql:

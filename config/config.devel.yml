@@ -14,14 +14,8 @@ mongo:
     db_name: "kavka"
 
 sql:
-    driver: "mongodb"
-    host: "127.0.0.1"
-    port: 5432
-    username: "postgres"
-    password: "postgres"
-    db_name: "kavka"
-    sqlite_path: "./kavka.db"
-    ssl_mode: "disable"
+    driver: "sqlite"
+    sqlite_path: "/tmp/kavka.db"
 
 redis:
     host: "127.0.0.1"

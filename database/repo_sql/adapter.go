@@ -11,8 +11,8 @@ import (
 )
 
 type SQLAdapter struct {
-	DB           *sql.DB
-	Driver       database.DriverType
+	DB     *sql.DB
+	Driver database.DriverType
 }
 
 func NewSQLAdapter(cfg *database.DatabaseConfig) (*SQLAdapter, error) {
@@ -23,6 +23,7 @@ func NewSQLAdapter(cfg *database.DatabaseConfig) (*SQLAdapter, error) {
 	case database.DriverPostgres:
 		dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 			cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
+
 		db, err = sql.Open("postgres", dsn)
 		if err != nil {
 			return nil, fmt.Errorf("postgres connection failed: %w", err)
